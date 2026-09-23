@@ -103,14 +103,14 @@ Added:
 - Mod-loaded checks
 - Safe hook gating
 
-OptiFine is detected rather than modified. A future compatibility layer can
-selectively disable conflicting hooks.
+When OptiFine is detected, Potassium's event-based living-entity render hook
+fails open until a dedicated compatibility layer is implemented.
 
 ### Part 11 — Benchmark & Stability
 Added:
 - Frame-time measurement
 - Client tick-time measurement
-- Chunk-work timing
+- Chunk-work timing instrumentation
 - JVM memory measurement
 - Measured FPS counter
 - Allocation counters
@@ -121,14 +121,35 @@ gain without real hardware and scene benchmarks.
 
 ## Build
 
-This is an old ForgeGradle 2.1 project and is intended to be built with **JDK 8**.
+This is a legacy **ForgeGradle 2.1** project for Minecraft 1.8.9 and is intended
+to be built with **JDK 8**. Use a legacy Gradle release compatible with
+ForgeGradle 2.1; Gradle 3.x/4.x are commonly used with this toolchain. Do not
+use a current Gradle 8.x release with this build.
+
+The project currently does not include a Gradle wrapper, so Gradle must be
+installed on the build machine.
 
     gradle setupDecompWorkspace
+    gradle build
+
+If dependency resolution fails because of stale legacy caches, try:
+
+    gradle clean
+    gradle setupDecompWorkspace --refresh-dependencies
     gradle build
 
 The compiled mod JAR is produced under:
 
     build/libs/
+
+## Runtime test
+
+Use a clean Minecraft **1.8.9 Forge 11.15.1.2318** profile for the first test.
+Forge lists 11.15.1.2318 as the recommended 1.8.9 build.
+
+For compatibility testing, first test Potassium alone. Then test it with other
+mods one group at a time. Gameplay-affecting entity-update throttling is off by
+default.
 
 ## Important
 
