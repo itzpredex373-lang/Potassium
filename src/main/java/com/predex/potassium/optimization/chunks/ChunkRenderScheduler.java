@@ -49,9 +49,13 @@ public final class ChunkRenderScheduler {
 
     public boolean shouldSchedule(int chunkX, int chunkZ) {
         if (!ChunkOptimizer.isEnabled() || !initialized) return true;
-        if (!deduplicator.markPending(chunkX, chunkZ)) return false;
-        return ChunkUpdateOptimizer.shouldProcessChunk(
-                chunkX, chunkZ, lastPlayerChunkX, lastPlayerChunkZ);
+
+        if (!ChunkUpdateOptimizer.shouldProcessChunk(
+                chunkX, chunkZ, lastPlayerChunkX, lastPlayerChunkZ)) {
+            return false;
+        }
+
+        return deduplicator.markPending(chunkX, chunkZ);
     }
 
     public boolean nextScheduledCandidate(int[] result) {
@@ -62,17 +66,23 @@ public final class ChunkRenderScheduler {
             int z = workQueue.nextChunkZ();
             workQueue.advance();
 
+            if (!ChunkUpdateOptimizer.shouldProcessChunk(
+                    x, z, lastPlayerChunkX, lastPlayerChunkChunkZ())) {
+                continue;
+            }
+
             if (!deduplicator.markPending(x, z)) continue;
 
-            if (ChunkUpdateOptimizer.shouldProcessChunk(
-                    x, z, lastPlayerChunkX, lastPlayerChunkZ)) {
-                result[0] = x;
-                result[1] = z;
-                return true;
-            }
+            result[0] = x;
+            result[1] = z;
+            return true;
         }
 
         return false;
+    }
+
+    private int lastPlayerChunkChunkZ() {
+        return lastPlayerChunkZ;
     }
 
     public void markChunkComplete(int chunkX, int chunkZ) {
