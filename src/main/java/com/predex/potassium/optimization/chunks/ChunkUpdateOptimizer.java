@@ -3,10 +3,7 @@ package com.predex.potassium.optimization.chunks;
 import com.predex.potassium.config.PotassiumConfig;
 
 /**
- * Lightweight per-tick budget for optional chunk maintenance.
- *
- * The budget prevents a future chunk hook from processing an unbounded number
- * of chunks in one client tick. No world data is modified here.
+ * Per-client-tick budget used by actual chunk-update decisions.
  */
 public final class ChunkUpdateOptimizer {
     private static long tick;
@@ -30,6 +27,21 @@ public final class ChunkUpdateOptimizer {
 
         updatesThisTick++;
         return true;
+    }
+
+    public static boolean shouldProcessChunk(int chunkX, int chunkZ,
+                                             int playerChunkX, int playerChunkZ) {
+        if (!PotassiumConfig.enabled || !PotassiumConfig.optimizeChunkUpdates) {
+            return true;
+        }
+
+        if (!ChunkOptimizer.isChunkUseful(
+                chunkX, chunkZ, playerChunkX, playerChunkZ,
+                PotassiumConfig.chunkUpdateRadius)) {
+            return false;
+        }
+
+        return tryAcquireUpdateSlot();
     }
 
     public static int getUpdatesThisTick() {
