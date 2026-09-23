@@ -56,7 +56,6 @@ public final class ParticleOptimizer {
         return tick;
     }
 
-    @SuppressWarnings("unchecked")
     private static void trimParticleLayers() {
         Minecraft minecraft = Minecraft.getMinecraft();
         if (minecraft.effectRenderer == null) {
@@ -66,49 +65,77 @@ public final class ParticleOptimizer {
         try {
             initializeFields(minecraft.effectRenderer);
 
-            int remaining = PotassiumConfig.maxParticlesPerTick;
-            remaining = trimArray(minecraft.effectRenderer, particleLayersField, remaining);
-            trimArray(minecraft.effectRenderer, particleLayersAlphaField, remaining);
+            int budget = PotassiumConfig.maxParticlesPerTick;
+            int total = countParticles(minecraft.effectRenderer, particleLayersField)
+                    + countParticles(minecraft.effectRenderer, particleLayersAlphaField);
+
+            int excess = total - budget;
+            if (excess <= 0) {
+                return;
+            }
+
+            // Remove oldest entries from higher-numbered layers first.
+            excess = trimArray(minecraft.effectRenderer, particleLayersAlphaField, excess);
+            trimArray(minecraft.effectRenderer, particleLayersField, excess);
         } catch (Throwable ignored) {
             // Performance optimization must never crash the client.
         }
     }
 
-    private static int trimArray(EffectRenderer renderer, Field field, int remaining) {
-        if (field == null || remaining <= 0) {
-            return remaining;
+    private static int countParticles(EffectRenderer renderer, Field field) throws IllegalAccessException {
+        if (field == null) {
+            return 0;
+        }
+
+        Object value = field.get(renderer);
+        if (!(value instanceof List[])) {
+            return 0;
+        }
+
+        int total = 0;
+        List<?>[] layers = (List<?>[]) value;
+        for (List<?> layer : layers) {
+            if (layer != null) {
+                total += layer.size();
+            }
+        }
+        return total;
+    }
+
+    private static int trimArray(EffectRenderer renderer, Field field, int excess) {
+        if (field == null || excess <= 0) {
+            return excess;
         }
 
         try {
             Object value = field.get(renderer);
             if (!(value instanceof List[])) {
-                return remaining;
+                return excess;
             }
 
             List<?>[] layers = (List<?>[]) value;
 
-            for (int i = layers.length - 1; i >= 0 && remaining > 0; i--) {
+            for (int i = layers.length - 1; i >= 0 && excess > 0; i--) {
                 List<?> layer = layers[i];
                 if (layer == null || layer.isEmpty()) {
                     continue;
                 }
 
-                if (layer.size() <= remaining) {
-                    remaining -= layer.size();
-                    continue;
-                }
+                int removeCount = Math.min(excess, layer.size());
 
-                int removeCount = layer.size() - remaining;
+                // EntityFX entries are kept in insertion order in these lists;
+                // removing from the front preferentially drops older particles.
                 for (int j = 0; j < removeCount; j++) {
                     layer.remove(0);
                 }
-                remaining = 0;
+
+                excess -= removeCount;
             }
         } catch (Throwable ignored) {
             // Ignore incompatible internals safely.
         }
 
-        return Math.max(0, remaining);
+        return Math.max(0, excess);
     }
 
     private static void initializeFields(EffectRenderer renderer) throws IllegalAccessException {
