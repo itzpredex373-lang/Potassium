@@ -1,13 +1,21 @@
 package com.predex.potassium.optimization.rendering;
 
+import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
 /**
- * Reserved for entity-rendering optimizations.
+ * Entity rendering optimization hooks.
  *
- * Future work:
- * - skip work for entities outside the useful render range
- * - reduce unnecessary render-state changes
- * - benchmark entity-heavy scenes
+ * The hook runs before a living entity renderer performs its normal work.
+ * Cancelling here avoids the renderer/model work for entities outside the
+ * configured useful render distance.
  */
 public final class EntityRenderOptimizer {
-    private EntityRenderOptimizer() {}
+
+    @SubscribeEvent
+    public void onRenderLivingPre(RenderLivingEvent.Pre event) {
+        if (!RenderOptimizer.shouldRenderLivingEntity(event.entity)) {
+            event.setCanceled(true);
+        }
+    }
 }
