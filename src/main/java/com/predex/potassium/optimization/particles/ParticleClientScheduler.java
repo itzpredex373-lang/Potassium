@@ -4,7 +4,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * Resets the Part 3 particle budget every client tick.
+ * Client-side particle maintenance scheduler.
  */
 public final class ParticleClientScheduler {
 
