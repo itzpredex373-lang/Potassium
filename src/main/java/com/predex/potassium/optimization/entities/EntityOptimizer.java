@@ -7,9 +7,9 @@ import net.minecraft.entity.EntityLivingBase;
 /**
  * Part 3 entity optimization.
  *
- * The update throttle is experimental and disabled by default because entity
- * updates can affect AI, movement and gameplay. Rendering optimization remains
- * separate and safe.
+ * Distant living-entity updates are throttled only when the experimental
+ * setting is enabled. The default remains disabled because LivingUpdateEvent
+ * cancellation can affect AI and gameplay behavior.
  */
 public final class EntityOptimizer {
     private EntityOptimizer() {}
@@ -24,7 +24,8 @@ public final class EntityOptimizer {
         }
 
         Minecraft minecraft = Minecraft.getMinecraft();
-        if (minecraft.thePlayer == null || entity == minecraft.thePlayer) {
+        if (minecraft.theWorld == null || minecraft.thePlayer == null
+                || entity == minecraft.thePlayer) {
             return true;
         }
 
@@ -33,10 +34,7 @@ public final class EntityOptimizer {
             return true;
         }
 
-        /*
-         * Alternate ticks for distant entities instead of running their full
-         * update every client tick. This is deliberately conservative.
-         */
-        return (minecraft.theWorld.getTotalWorldTime() + entity.getEntityId() & 1L) == 0L;
+        return ((minecraft.theWorld.getTotalWorldTime()
+                + (long) entity.getEntityId()) & 1L) == 0L;
     }
 }
