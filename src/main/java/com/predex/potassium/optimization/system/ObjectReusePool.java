@@ -14,12 +14,22 @@ public final class ObjectReusePool<T> {
 
     public T acquire(Supplier<T> factory) {
         T value = pool.pollFirst();
-        return value != null ? value : factory.get();
+        if (value != null) {
+            return value;
+        }
+        if (factory == null) {
+            return null;
+        }
+        return factory.get();
     }
 
     public void release(T value) {
-        if (value != null && pool.size() < capacity) pool.offerFirst(value);
+        if (value != null && pool.size() < capacity) {
+            pool.offerFirst(value);
+        }
     }
 
-    public int size() { return pool.size(); }
+    public int size() {
+        return pool.size();
+    }
 }
