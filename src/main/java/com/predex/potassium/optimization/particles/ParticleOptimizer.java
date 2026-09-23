@@ -1,6 +1,7 @@
 package com.predex.potassium.optimization.particles;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.system.MemoryOptimizer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
@@ -54,8 +55,7 @@ public final class ParticleOptimizer {
 
         // Part 4 may lower this budget when the JVM is under memory pressure.
         try {
-            int multiplier = com.predex.potassium.optimization.system.MemoryOptimizer
-                    .getParticleBudgetPercent();
+            int multiplier = MemoryOptimizer.getParticleBudgetPercent();
             return Math.max(16, configured * multiplier / 100);
         } catch (Throwable ignored) {
             return configured;
