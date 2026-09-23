@@ -5,9 +5,8 @@ import com.predex.potassium.config.PotassiumConfig;
 /**
  * Part 4/5 memory-pressure controller.
  *
- * Reads JVM heap usage without forcing garbage collection. Part 5 profiles
- * provide the baseline budget; this class dynamically backs optional work off
- * when heap pressure rises.
+ * Reads JVM heap usage without forcing garbage collection. The value is JVM
+ * heap occupancy, not physical device RAM usage.
  */
 public final class MemoryOptimizer {
     private static long usedBytes;
@@ -55,22 +54,15 @@ public final class MemoryOptimizer {
             return 100;
         }
 
-        int percent;
-
         if (pressurePercent >= 95) {
-            percent = 50;
-        } else if (pressurePercent >= PotassiumConfig.memoryPressureThreshold) {
-            percent = 70;
-        } else {
-            percent = 100;
+            return 50;
         }
 
-        // Part 5 low-memory profiles are intentionally conservative.
-        if (PotassiumConfig.lowMemoryMode) {
-            percent = Math.min(percent, 85);
+        if (pressurePercent >= PotassiumConfig.memoryPressureThreshold) {
+            return 70;
         }
 
-        return percent;
+        return PotassiumConfig.lowMemoryMode ? 85 : 100;
     }
 
     public static int getChunkBudgetPercent() {
