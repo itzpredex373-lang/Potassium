@@ -3,7 +3,6 @@ package com.predex.potassium.optimization.chunks;
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.adaptive.AdaptivePerformanceController;
 import com.predex.potassium.optimization.system.CpuOptimizer;
-import com.predex.potassium.optimization.benchmark.ChunkTimeTracker;
 import com.predex.potassium.optimization.world.WorldUpdateOptimizer;
 
 public final class ChunkUpdateOptimizer {
