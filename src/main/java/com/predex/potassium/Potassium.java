@@ -1,10 +1,10 @@
 package com.predex.potassium;
 
 import com.predex.potassium.config.PotassiumConfig;
-import com.predex.potassium.optimization.rendering.EntityRenderOptimizer;
+import com.predex.potassium.proxy.PotassiumProxy;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
@@ -13,6 +13,11 @@ public final class Potassium {
     public static final String MOD_ID = "potassium";
     public static final String NAME = "Potassium";
     public static final String VERSION = "0.1.0";
+
+    @SidedProxy(
+            clientSide = "com.predex.potassium.proxy.PotassiumClientProxy",
+            serverSide = "com.predex.potassium.proxy.PotassiumProxy")
+    private static PotassiumProxy proxy;
 
     private static Potassium instance;
 
@@ -25,10 +30,7 @@ public final class Potassium {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new PotassiumEventHandler());
-
-        if (FMLCommonHandler.instance().getSide().isClient()) {
-            MinecraftForge.EVENT_BUS.register(new EntityRenderOptimizer());
-        }
+        proxy.registerClientHooks();
     }
 
     public static Potassium getInstance() {
