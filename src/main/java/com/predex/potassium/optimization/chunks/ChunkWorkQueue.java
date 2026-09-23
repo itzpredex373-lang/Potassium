@@ -1,7 +1,12 @@
 package com.predex.potassium.optimization.chunks;
 
 public final class ChunkWorkQueue {
-    private static final int MAX_CANDIDATES = 256;
+    /*
+     * A radius of 32 contains at most 4225 positions. Keeping the full
+     * candidate set avoids silently dropping useful chunks on higher profiles.
+     * A binary min-heap keeps rebuild insertion O(n log n) instead of O(n^2).
+     */
+    private static final int MAX_CANDIDATES = 4225;
 
     private final int[] chunkX = new int[MAX_CANDIDATES];
     private final int[] chunkZ = new int[MAX_CANDIDATES];
@@ -17,7 +22,7 @@ public final class ChunkWorkQueue {
     public void rebuild(int playerChunkX, int playerChunkZ, int radius) {
         clear();
 
-        int safeRadius = Math.max(2, Math.min(radius, 16));
+        int safeRadius = Math.max(2, Math.min(radius, 32));
         int maxDistanceSq = safeRadius * safeRadius;
 
         for (int dz = -safeRadius; dz <= safeRadius; dz++) {
@@ -31,25 +36,33 @@ public final class ChunkWorkQueue {
     }
 
     private void insert(int x, int z, int distanceSq) {
-        if (size == MAX_CANDIDATES && distanceSq >= priority[size - 1]) {
-            return;
-        }
+        if (size >= MAX_CANDIDATES) return;
 
-        int index = size < MAX_CANDIDATES ? size : MAX_CANDIDATES - 1;
-        while (index > 0 && priority[index - 1] > distanceSq) {
-            chunkX[index] = chunkX[index - 1];
-            chunkZ[index] = chunkZ[index - 1];
-            priority[index] = priority[index - 1];
-            index--;
-        }
-
+        int index = size++;
         chunkX[index] = x;
         chunkZ[index] = z;
         priority[index] = distanceSq;
 
-        if (size < MAX_CANDIDATES) {
-            size++;
+        while (index > 0) {
+            int parent = (index - 1) >>> 1;
+            if (priority[parent] <= priority[index]) break;
+            swap(parent, index);
+            index = parent;
         }
+    }
+
+    private void swap(int a, int b) {
+        int x = chunkX[a];
+        int z = chunkZ[a];
+        int p = priority[a];
+
+        chunkX[a] = chunkX[b];
+        chunkZ[a] = chunkZ[b];
+        priority[a] = priority[b];
+
+        chunkX[b] = x;
+        chunkZ[b] = z;
+        priority[b] = p;
     }
 
     public boolean hasNext() {
@@ -69,9 +82,7 @@ public final class ChunkWorkQueue {
     }
 
     public void advance() {
-        if (cursor < size) {
-            cursor++;
-        }
+        if (cursor < size) cursor++;
     }
 
     public int size() {
