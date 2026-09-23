@@ -6,15 +6,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 /**
  * Entity rendering optimization hooks.
  *
- * The hook runs before a living entity renderer performs its normal work.
- * Cancelling here avoids the renderer/model work for entities outside the
- * configured useful render distance.
+ * Distance and frustum tests run before normal living-entity renderer work.
  */
 public final class EntityRenderOptimizer {
-
     @SubscribeEvent
     public void onRenderLivingPre(RenderLivingEvent.Pre event) {
-        if (!RenderOptimizer.shouldRenderLivingEntity(event.entity)) {
+        if (!RenderVisibilityOptimizer.shouldRender(event.entity)) {
             event.setCanceled(true);
         }
     }
