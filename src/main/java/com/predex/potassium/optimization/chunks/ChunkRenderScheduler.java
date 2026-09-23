@@ -5,23 +5,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-/**
- * Part 2 chunk scheduler.
- *
- * Maintains an allocation-free spiral candidate cursor around the player.
- * This provides deterministic near-to-far chunk planning without allocating
- * lists every tick. A future RenderGlobal hook can consume nextCandidate().
- */
 public final class ChunkRenderScheduler {
+    private final ChunkWorkQueue workQueue = new ChunkWorkQueue();
+
     private int lastPlayerChunkX;
     private int lastPlayerChunkZ;
     private boolean initialized;
-
-    private int ringRadius;
-    private int ringX;
-    private int ringZ;
-    private int ringSide;
-    private boolean scanReady;
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
@@ -34,7 +23,7 @@ public final class ChunkRenderScheduler {
         Minecraft minecraft = Minecraft.getMinecraft();
         if (minecraft.theWorld == null || minecraft.thePlayer == null) {
             initialized = false;
-            scanReady = false;
+            workQueue.clear();
             return;
         }
 
@@ -50,16 +39,8 @@ public final class ChunkRenderScheduler {
         initialized = true;
 
         if (movedChunk) {
-            resetScan();
+            workQueue.rebuild(chunkX, chunkZ, PotassiumConfig.chunkUpdateRadius);
         }
-    }
-
-    private void resetScan() {
-        ringRadius = 0;
-        ringX = 0;
-        ringZ = 0;
-        ringSide = 0;
-        scanReady = true;
     }
 
     public boolean isPlayerChunk(int chunkX, int chunkZ) {
@@ -75,66 +56,29 @@ public final class ChunkRenderScheduler {
                 chunkX, chunkZ, lastPlayerChunkX, lastPlayerChunkZ);
     }
 
-    /**
-     * Returns one nearby chunk per call, from the center outward.
-     * The supplied array must have length >= 2.
-     */
-    public boolean nextCandidate(int[] result) {
-        if (!scanReady || result == null || result.length < 2) {
+    public boolean nextScheduledCandidate(int[] result) {
+        if (!initialized || result == null || result.length < 2) {
             return false;
         }
 
-        int x = ringX;
-        int z = ringZ;
-        int radius = Math.max(0, PotassiumConfig.chunkUpdateRadius);
+        while (workQueue.hasNext()) {
+            int x = workQueue.nextChunkX();
+            int z = workQueue.nextChunkZ();
+            workQueue.advance();
 
-        result[0] = lastPlayerChunkX + x;
-        result[1] = lastPlayerChunkZ + z;
-
-        if (ringRadius == 0) {
-            ringRadius = 1;
-            ringX = -1;
-            ringZ = -1;
-            ringSide = 0;
-            return true;
-        }
-
-        if (ringSide == 0) {
-            ringX++;
-            if (ringX > ringRadius) {
-                ringSide = 1;
-                ringX = ringRadius;
-                ringZ++;
-            }
-        } else if (ringSide == 1) {
-            ringZ++;
-            if (ringZ > ringRadius) {
-                ringSide = 2;
-                ringZ = ringRadius;
-                ringX--;
-            }
-        } else if (ringSide == 2) {
-            ringX--;
-            if (ringX < -ringRadius) {
-                ringSide = 3;
-                ringX = -ringRadius;
-                ringZ--;
-            }
-        } else {
-            ringZ--;
-            if (ringZ < -ringRadius) {
-                ringRadius++;
-                if (ringRadius > radius) {
-                    scanReady = false;
-                } else {
-                    ringX = -ringRadius;
-                    ringZ = -ringRadius;
-                    ringSide = 0;
-                }
+            if (ChunkUpdateOptimizer.shouldProcessChunk(
+                    x, z, lastPlayerChunkX, lastPlayerChunkZ)) {
+                result[0] = x;
+                result[1] = z;
+                return true;
             }
         }
 
-        return true;
+        return false;
+    }
+
+    public int getRemainingCandidates() {
+        return workQueue.remaining();
     }
 
     public int getPlayerChunkX() {
