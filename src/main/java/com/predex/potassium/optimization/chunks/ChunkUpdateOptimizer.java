@@ -61,14 +61,8 @@ public final class ChunkUpdateOptimizer {
             return budget;
         }
 
-        if (MemoryOptimizer.getPressurePercent() >= 95) {
-            return Math.max(1, budget / 2);
-        }
-
-        if (MemoryOptimizer.getPressurePercent()
-                >= PotassiumConfig.memoryPressureThreshold) {
-            return Math.max(1, budget * 3 / 4);
-        }
+        int percent = MemoryOptimizer.getChunkBudgetPercent();
+        budget = Math.max(1, budget * percent / 100);
 
         return budget;
     }
