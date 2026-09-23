@@ -1,7 +1,9 @@
 package com.predex.potassium;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.rendering.EntityRenderOptimizer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -23,6 +25,10 @@ public final class Potassium {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new PotassiumEventHandler());
+
+        if (FMLCommonHandler.instance().getSide().isClient()) {
+            MinecraftForge.EVENT_BUS.register(new EntityRenderOptimizer());
+        }
     }
 
     public static Potassium getInstance() {
