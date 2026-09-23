@@ -12,11 +12,9 @@ public final class ChunkWorkQueue {
     private final int[] chunkZ = new int[MAX_CANDIDATES];
     private final int[] priority = new int[MAX_CANDIDATES];
     private int size;
-    private int cursor;
 
     public void clear() {
         size = 0;
-        cursor = 0;
     }
 
     public void rebuild(int playerChunkX, int playerChunkZ, int radius) {
@@ -44,8 +42,8 @@ public final class ChunkWorkQueue {
         priority[index] = distanceSq;
 
         while (index > 0) {
-            int parent = ((index - 1) >>> 1) + cursor;
-            if (parent < cursor || priority[parent] <= priority[index]) break;
+            int parent = (index - 1) >>> 1;
+            if (priority[parent] <= priority[index]) break;
             swap(parent, index);
             index = parent;
         }
@@ -66,33 +64,34 @@ public final class ChunkWorkQueue {
     }
 
     public boolean hasNext() {
-        return cursor < size;
+        return size > 0;
     }
 
     public int nextChunkX() {
-        return chunkX[cursor];
+        return chunkX[0];
     }
 
     public int nextChunkZ() {
-        return chunkZ[cursor];
+        return chunkZ[0];
     }
 
     public int nextPriority() {
-        return priority[cursor];
+        return priority[0];
     }
 
     public void advance() {
-        if (cursor >= size) return;
+        if (size <= 0) return;
 
-        int last = size - 1;
-        if (cursor != last) swap(cursor, last);
-        size--;
-        cursor++;
+        int last = --size;
+        if (last <= 0) return;
 
-        // Restore the min-heap for the remaining active range.
-        int root = cursor;
-        while (root < size) {
-            int left = cursor + ((root - cursor) * 2 + 1);
+        chunkX[0] = chunkX[last];
+        chunkZ[0] = chunkZ[last];
+        priority[0] = priority[last];
+
+        int root = 0;
+        while (true) {
+            int left = (root << 1) + 1;
             if (left >= size) break;
 
             int right = left + 1;
@@ -112,7 +111,7 @@ public final class ChunkWorkQueue {
     }
 
     public int remaining() {
-        return size - cursor;
+        return size;
     }
 
     public int getChunkX(int index) {
