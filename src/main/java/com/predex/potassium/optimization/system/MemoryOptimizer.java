@@ -3,10 +3,11 @@ package com.predex.potassium.optimization.system;
 import com.predex.potassium.config.PotassiumConfig;
 
 /**
- * Part 4 memory optimization.
+ * Part 4/5 memory-pressure controller.
  *
- * Monitors JVM heap pressure without forcing garbage collection. Under high
- * pressure, optional particle work receives a smaller budget.
+ * Reads JVM heap usage without forcing garbage collection. Part 5 profiles
+ * provide the baseline budget; this class dynamically backs optional work off
+ * when heap pressure rises.
  */
 public final class MemoryOptimizer {
     private static long usedBytes;
@@ -23,7 +24,9 @@ public final class MemoryOptimizer {
 
         maxBytes = Math.max(1L, max);
         usedBytes = Math.max(0L, used);
-        pressurePercent = (int) Math.min(100L, (usedBytes * 100L) / maxBytes);
+
+        long percent = (usedBytes * 100L) / maxBytes;
+        pressurePercent = (int) Math.min(100L, Math.max(0L, percent));
     }
 
     public static int getPressurePercent() {
@@ -44,8 +47,7 @@ public final class MemoryOptimizer {
     }
 
     public static boolean isUnderPressure() {
-        return PotassiumConfig.adaptivePerformance
-                && pressurePercent >= PotassiumConfig.memoryPressureThreshold;
+        return shouldReduceOptionalWork();
     }
 
     public static int getParticleBudgetPercent() {
@@ -53,13 +55,37 @@ public final class MemoryOptimizer {
             return 100;
         }
 
+        int percent;
+
+        if (pressurePercent >= 95) {
+            percent = 50;
+        } else if (pressurePercent >= PotassiumConfig.memoryPressureThreshold) {
+            percent = 70;
+        } else {
+            percent = 100;
+        }
+
+        // Part 5 low-memory profiles are intentionally conservative.
+        if (PotassiumConfig.lowMemoryMode) {
+            percent = Math.min(percent, 85);
+        }
+
+        return percent;
+    }
+
+    public static int getChunkBudgetPercent() {
+        if (!PotassiumConfig.adaptivePerformance) {
+            return 100;
+        }
+
         if (pressurePercent >= 95) {
             return 50;
         }
+
         if (pressurePercent >= PotassiumConfig.memoryPressureThreshold) {
-            return 70;
+            return 75;
         }
 
-        return 100;
+        return PotassiumConfig.lowMemoryMode ? 90 : 100;
     }
 }
