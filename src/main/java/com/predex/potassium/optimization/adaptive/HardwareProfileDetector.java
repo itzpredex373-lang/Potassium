@@ -44,6 +44,24 @@ public final class HardwareProfileDetector {
         return Tier.HIGH;
     }
 
+    /**
+     * Conservative cap for optional Potassium workload.
+     * This never changes vanilla gameplay rules; it only limits optional work.
+     */
+    public static int getOptionalWorkCapPercent() {
+        switch (detectTier()) {
+            case VERY_LOW:
+                return 70;
+            case LOW:
+                return 85;
+            case MEDIUM:
+                return 100;
+            case HIGH:
+            default:
+                return 100;
+        }
+    }
+
     public static String getTierName() {
         return detectTier().name();
     }
