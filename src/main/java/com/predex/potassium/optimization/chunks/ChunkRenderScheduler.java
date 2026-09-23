@@ -8,17 +8,19 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 /**
  * Part 2 chunk scheduler.
  *
- * Keeps the player's chunk state and a nearest-first scan cursor. The cursor
- * is allocation-free and can be consumed by a future RenderGlobal hook.
+ * Maintains an allocation-free spiral candidate cursor around the player.
+ * This provides deterministic near-to-far chunk planning without allocating
+ * lists every tick. A future RenderGlobal hook can consume nextCandidate().
  */
 public final class ChunkRenderScheduler {
     private int lastPlayerChunkX;
     private int lastPlayerChunkZ;
     private boolean initialized;
 
-    private int scanX;
-    private int scanZ;
-    private int scanRadius;
+    private int ringRadius;
+    private int ringX;
+    private int ringZ;
+    private int ringSide;
     private boolean scanReady;
 
     @SubscribeEvent
@@ -48,11 +50,16 @@ public final class ChunkRenderScheduler {
         initialized = true;
 
         if (movedChunk) {
-            scanRadius = Math.max(2, PotassiumConfig.chunkUpdateRadius);
-            scanX = -scanRadius;
-            scanZ = -scanRadius;
-            scanReady = true;
+            resetScan();
         }
+    }
+
+    private void resetScan() {
+        ringRadius = 0;
+        ringX = 0;
+        ringZ = 0;
+        ringSide = 0;
+        scanReady = true;
     }
 
     public boolean isPlayerChunk(int chunkX, int chunkZ) {
@@ -69,39 +76,64 @@ public final class ChunkRenderScheduler {
     }
 
     /**
-     * Returns the next nearby chunk in deterministic nearest-first ring order.
-     * The caller still decides whether Minecraft should actually rebuild it.
+     * Returns one nearby chunk per call, from the center outward.
+     * The supplied array must have length >= 2.
      */
     public boolean nextCandidate(int[] result) {
         if (!scanReady || result == null || result.length < 2) {
             return false;
         }
 
-        int bestX = 0;
-        int bestZ = 0;
-        int bestDistance = Integer.MAX_VALUE;
-        boolean found = false;
+        int x = ringX;
+        int z = ringZ;
+        int radius = Math.max(0, PotassiumConfig.chunkUpdateRadius);
 
-        for (int z = -scanRadius; z <= scanRadius; z++) {
-            for (int x = -scanRadius; x <= scanRadius; x++) {
-                int distance = x * x + z * z;
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                    bestX = x;
-                    bestZ = z;
-                    found = true;
+        result[0] = lastPlayerChunkX + x;
+        result[1] = lastPlayerChunkZ + z;
+
+        if (ringRadius == 0) {
+            ringRadius = 1;
+            ringX = -1;
+            ringZ = -1;
+            ringSide = 0;
+            return true;
+        }
+
+        if (ringSide == 0) {
+            ringX++;
+            if (ringX > ringRadius) {
+                ringSide = 1;
+                ringX = ringRadius;
+                ringZ++;
+            }
+        } else if (ringSide == 1) {
+            ringZ++;
+            if (ringZ > ringRadius) {
+                ringSide = 2;
+                ringZ = ringRadius;
+                ringX--;
+            }
+        } else if (ringSide == 2) {
+            ringX--;
+            if (ringX < -ringRadius) {
+                ringSide = 3;
+                ringX = -ringRadius;
+                ringZ--;
+            }
+        } else {
+            ringZ--;
+            if (ringZ < -ringRadius) {
+                ringRadius++;
+                if (ringRadius > radius) {
+                    scanReady = false;
+                } else {
+                    ringX = -ringRadius;
+                    ringZ = -ringRadius;
+                    ringSide = 0;
                 }
             }
         }
 
-        if (!found) {
-            scanReady = false;
-            return false;
-        }
-
-        result[0] = lastPlayerChunkX + bestX;
-        result[1] = lastPlayerChunkZ + bestZ;
-        scanReady = false;
         return true;
     }
 
