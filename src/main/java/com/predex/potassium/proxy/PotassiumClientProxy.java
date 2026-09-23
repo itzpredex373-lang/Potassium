@@ -5,6 +5,7 @@ import com.predex.potassium.optimization.entities.EntityUpdateHandler;
 import com.predex.potassium.optimization.particles.ParticleClientScheduler;
 import com.predex.potassium.optimization.chunks.ChunkRenderScheduler;
 import com.predex.potassium.optimization.system.SystemPerformanceScheduler;
+import com.predex.potassium.optimization.benchmark.PotassiumDebugOverlay;
 import net.minecraftforge.common.MinecraftForge;
 
 /**
@@ -18,5 +19,6 @@ public final class PotassiumClientProxy extends PotassiumProxy {
         MinecraftForge.EVENT_BUS.register(new EntityUpdateHandler());
         MinecraftForge.EVENT_BUS.register(new ParticleClientScheduler());
         MinecraftForge.EVENT_BUS.register(new ChunkRenderScheduler());
+        MinecraftForge.EVENT_BUS.register(new PotassiumDebugOverlay());
     }
 }
