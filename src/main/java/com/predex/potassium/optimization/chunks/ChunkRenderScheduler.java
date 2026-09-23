@@ -67,7 +67,7 @@ public final class ChunkRenderScheduler {
             workQueue.advance();
 
             if (!ChunkUpdateOptimizer.shouldProcessChunk(
-                    x, z, lastPlayerChunkX, lastPlayerChunkChunkZ())) {
+                    x, z, lastPlayerChunkX, lastPlayerChunkZ)) {
                 continue;
             }
 
@@ -79,10 +79,6 @@ public final class ChunkRenderScheduler {
         }
 
         return false;
-    }
-
-    private int lastPlayerChunkChunkZ() {
-        return lastPlayerChunkZ;
     }
 
     public void markChunkComplete(int chunkX, int chunkZ) {
