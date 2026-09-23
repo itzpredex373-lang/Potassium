@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "potassium",
+    "name": "Potassium",
+    "description": "A lightweight Minecraft 1.8.9 Forge performance mod focused on low-end hardware.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/itzpredex373-lang/Potassium",
+    "updateUrl": "",
+    "authorList": ["Predex"],
+    "credits": "Potassium development project",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
