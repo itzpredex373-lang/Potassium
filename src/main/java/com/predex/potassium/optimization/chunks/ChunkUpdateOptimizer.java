@@ -1,15 +1,9 @@
 package com.predex.potassium.optimization.chunks;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.adaptive.AdaptivePerformanceController;
 import com.predex.potassium.optimization.system.CpuOptimizer;
-import com.predex.potassium.optimization.system.MemoryOptimizer;
 
-/**
- * Per-client-tick budget for optional chunk work.
- *
- * The budget is deliberately a gate rather than a forced rebuild. A future
- * RenderGlobal/RenderChunk hook can call shouldProcessChunk() before work.
- */
 public final class ChunkUpdateOptimizer {
     private static long tick;
     private static int updatesThisTick;
@@ -61,8 +55,7 @@ public final class ChunkUpdateOptimizer {
             return configured;
         }
 
-        int percent = MemoryOptimizer.getChunkBudgetPercent();
-        return Math.max(1, configured * percent / 100);
+        return AdaptivePerformanceController.scaleBudget(configured);
     }
 
     public static int getUpdatesThisTick() {
