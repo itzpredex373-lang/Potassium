@@ -44,8 +44,8 @@ public final class ChunkWorkQueue {
         priority[index] = distanceSq;
 
         while (index > 0) {
-            int parent = (index - 1) >>> 1;
-            if (priority[parent] <= priority[index]) break;
+            int parent = ((index - 1) >>> 1) + cursor;
+            if (parent < cursor || priority[parent] <= priority[index]) break;
             swap(parent, index);
             index = parent;
         }
@@ -82,7 +82,29 @@ public final class ChunkWorkQueue {
     }
 
     public void advance() {
-        if (cursor < size) cursor++;
+        if (cursor >= size) return;
+
+        int last = size - 1;
+        if (cursor != last) swap(cursor, last);
+        size--;
+        cursor++;
+
+        // Restore the min-heap for the remaining active range.
+        int root = cursor;
+        while (root < size) {
+            int left = cursor + ((root - cursor) * 2 + 1);
+            if (left >= size) break;
+
+            int right = left + 1;
+            int smallest = left;
+            if (right < size && priority[right] < priority[left]) {
+                smallest = right;
+            }
+
+            if (priority[root] <= priority[smallest]) break;
+            swap(root, smallest);
+            root = smallest;
+        }
     }
 
     public int size() {
