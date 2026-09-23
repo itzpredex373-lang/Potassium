@@ -39,10 +39,8 @@ public final class PerformanceProfileManager {
                 activeProfile.isLowMemoryMode();
         PotassiumConfig.adaptivePerformance = true;
 
-        // Deliberately remain false unless explicitly enabled in the config.
-        // This optimization can affect entity AI/movement/gameplay.
-        PotassiumConfig.reduceEntityUpdates =
-                PotassiumConfig.reduceEntityUpdates && false;
+        // Intentionally do not change reduceEntityUpdates here. The profile
+        // must never silently enable a gameplay-affecting optimization.
     }
 
     public static PerformanceProfile getActiveProfile() {
