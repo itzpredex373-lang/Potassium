@@ -3,7 +3,7 @@ package com.predex.potassium.optimization.system;
 import com.predex.potassium.config.PotassiumConfig;
 
 /**
- * Part 4 CPU/frame-time optimizer.
+ * Part 4 CPU/frame-time optimizer. Optional work uses the measured average tick time.
  *
  * Measures client tick duration and lets optional maintenance back off when
  * the client is already spending too much time in a tick.
