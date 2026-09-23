@@ -5,10 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.chunk.Chunk;
 
 /**
- * Cheap chunk-distance decisions used by the Part 2 scheduler.
- *
- * This class does not unload chunks or alter world data. It only decides
- * whether optional client-side chunk work is useful at the current distance.
+ * Chunk-distance and priority calculations used by Part 2.
  */
 public final class ChunkOptimizer {
     private ChunkOptimizer() {}
@@ -27,12 +24,12 @@ public final class ChunkOptimizer {
             return true;
         }
 
-        int chunkX = chunk.xPosition;
-        int chunkZ = chunk.zPosition;
-        int playerChunkX = ((int)Math.floor(minecraft.thePlayer.posX)) >> 4;
-        int playerChunkZ = ((int)Math.floor(minecraft.thePlayer.posZ)) >> 4;
+        int playerChunkX = ((int) Math.floor(minecraft.thePlayer.posX)) >> 4;
+        int playerChunkZ = ((int) Math.floor(minecraft.thePlayer.posZ)) >> 4;
 
-        return isChunkUseful(chunkX, chunkZ, playerChunkX, playerChunkZ,
+        return isChunkUseful(
+                chunk.xPosition, chunk.zPosition,
+                playerChunkX, playerChunkZ,
                 PotassiumConfig.chunkUpdateRadius);
     }
 
@@ -42,6 +39,31 @@ public final class ChunkOptimizer {
         int dx = chunkX - playerChunkX;
         int dz = chunkZ - playerChunkZ;
         int safeRadius = Math.max(2, radius);
+
         return dx * dx + dz * dz <= safeRadius * safeRadius;
+    }
+
+    /**
+     * Squared distance is used so this check does not allocate or call sqrt.
+     */
+    public static double getDistanceSqToPlayer(int chunkX, int chunkZ) {
+        Minecraft minecraft = Minecraft.getMinecraft();
+        if (minecraft.thePlayer == null) {
+            return 0.0D;
+        }
+
+        double centerX = chunkX * 16.0D + 8.0D;
+        double centerZ = chunkZ * 16.0D + 8.0D;
+        double dx = centerX - minecraft.thePlayer.posX;
+        double dz = centerZ - minecraft.thePlayer.posZ;
+
+        return dx * dx + dz * dz;
+    }
+
+    public static int getPriority(int chunkX, int chunkZ,
+                                  int playerChunkX, int playerChunkZ) {
+        int dx = chunkX - playerChunkX;
+        int dz = chunkZ - playerChunkZ;
+        return dx * dx + dz * dz;
     }
 }
