@@ -5,10 +5,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 
 /**
- * Entry point for client rendering optimizations.
+ * Part 1 rendering gate.
  *
- * Part 1 starts with conservative, measurable rendering work:
- * distant living entities can be skipped before their renderer is invoked.
+ * Performs the cheapest useful test first: squared distance, with no sqrt and
+ * no allocations. The local player is always rendered.
  */
 public final class RenderOptimizer {
     private RenderOptimizer() {}
@@ -22,14 +22,15 @@ public final class RenderOptimizer {
     }
 
     public static boolean shouldRenderLivingEntity(EntityLivingBase entity) {
-        if (!PotassiumConfig.enabled || !PotassiumConfig.optimizeEntityRendering) {
+        if (!PotassiumConfig.enabled || !PotassiumConfig.optimizeEntityRendering
+                || entity == null) {
             return true;
         }
 
         Minecraft minecraft = Minecraft.getMinecraft();
         EntityLivingBase player = minecraft.thePlayer;
 
-        if (player == null || entity == player) {
+        if (player == null || entity == player || entity.isDead) {
             return true;
         }
 
