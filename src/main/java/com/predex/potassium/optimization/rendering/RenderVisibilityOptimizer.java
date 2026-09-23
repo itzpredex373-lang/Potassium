@@ -8,19 +8,15 @@ public final class RenderVisibilityOptimizer {
     private RenderVisibilityOptimizer() {}
 
     public static boolean shouldRender(Entity entity) {
-        if (!PotassiumConfig.enabled || entity == null) {
-            return true;
-        }
-
-        if (entity.isDead) {
-            return false;
-        }
+        if (!PotassiumConfig.enabled || entity == null) return true;
+        if (entity.isDead) return false;
 
         if (entity instanceof EntityLivingBase
                 && !RenderOptimizer.shouldRenderLivingEntity((EntityLivingBase) entity)) {
             return false;
         }
 
-        return FrustumRenderOptimizer.isVisible(entity);
+        if (!FrustumRenderOptimizer.isVisible(entity)) return false;
+        return OcclusionRenderOptimizer.isPotentiallyVisible(entity);
     }
 }
