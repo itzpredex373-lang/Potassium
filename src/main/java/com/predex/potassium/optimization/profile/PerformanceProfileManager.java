@@ -6,8 +6,10 @@ import com.predex.potassium.config.PotassiumConfig;
  * Part 5 runtime profile controller.
  *
  * Profiles are applied once after Forge configuration loading. The selected
- * preset then feeds the real rendering, chunk, particle, CPU and memory
- * optimization paths through PotassiumConfig.
+ * preset feeds Potassium's optimization paths through PotassiumConfig.
+ *
+ * The profile is a baseline preset: explicit user toggles such as
+ * reduceParticles=false are respected instead of being silently overwritten.
  */
 public final class PerformanceProfileManager {
     private static PerformanceProfile activeProfile = PerformanceProfile.LOW_END;
@@ -21,7 +23,6 @@ public final class PerformanceProfileManager {
         PotassiumConfig.entityRenderDistance =
                 activeProfile.getEntityRenderDistance();
 
-        PotassiumConfig.reduceParticles = true;
         PotassiumConfig.maxParticlesPerTick =
                 activeProfile.getMaxParticlesPerTick();
 
@@ -39,8 +40,8 @@ public final class PerformanceProfileManager {
                 activeProfile.isLowMemoryMode();
         PotassiumConfig.adaptivePerformance = true;
 
-        // Intentionally do not change reduceEntityUpdates here. The profile
-        // must never silently enable a gameplay-affecting optimization.
+        // Do not enable or disable gameplay-affecting entity update throttling.
+        // Do not override the user's reduceParticles master toggle.
     }
 
     public static PerformanceProfile getActiveProfile() {
