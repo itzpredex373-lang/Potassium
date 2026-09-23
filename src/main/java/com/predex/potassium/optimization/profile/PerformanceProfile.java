@@ -1,59 +1,52 @@
 package com.predex.potassium.optimization.profile;
 
 /**
- * Part 5 preset settings for different hardware targets.
+ * Part 5 hardware-oriented presets.
  *
- * Profiles are applied once during client initialization and only change
- * Potassium's own configuration values. They do not modify Minecraft options.
+ * A profile controls Potassium's own optimization budgets. It never changes
+ * vanilla Minecraft settings and never enables the gameplay-affecting entity
+ * update throttle.
  */
 public enum PerformanceProfile {
     BALANCED(
-            128, true, 64, 100,
-            16, 3, true
+            128, 100, 16, 3,
+            90, 50, false
     ),
     LOW_END(
-            96, true, 64, 80,
-            12, 2, true
+            96, 80, 12, 2,
+            85, 45, true
     ),
     ULTRA_LOW(
-            64, true, 48, 50,
-            8, 1, true
+            64, 50, 8, 1,
+            75, 35, true
     );
 
     private final int entityRenderDistance;
-    private final boolean reduceParticles;
-    private final int entityUpdateDistance;
     private final int maxParticlesPerTick;
     private final int chunkUpdateRadius;
     private final int maxChunkUpdatesPerTick;
-    private final boolean adaptivePerformance;
+    private final int memoryPressureThreshold;
+    private final int cpuBudgetMillis;
+    private final boolean lowMemoryMode;
 
     PerformanceProfile(int entityRenderDistance,
-                       boolean reduceParticles,
-                       int entityUpdateDistance,
                        int maxParticlesPerTick,
                        int chunkUpdateRadius,
                        int maxChunkUpdatesPerTick,
-                       boolean adaptivePerformance) {
+                       int memoryPressureThreshold,
+                       int cpuBudgetMillis,
+                       boolean lowMemoryMode) {
         this.entityRenderDistance = entityRenderDistance;
-        this.reduceParticles = reduceParticles;
-        this.entityUpdateDistance = entityUpdateDistance;
         this.maxParticlesPerTick = maxParticlesPerTick;
         this.chunkUpdateRadius = chunkUpdateRadius;
         this.maxChunkUpdatesPerTick = maxChunkUpdatesPerTick;
-        this.adaptivePerformance = adaptivePerformance;
+        this.memoryPressureThreshold = memoryPressureThreshold;
+        this.cpuBudgetMillis = cpuBudgetMillis;
+        this.lowMemoryMode = lowMemoryMode;
     }
 
     public int getEntityRenderDistance() {
         return entityRenderDistance;
-    }
-
-    public boolean isReduceParticles() {
-        return reduceParticles;
-    }
-
-    public int getEntityUpdateDistance() {
-        return entityUpdateDistance;
     }
 
     public int getMaxParticlesPerTick() {
@@ -68,8 +61,16 @@ public enum PerformanceProfile {
         return maxChunkUpdatesPerTick;
     }
 
-    public boolean isAdaptivePerformance() {
-        return adaptivePerformance;
+    public int getMemoryPressureThreshold() {
+        return memoryPressureThreshold;
+    }
+
+    public int getCpuBudgetMillis() {
+        return cpuBudgetMillis;
+    }
+
+    public boolean isLowMemoryMode() {
+        return lowMemoryMode;
     }
 
     public static PerformanceProfile fromName(String name) {
