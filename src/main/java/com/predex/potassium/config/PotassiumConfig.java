@@ -15,6 +15,8 @@ public final class PotassiumConfig {
     public static boolean optimizeChunkUpdates = true;
     public static int chunkUpdateRadius = 12;
     public static int maxChunkUpdatesPerTick = 2;
+    public static int entityUpdateDistance = 64;
+    public static int maxParticlesPerTick = 80;
 
     private PotassiumConfig() {}
 
@@ -47,6 +49,11 @@ public final class PotassiumConfig {
                 "Chunk radius considered useful for optional client chunk work.");
         maxChunkUpdatesPerTick = configuration.getInt("maxChunkUpdatesPerTick", "chunks", 2, 1, 16,
                 "Maximum optional chunk-work slots reserved per client tick.");
+
+        entityUpdateDistance = configuration.getInt("entityUpdateDistance", "entities", 64, 16, 128,
+                "Distance in blocks beyond which experimental living-entity updates may be throttled.");
+        maxParticlesPerTick = configuration.getInt("maxParticlesPerTick", "particles", 80, 16, 512,
+                "Maximum optional particle-processing budget per client tick.");
 
         if (configuration.hasChanged()) configuration.save();
     }
