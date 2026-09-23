@@ -1,6 +1,7 @@
 package com.predex.potassium.optimization.rendering;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.adaptive.AdaptivePerformanceController;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 
@@ -34,7 +35,8 @@ public final class RenderOptimizer {
             return true;
         }
 
-        double maxDistance = PotassiumConfig.entityRenderDistance;
+        double maxDistance = AdaptivePerformanceController.scaleDistance(
+                PotassiumConfig.entityRenderDistance);
         return entity.getDistanceSqToEntity(player) <= maxDistance * maxDistance;
     }
 }
