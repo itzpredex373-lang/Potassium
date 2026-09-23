@@ -11,14 +11,14 @@ import java.util.List;
 /**
  * Part 3 particle optimization.
  *
- * Minecraft 1.8.9 has no general Forge particle-spawn event, so Potassium
- * applies the budget directly to EffectRenderer's client particle lists.
+ * Forge/Minecraft 1.8.9 stores particles in EffectRenderer.fxLayers as a
+ * two-dimensional List array: four render layers and two depth modes.
+ * Potassium applies a bounded client-side particle budget to those lists.
  */
 public final class ParticleOptimizer {
     private static long tick;
     private static int particlesThisTick;
     private static Field particleLayersField;
-    private static Field particleLayersAlphaField;
 
     private ParticleOptimizer() {}
 
@@ -27,7 +27,7 @@ public final class ParticleOptimizer {
         particlesThisTick = 0;
 
         if (isEnabled()) {
-            trimParticleLayers();
+            trimParticleLayers(getEffectiveBudget());
         }
     }
 
@@ -40,12 +40,25 @@ public final class ParticleOptimizer {
             return true;
         }
 
-        if (particlesThisTick >= PotassiumConfig.maxParticlesPerTick) {
+        if (particlesThisTick >= getEffectiveBudget()) {
             return false;
         }
 
         particlesThisTick++;
         return true;
+    }
+
+    public static int getEffectiveBudget() {
+        int configured = PotassiumConfig.maxParticlesPerTick;
+
+        // Part 4 may lower this budget when the JVM is under memory pressure.
+        try {
+            int multiplier = com.predex.potassium.optimization.system.MemoryOptimizer
+                    .getParticleBudgetPercent();
+            return Math.max(16, configured * multiplier / 100);
+        } catch (Throwable ignored) {
+            return configured;
+        }
     }
 
     public static int getParticlesThisTick() {
@@ -56,124 +69,80 @@ public final class ParticleOptimizer {
         return tick;
     }
 
-    private static void trimParticleLayers() {
+    private static void trimParticleLayers(int budget) {
         Minecraft minecraft = Minecraft.getMinecraft();
         if (minecraft.effectRenderer == null) {
             return;
         }
 
         try {
-            initializeFields(minecraft.effectRenderer);
+            Field layersField = getParticleLayersField();
+            if (layersField == null) {
+                return;
+            }
 
-            int budget = PotassiumConfig.maxParticlesPerTick;
-            int total = countParticles(minecraft.effectRenderer, particleLayersField)
-                    + countParticles(minecraft.effectRenderer, particleLayersAlphaField);
+            Object value = layersField.get(minecraft.effectRenderer);
+            if (!(value instanceof List[][])) {
+                return;
+            }
+
+            List<?>[][] layers = (List<?>[][]) value;
+            int total = 0;
+
+            for (List<?>[] layerGroup : layers) {
+                if (layerGroup == null) {
+                    continue;
+                }
+                for (List<?> layer : layerGroup) {
+                    if (layer != null) {
+                        total += layer.size();
+                    }
+                }
+            }
 
             int excess = total - budget;
             if (excess <= 0) {
                 return;
             }
 
-            // Remove oldest entries from higher-numbered layers first.
-            excess = trimArray(minecraft.effectRenderer, particleLayersAlphaField, excess);
-            trimArray(minecraft.effectRenderer, particleLayersField, excess);
-        } catch (Throwable ignored) {
-            // Performance optimization must never crash the client.
-        }
-    }
-
-    private static int countParticles(EffectRenderer renderer, Field field) throws IllegalAccessException {
-        if (field == null) {
-            return 0;
-        }
-
-        Object value = field.get(renderer);
-        if (!(value instanceof List[])) {
-            return 0;
-        }
-
-        int total = 0;
-        List<?>[] layers = (List<?>[]) value;
-        for (List<?> layer : layers) {
-            if (layer != null) {
-                total += layer.size();
-            }
-        }
-        return total;
-    }
-
-    private static int trimArray(EffectRenderer renderer, Field field, int excess) {
-        if (field == null || excess <= 0) {
-            return excess;
-        }
-
-        try {
-            Object value = field.get(renderer);
-            if (!(value instanceof List[])) {
-                return excess;
-            }
-
-            List<?>[] layers = (List<?>[]) value;
-
-            for (int i = layers.length - 1; i >= 0 && excess > 0; i--) {
-                List<?> layer = layers[i];
-                if (layer == null || layer.isEmpty()) {
+            // Preserve lower-numbered particle layers first.
+            for (int group = layers.length - 1; group >= 0 && excess > 0; group--) {
+                List<?>[] layerGroup = layers[group];
+                if (layerGroup == null) {
                     continue;
                 }
 
-                int removeCount = Math.min(excess, layer.size());
+                for (int mode = layerGroup.length - 1; mode >= 0 && excess > 0; mode--) {
+                    List<?> layer = layerGroup[mode];
+                    if (layer == null || layer.isEmpty()) {
+                        continue;
+                    }
 
-                // EntityFX entries are kept in insertion order in these lists;
-                // removing from the front preferentially drops older particles.
-                for (int j = 0; j < removeCount; j++) {
-                    layer.remove(0);
+                    int removeCount = Math.min(excess, layer.size());
+
+                    // ArrayList-backed layers support a single efficient range
+                    // removal instead of repeated remove(0) operations.
+                    layer.subList(0, removeCount).clear();
+                    excess -= removeCount;
                 }
-
-                excess -= removeCount;
             }
         } catch (Throwable ignored) {
-            // Ignore incompatible internals safely.
+            // Optimization must never crash the client.
         }
-
-        return Math.max(0, excess);
     }
 
-    private static void initializeFields(EffectRenderer renderer) throws IllegalAccessException {
-        if (particleLayersField != null && particleLayersAlphaField != null) {
-            return;
+    private static Field getParticleLayersField() {
+        if (particleLayersField != null) {
+            return particleLayersField;
         }
 
-        Field firstListArray = null;
-        Field secondListArray = null;
-
-        for (Field field : renderer.getClass().getDeclaredFields()) {
-            Class<?> type = field.getType();
-
-            if (!type.isArray() || !List.class.isAssignableFrom(type.getComponentType())) {
-                continue;
-            }
-
-            field.setAccessible(true);
-
-            if (firstListArray == null) {
-                firstListArray = field;
-            } else if (secondListArray == null) {
-                secondListArray = field;
-                break;
-            }
-        }
-
-        if (firstListArray == null) {
-            firstListArray = ReflectionHelper.findField(
+        try {
+            particleLayersField = ReflectionHelper.findField(
                     EffectRenderer.class, "fxLayers", "field_78876_b");
+            particleLayersField.setAccessible(true);
+            return particleLayersField;
+        } catch (Throwable ignored) {
+            return null;
         }
-
-        if (secondListArray == null) {
-            secondListArray = ReflectionHelper.findField(
-                    EffectRenderer.class, "fxLayersAlpha", "field_78875_c");
-        }
-
-        particleLayersField = firstListArray;
-        particleLayersAlphaField = secondListArray;
     }
 }
