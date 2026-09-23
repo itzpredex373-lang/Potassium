@@ -11,8 +11,8 @@ low-end hardware and Java launchers.
 - Central performance manager and client tick scheduler
 - Part 1: distance-based living-entity render culling
 - Part 2: bounded client chunk-work scheduler foundation
-- Chunk usefulness/distance checks
-- Configurable per-tick chunk-work budget
+- Part 3: entity update throttling and client particle budgeting
+- Part 4: adaptive JVM memory-pressure and client tick-time monitoring
 
 ## Part 1 — Rendering
 
@@ -24,9 +24,7 @@ Defaults:
 - `optimizeEntityRendering = true`
 - `entityRenderDistance = 96` blocks
 
-The render event hook is now registered only from the client proxy. This keeps
-client-only Forge rendering classes out of the dedicated-server initialization
-path.
+The render event hook is registered only from the client proxy.
 
 ## Part 2 — Chunk optimization
 
@@ -42,10 +40,66 @@ Defaults:
 - `chunkUpdateRadius = 12` chunks
 - `maxChunkUpdatesPerTick = 2`
 
-This is deliberately a safe foundation. It does **not** unload chunks or
-rewrite Minecraft's internal `RenderGlobal`/`RenderChunk` implementation.
-A later hook can use the scheduler budget without creating an unbounded amount
-of chunk work in one frame.
+This is deliberately a safe foundation. It does **not** unload chunks or rewrite
+Minecraft's internal `RenderGlobal`/`RenderChunk` implementation.
+
+## Part 3 — Entity and particle optimization
+
+### Entities
+
+Potassium includes an experimental distant-living-entity update throttle.
+
+Defaults:
+
+- `reduceEntityUpdates = false`
+- `entityUpdateDistance = 64` blocks
+
+It is disabled by default because cancelling `LivingUpdateEvent` can affect
+AI, movement, and gameplay behavior.
+
+### Particles
+
+Potassium reads Minecraft 1.8.9's client `EffectRenderer` particle layers and
+keeps the total particle list bounded by the configured budget.
+
+Defaults:
+
+- `reduceParticles = true`
+- `maxParticlesPerTick = 80`
+
+The particle cleanup is CPU-aware and can back off when the client is already
+spending too much time in its tick.
+
+## Part 4 — Memory and CPU optimization
+
+Part 4 adds lightweight adaptive monitoring rather than forcing garbage
+collection or creating extra worker threads.
+
+### Memory
+
+`MemoryOptimizer` monitors JVM heap pressure using `Runtime`. When adaptive
+performance is enabled and heap usage becomes high, Potassium reduces the
+optional particle budget.
+
+Defaults:
+
+- `adaptivePerformance = true`
+- `memoryPressureThreshold = 85` percent
+
+At very high heap pressure, the optional particle budget can be reduced further.
+
+### CPU / client tick time
+
+`CpuOptimizer` measures client tick duration with `System.nanoTime()` and
+uses an allocation-free moving average. Optional particle maintenance is skipped
+when the moving average exceeds the configured budget.
+
+Default:
+
+- `cpuBudgetMillis = 45` ms
+
+This does not claim to reduce all Minecraft CPU work; it prevents Potassium's
+optional maintenance from adding work when the client is already overloaded.
 
 ## Project structure
 
@@ -64,10 +118,20 @@ src/main/java/com/predex/potassium/
     │   ├── RenderOptimizer.java
     │   ├── BlockRenderOptimizer.java
     │   └── EntityRenderOptimizer.java
-    └── chunks/
-        ├── ChunkOptimizer.java
-        ├── ChunkUpdateOptimizer.java
-        └── ChunkRenderScheduler.java
+    ├── chunks/
+    │   ├── ChunkOptimizer.java
+    │   ├── ChunkUpdateOptimizer.java
+    │   └── ChunkRenderScheduler.java
+    ├── entities/
+    │   ├── EntityOptimizer.java
+    │   └── EntityUpdateHandler.java
+    ├── particles/
+    │   ├── ParticleOptimizer.java
+    │   └── ParticleClientScheduler.java
+    └── system/
+        ├── MemoryOptimizer.java
+        ├── CpuOptimizer.java
+        └── SystemPerformanceScheduler.java
 ~~~
 
 ## Build
