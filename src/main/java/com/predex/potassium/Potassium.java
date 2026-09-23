@@ -2,6 +2,7 @@ package com.predex.potassium;
 
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.proxy.PotassiumProxy;
+import com.predex.potassium.optimization.profile.PerformanceProfileManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -25,6 +26,7 @@ public final class Potassium {
     public void preInit(FMLPreInitializationEvent event) {
         instance = this;
         PotassiumConfig.init(event.getSuggestedConfigurationFile());
+        PerformanceProfileManager.applyConfiguredProfile();
     }
 
     @Mod.EventHandler
