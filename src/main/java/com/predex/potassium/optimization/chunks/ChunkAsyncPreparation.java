@@ -3,13 +3,23 @@ package com.predex.potassium.optimization.chunks;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Optional preparation executor. It performs only caller-supplied pure work;
  * Minecraft world/render objects must remain on the client thread.
  */
 public final class ChunkAsyncPreparation {
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(
+            new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable runnable) {
+                    Thread thread = new Thread(runnable, "Potassium-ChunkPrep");
+                    thread.setDaemon(true);
+                    return thread;
+                }
+            });
+
     private Future<?> pending;
 
     public synchronized boolean submit(Runnable preparation) {
@@ -24,7 +34,8 @@ public final class ChunkAsyncPreparation {
         return pending != null && !pending.isDone();
     }
 
-    public void shutdown() {
+    public synchronized void shutdown() {
         executor.shutdownNow();
+        pending = null;
     }
 }
