@@ -7,6 +7,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public final class ChunkRenderScheduler {
     private final ChunkWorkQueue workQueue = new ChunkWorkQueue();
+    private final ChunkRebuildDeduplicator deduplicator = new ChunkRebuildDeduplicator();
 
     private int lastPlayerChunkX;
     private int lastPlayerChunkZ;
@@ -14,9 +15,7 @@ public final class ChunkRenderScheduler {
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
+        if (event.phase != TickEvent.Phase.END) return;
 
         ChunkUpdateOptimizer.beginTick();
 
@@ -24,6 +23,7 @@ public final class ChunkRenderScheduler {
         if (minecraft.theWorld == null || minecraft.thePlayer == null) {
             initialized = false;
             workQueue.clear();
+            deduplicator.clear();
             return;
         }
 
@@ -31,8 +31,7 @@ public final class ChunkRenderScheduler {
         int chunkZ = ((int) Math.floor(minecraft.thePlayer.posZ)) >> 4;
 
         boolean movedChunk = !initialized
-                || chunkX != lastPlayerChunkX
-                || chunkZ != lastPlayerChunkZ;
+                || chunkX != lastPlayerChunkX || chunkZ != lastPlayerChunkZ;
 
         lastPlayerChunkX = chunkX;
         lastPlayerChunkZ = chunkZ;
@@ -40,6 +39,7 @@ public final class ChunkRenderScheduler {
 
         if (movedChunk) {
             workQueue.rebuild(chunkX, chunkZ, PotassiumConfig.chunkUpdateRadius);
+            deduplicator.clear();
         }
     }
 
@@ -48,23 +48,21 @@ public final class ChunkRenderScheduler {
     }
 
     public boolean shouldSchedule(int chunkX, int chunkZ) {
-        if (!ChunkOptimizer.isEnabled() || !initialized) {
-            return true;
-        }
-
+        if (!ChunkOptimizer.isEnabled() || !initialized) return true;
+        if (!deduplicator.markPending(chunkX, chunkZ)) return false;
         return ChunkUpdateOptimizer.shouldProcessChunk(
                 chunkX, chunkZ, lastPlayerChunkX, lastPlayerChunkZ);
     }
 
     public boolean nextScheduledCandidate(int[] result) {
-        if (!initialized || result == null || result.length < 2) {
-            return false;
-        }
+        if (!initialized || result == null || result.length < 2) return false;
 
         while (workQueue.hasNext()) {
             int x = workQueue.nextChunkX();
             int z = workQueue.nextChunkZ();
             workQueue.advance();
+
+            if (!deduplicator.markPending(x, z)) continue;
 
             if (ChunkUpdateOptimizer.shouldProcessChunk(
                     x, z, lastPlayerChunkX, lastPlayerChunkZ)) {
@@ -77,15 +75,11 @@ public final class ChunkRenderScheduler {
         return false;
     }
 
-    public int getRemainingCandidates() {
-        return workQueue.remaining();
+    public void markChunkComplete(int chunkX, int chunkZ) {
+        deduplicator.markComplete(chunkX, chunkZ);
     }
 
-    public int getPlayerChunkX() {
-        return lastPlayerChunkX;
-    }
-
-    public int getPlayerChunkZ() {
-        return lastPlayerChunkZ;
-    }
+    public int getRemainingCandidates() { return workQueue.remaining(); }
+    public int getPlayerChunkX() { return lastPlayerChunkX; }
+    public int getPlayerChunkZ() { return lastPlayerChunkZ; }
 }
