@@ -1,9 +1,14 @@
 package com.predex.potassium.optimization.chunks;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.system.CpuOptimizer;
+import com.predex.potassium.optimization.system.MemoryOptimizer;
 
 /**
  * Per-client-tick budget used by actual chunk-update decisions.
+ *
+ * Part 4 can dynamically reduce the optional chunk budget when CPU or heap
+ * pressure is already high.
  */
 public final class ChunkUpdateOptimizer {
     private static long tick;
@@ -21,7 +26,12 @@ public final class ChunkUpdateOptimizer {
             return true;
         }
 
-        if (updatesThisTick >= PotassiumConfig.maxChunkUpdatesPerTick) {
+        if (!CpuOptimizer.shouldRunOptionalWork()) {
+            return false;
+        }
+
+        int budget = getEffectiveBudget();
+        if (updatesThisTick >= budget) {
             return false;
         }
 
@@ -42,6 +52,25 @@ public final class ChunkUpdateOptimizer {
         }
 
         return tryAcquireUpdateSlot();
+    }
+
+    private static int getEffectiveBudget() {
+        int budget = PotassiumConfig.maxChunkUpdatesPerTick;
+
+        if (!PotassiumConfig.adaptivePerformance) {
+            return budget;
+        }
+
+        if (MemoryOptimizer.getPressurePercent() >= 95) {
+            return Math.max(1, budget / 2);
+        }
+
+        if (MemoryOptimizer.getPressurePercent()
+                >= PotassiumConfig.memoryPressureThreshold) {
+            return Math.max(1, budget * 3 / 4);
+        }
+
+        return budget;
     }
 
     public static int getUpdatesThisTick() {
