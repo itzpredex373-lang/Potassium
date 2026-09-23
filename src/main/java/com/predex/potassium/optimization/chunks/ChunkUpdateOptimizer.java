@@ -5,10 +5,10 @@ import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.system.MemoryOptimizer;
 
 /**
- * Per-client-tick budget used by actual chunk-update decisions.
+ * Per-client-tick budget for optional chunk work.
  *
- * Part 4 can dynamically reduce the optional chunk budget when CPU or heap
- * pressure is already high.
+ * The budget is deliberately a gate rather than a forced rebuild. A future
+ * RenderGlobal/RenderChunk hook can call shouldProcessChunk() before work.
  */
 public final class ChunkUpdateOptimizer {
     private static long tick;
@@ -55,20 +55,22 @@ public final class ChunkUpdateOptimizer {
     }
 
     private static int getEffectiveBudget() {
-        int budget = PotassiumConfig.maxChunkUpdatesPerTick;
+        int configured = Math.max(1, PotassiumConfig.maxChunkUpdatesPerTick);
 
         if (!PotassiumConfig.adaptivePerformance) {
-            return budget;
+            return configured;
         }
 
         int percent = MemoryOptimizer.getChunkBudgetPercent();
-        budget = Math.max(1, budget * percent / 100);
-
-        return budget;
+        return Math.max(1, configured * percent / 100);
     }
 
     public static int getUpdatesThisTick() {
         return updatesThisTick;
+    }
+
+    public static int getEffectiveBudgetForDiagnostics() {
+        return getEffectiveBudget();
     }
 
     public static long getTick() {
