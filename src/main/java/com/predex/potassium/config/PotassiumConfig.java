@@ -12,6 +12,9 @@ public final class PotassiumConfig {
     public static boolean reduceEntityUpdates = false;
     public static boolean optimizeEntityRendering = true;
     public static int entityRenderDistance = 96;
+    public static boolean optimizeChunkUpdates = true;
+    public static int chunkUpdateRadius = 12;
+    public static int maxChunkUpdatesPerTick = 2;
 
     private PotassiumConfig() {}
 
@@ -32,10 +35,18 @@ public final class PotassiumConfig {
                 "Allows Potassium to reduce unnecessary particle work.");
         reduceEntityUpdates = configuration.getBoolean("reduceEntityUpdates", "performance", false,
                 "Experimental entity-update optimization. Disabled by default.");
+
         optimizeEntityRendering = configuration.getBoolean("optimizeEntityRendering", "rendering", true,
                 "Reduce rendering work for distant living entities.");
         entityRenderDistance = configuration.getInt("entityRenderDistance", "rendering", 96, 32, 256,
                 "Maximum distance in blocks for living-entity rendering when the optimization is active.");
+
+        optimizeChunkUpdates = configuration.getBoolean("optimizeChunkUpdates", "chunks", true,
+                "Enable conservative chunk-work scheduling.");
+        chunkUpdateRadius = configuration.getInt("chunkUpdateRadius", "chunks", 12, 2, 32,
+                "Chunk radius considered useful for optional client chunk work.");
+        maxChunkUpdatesPerTick = configuration.getInt("maxChunkUpdatesPerTick", "chunks", 2, 1, 16,
+                "Maximum optional chunk-work slots reserved per client tick.");
 
         if (configuration.hasChanged()) configuration.save();
     }
