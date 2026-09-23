@@ -1,12 +1,5 @@
 package com.predex.potassium.optimization.chunks;
 
-/**
- * Allocation-free chunk work planner for Part 2.
- *
- * It builds a small nearest-first candidate queue when the player changes
- * chunk. The queue is intentionally separate from Minecraft's RenderGlobal
- * internals so it can later be connected through a safe hook/coremod.
- */
 public final class ChunkWorkQueue {
     private static final int MAX_CANDIDATES = 256;
 
@@ -14,24 +7,25 @@ public final class ChunkWorkQueue {
     private final int[] chunkZ = new int[MAX_CANDIDATES];
     private final int[] priority = new int[MAX_CANDIDATES];
     private int size;
+    private int cursor;
 
     public void clear() {
         size = 0;
+        cursor = 0;
     }
 
     public void rebuild(int playerChunkX, int playerChunkZ, int radius) {
         clear();
 
-        int safeRadius = Math.max(2, Math.min(radius, 32));
+        int safeRadius = Math.max(2, Math.min(radius, 16));
         int maxDistanceSq = safeRadius * safeRadius;
 
         for (int dz = -safeRadius; dz <= safeRadius; dz++) {
             for (int dx = -safeRadius; dx <= safeRadius; dx++) {
                 int distanceSq = dx * dx + dz * dz;
-                if (distanceSq > maxDistanceSq) {
-                    continue;
+                if (distanceSq <= maxDistanceSq) {
+                    insert(playerChunkX + dx, playerChunkZ + dz, distanceSq);
                 }
-                insert(playerChunkX + dx, playerChunkZ + dz, distanceSq);
             }
         }
     }
@@ -42,13 +36,10 @@ public final class ChunkWorkQueue {
         }
 
         int index = size < MAX_CANDIDATES ? size : MAX_CANDIDATES - 1;
-
         while (index > 0 && priority[index - 1] > distanceSq) {
-            if (index < MAX_CANDIDATES) {
-                chunkX[index] = chunkX[index - 1];
-                chunkZ[index] = chunkZ[index - 1];
-                priority[index] = priority[index - 1];
-            }
+            chunkX[index] = chunkX[index - 1];
+            chunkZ[index] = chunkZ[index - 1];
+            priority[index] = priority[index - 1];
             index--;
         }
 
@@ -61,8 +52,34 @@ public final class ChunkWorkQueue {
         }
     }
 
+    public boolean hasNext() {
+        return cursor < size;
+    }
+
+    public int nextChunkX() {
+        return chunkX[cursor];
+    }
+
+    public int nextChunkZ() {
+        return chunkZ[cursor];
+    }
+
+    public int nextPriority() {
+        return priority[cursor];
+    }
+
+    public void advance() {
+        if (cursor < size) {
+            cursor++;
+        }
+    }
+
     public int size() {
         return size;
+    }
+
+    public int remaining() {
+        return size - cursor;
     }
 
     public int getChunkX(int index) {
