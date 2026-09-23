@@ -8,18 +8,18 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 /**
  * Part 2 chunk scheduler.
  *
- * Maintains a nearest-first, allocation-free work plan around the player.
- * This is a real scheduling layer, but it deliberately does not inject into
- * RenderGlobal/RenderChunk yet; that deeper hook requires a version-specific
- * coremod/ASM layer and must be tested separately.
+ * Keeps the player's chunk state and a nearest-first scan cursor. The cursor
+ * is allocation-free and can be consumed by a future RenderGlobal hook.
  */
 public final class ChunkRenderScheduler {
-    private final ChunkWorkQueue workQueue = new ChunkWorkQueue();
-
     private int lastPlayerChunkX;
     private int lastPlayerChunkZ;
     private boolean initialized;
-    private long lastQueueTick;
+
+    private int scanX;
+    private int scanZ;
+    private int scanRadius;
+    private boolean scanReady;
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
@@ -32,7 +32,7 @@ public final class ChunkRenderScheduler {
         Minecraft minecraft = Minecraft.getMinecraft();
         if (minecraft.theWorld == null || minecraft.thePlayer == null) {
             initialized = false;
-            workQueue.clear();
+            scanReady = false;
             return;
         }
 
@@ -47,10 +47,11 @@ public final class ChunkRenderScheduler {
         lastPlayerChunkZ = chunkZ;
         initialized = true;
 
-        if (movedChunk || lastQueueTick == 0L
-                || ChunkUpdateOptimizer.getTick() - lastQueueTick >= 8L) {
-            workQueue.rebuild(chunkX, chunkZ, PotassiumConfig.chunkUpdateRadius);
-            lastQueueTick = ChunkUpdateOptimizer.getTick();
+        if (movedChunk) {
+            scanRadius = Math.max(2, PotassiumConfig.chunkUpdateRadius);
+            scanX = -scanRadius;
+            scanZ = -scanRadius;
+            scanReady = true;
         }
     }
 
@@ -67,26 +68,41 @@ public final class ChunkRenderScheduler {
                 chunkX, chunkZ, lastPlayerChunkX, lastPlayerChunkZ);
     }
 
-    public boolean isPlannedChunk(int chunkX, int chunkZ) {
-        for (int i = 0; i < workQueue.size(); i++) {
-            if (workQueue.getChunkX(i) == chunkX
-                    && workQueue.getChunkZ(i) == chunkZ) {
-                return true;
+    /**
+     * Returns the next nearby chunk in deterministic nearest-first ring order.
+     * The caller still decides whether Minecraft should actually rebuild it.
+     */
+    public boolean nextCandidate(int[] result) {
+        if (!scanReady || result == null || result.length < 2) {
+            return false;
+        }
+
+        int bestX = 0;
+        int bestZ = 0;
+        int bestDistance = Integer.MAX_VALUE;
+        boolean found = false;
+
+        for (int z = -scanRadius; z <= scanRadius; z++) {
+            for (int x = -scanRadius; x <= scanRadius; x++) {
+                int distance = x * x + z * z;
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestX = x;
+                    bestZ = z;
+                    found = true;
+                }
             }
         }
-        return false;
-    }
 
-    public int getPlannedChunkCount() {
-        return workQueue.size();
-    }
+        if (!found) {
+            scanReady = false;
+            return false;
+        }
 
-    public int getPlannedChunkX(int index) {
-        return workQueue.getChunkX(index);
-    }
-
-    public int getPlannedChunkZ(int index) {
-        return workQueue.getChunkZ(index);
+        result[0] = lastPlayerChunkX + bestX;
+        result[1] = lastPlayerChunkZ + bestZ;
+        scanReady = false;
+        return true;
     }
 
     public int getPlayerChunkX() {
