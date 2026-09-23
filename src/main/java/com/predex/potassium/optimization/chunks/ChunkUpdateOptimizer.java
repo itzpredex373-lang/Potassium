@@ -32,10 +32,7 @@ public final class ChunkUpdateOptimizer {
         if (!WorldUpdateOptimizer.shouldProcessOptionalChunkWork(chunkX, chunkZ)) return false;
         if (!ChunkOptimizer.isChunkUseful(chunkX, chunkZ, playerChunkX, playerChunkZ,
                 PotassiumConfig.chunkUpdateRadius)) return false;
-
-        boolean allowed = tryAcquireUpdateSlot();
-        if (allowed) ChunkTimeTracker.begin();
-        return allowed;
+        return tryAcquireUpdateSlot();
     }
 
     private static int getEffectiveBudget() {
