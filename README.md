@@ -122,26 +122,44 @@ gain without real hardware and scene benchmarks.
 ## Build
 
 This is a legacy **ForgeGradle 2.1** project for Minecraft 1.8.9 and is intended
-to be built with **JDK 8**. Use a legacy Gradle release compatible with
-ForgeGradle 2.1; Gradle 3.x/4.x are commonly used with this toolchain. Do not
-use a current Gradle 8.x release with this build.
+to be built with **JDK 8**. Do not use a current Gradle 8.x release with this
+toolchain.
 
-The project currently does not include a Gradle wrapper, so Gradle must be
-installed on the build machine.
+The repository now includes a lightweight Gradle bootstrapper. It pins Gradle
+**2.14.1**, downloads it on first use, and then runs the build. This avoids
+requiring a separate Gradle installation.
 
-    gradle setupDecompWorkspace
-    gradle build
+### Windows
+
+Open Command Prompt in the Potassium folder:
+
+    gradlew.bat setupDecompWorkspace
+    gradlew.bat build
+
+Or, after the workspace has been prepared:
+
+    gradlew.bat build
+
+### Linux / macOS
+
+Open a terminal in the Potassium folder:
+
+    chmod +x gradlew
+    ./gradlew setupDecompWorkspace
+    ./gradlew build
+
+The first run downloads Gradle 2.14.1. The Gradle distribution is cached locally
+under .gradle-bootstrap/ and that directory is ignored by Git.
 
 If dependency resolution fails because of stale legacy caches, try:
 
-    gradle clean
-    gradle setupDecompWorkspace --refresh-dependencies
-    gradle build
+    gradlew.bat clean
+    gradlew.bat setupDecompWorkspace --refresh-dependencies
+    gradlew.bat build
 
 The compiled mod JAR is produced under:
 
     build/libs/
-
 ## Runtime test
 
 Use a clean Minecraft **1.8.9 Forge 11.15.1.2318** profile for the first test.
