@@ -10,6 +10,8 @@ public final class PotassiumConfig {
     public static boolean lowMemoryMode = true;
     public static boolean reduceParticles = true;
     public static boolean reduceEntityUpdates = false;
+    public static boolean optimizeEntityRendering = true;
+    public static int entityRenderDistance = 96;
 
     private PotassiumConfig() {}
 
@@ -30,6 +32,10 @@ public final class PotassiumConfig {
                 "Allows Potassium to reduce unnecessary particle work.");
         reduceEntityUpdates = configuration.getBoolean("reduceEntityUpdates", "performance", false,
                 "Experimental entity-update optimization. Disabled by default.");
+        optimizeEntityRendering = configuration.getBoolean("optimizeEntityRendering", "rendering", true,
+                "Reduce rendering work for distant living entities.");
+        entityRenderDistance = configuration.getInt("entityRenderDistance", "rendering", 96, 32, 256,
+                "Maximum distance in blocks for living-entity rendering when the optimization is active.");
 
         if (configuration.hasChanged()) configuration.save();
     }
