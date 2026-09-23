@@ -3,152 +3,132 @@
 Potassium is a Minecraft Java Edition **1.8.9 Forge** performance mod focused on
 low-end hardware and Java launchers.
 
-## Current implementation
+## Roadmap / implementation status
 
-- Forge 1.8.9 mod bootstrap
-- Persistent Forge configuration
-- Common/client sided proxy separation
-- Central performance manager and client tick scheduler
-- Part 1: distance-based living-entity render culling
-- Part 2: bounded client chunk-work scheduler foundation
-- Part 3: entity update throttling and client particle budgeting
-- Part 4: adaptive JVM memory-pressure and client tick-time monitoring
+Potassium is being developed as an optimization-first project. **Part 6 (Settings
+UI) is intentionally skipped for now.** The engine work in Parts 1-5 and the
+advanced Parts 7-11 is prioritized first.
 
-## Part 1 — Rendering
+### Part 1 — Rendering Engine
+- Living-entity distance culling
+- Frustum culling
+- Conservative occlusion/visibility gate
+- Block/chunk distance helpers
+- Render-pass/state helper and state cache
+- Vertex-buffer and texture-binding helper layers
+- Adaptive render distance scaling
 
-Potassium can cancel the rendering of living entities that are farther than
-the configured entity-render distance.
+Deep RenderGlobal/RenderChunk replacement and true GPU occlusion queries are
+not enabled yet because those require careful 1.8.9 renderer/coremod integration.
 
-Defaults:
+### Part 2 — Chunk Engine
+- Chunk build scheduling foundation
+- Nearest-first priority queue
+- Player-proximity priority
+- Bounded per-tick chunk budget
+- Rebuild deduplication
+- World-update gating
+- Optional async preparation API for pure data work
 
-- `optimizeEntityRendering = true`
-- `entityRenderDistance = 96` blocks
+The async API deliberately does not move Minecraft world/render objects off the
+client thread. Vanilla RenderGlobal/RenderChunk rebuilding is not rewritten yet.
 
-The render event hook is registered only from the client proxy.
+### Part 3 — Entity & Particle
+- Entity render distance/culling
+- Experimental distant living-entity update throttling
+- Particle budget and adaptive trimming
+- Particle culling helper
+- Bounded particle object-pool helper
 
-## Part 2 — Chunk optimization
+Gameplay-affecting entity update throttling remains disabled by default.
 
-Part 2 adds:
+### Part 4 — CPU & Memory
+- Client tick CPU budget
+- JVM heap pressure monitoring
+- Allocation/object-reuse helpers
+- Mesh-data reuse pool
+- Bounded cache management
+- Adaptive scheduler
+- Stability guard / fail-safe degradation
 
-- `ChunkOptimizer` for cheap player-to-chunk distance decisions
-- `ChunkUpdateOptimizer` for a bounded per-client-tick work budget
-- `ChunkRenderScheduler` as the client scheduler entry point
+Potassium does not force garbage collection.
 
-Defaults:
+### Part 5 — Low-End Engine
+Profiles:
+- BALANCED
+- LOW_END
+- ULTRA_LOW
 
-- `optimizeChunkUpdates = true`
-- `chunkUpdateRadius = 12` chunks
-- `maxChunkUpdatesPerTick = 2`
+Also included:
+- Dynamic quality scaling
+- CPU/memory-aware workload scaling
+- JVM processor/heap based hardware tier detection
+- Hardware work scaling
 
-This is deliberately a safe foundation. It does **not** unload chunks or rewrite
-Minecraft's internal `RenderGlobal`/`RenderChunk` implementation.
+### Part 6 — Settings UI
+**Skipped for now.** No settings UI work is being prioritized until the engine
+parts are substantially complete.
 
-## Part 3 — Entity and particle optimization
+### Part 7 — Advanced Rendering
+Engine foundations added for:
+- Vertex buffer optimization
+- Render-state caching
+- Texture-binding reduction
+- Display-list/render-pass helper compatibility
+- Draw-call/state tracking foundations
 
-### Entities
+Actual vanilla renderer bytecode replacement is intentionally deferred until
+1.8.9 runtime mappings are tested.
 
-Potassium includes an experimental distant-living-entity update throttle.
+### Part 8 — Memory Engine
+Added:
+- Chunk memory estimation helpers
+- Mesh/data reuse pools
+- LRU cache management
+- Allocation tracking
 
-Defaults:
+### Part 9 — World Optimization
+Added foundations for:
+- Tile-entity validity checks
+- Light-update scheduling
+- Optional world-update budgeting
+- Redundant update deduplication
 
-- `reduceEntityUpdates = false`
-- `entityUpdateDistance = 64` blocks
+Vanilla world ticks are not globally cancelled.
 
-It is disabled by default because cancelling `LivingUpdateEvent` can affect
-AI, movement, and gameplay behavior.
+### Part 10 — Compatibility
+Added:
+- Forge presence/fallback checks
+- OptiFine detection
+- Mod-loaded checks
+- Safe hook gating
 
-### Particles
+OptiFine is detected rather than modified. A future compatibility layer can
+selectively disable conflicting hooks.
 
-Potassium reads Minecraft 1.8.9's client `EffectRenderer` particle layers and
-keeps the total particle list bounded by the configured budget.
+### Part 11 — Benchmark & Stability
+Added:
+- Frame-time measurement
+- Client tick-time measurement
+- Chunk-work timing
+- JVM memory measurement
+- Measured FPS counter
+- Allocation counters
+- Stability degradation guard
 
-Defaults:
-
-- `reduceParticles = true`
-- `maxParticlesPerTick = 80`
-
-The particle cleanup is CPU-aware and can back off when the client is already
-spending too much time in its tick.
-
-## Part 4 — Memory and CPU optimization
-
-Part 4 adds lightweight adaptive monitoring rather than forcing garbage
-collection or creating extra worker threads.
-
-### Memory
-
-`MemoryOptimizer` monitors JVM heap pressure using `Runtime`. When adaptive
-performance is enabled and heap usage becomes high, Potassium reduces the
-optional particle budget.
-
-Defaults:
-
-- `adaptivePerformance = true`
-- `memoryPressureThreshold = 85` percent
-
-At very high heap pressure, the optional particle budget can be reduced further.
-
-### CPU / client tick time
-
-`CpuOptimizer` measures client tick duration with `System.nanoTime()` and
-uses an allocation-free moving average. Optional particle maintenance is skipped
-when the moving average exceeds the configured budget.
-
-Default:
-
-- `cpuBudgetMillis = 45` ms
-
-This does not claim to reduce all Minecraft CPU work; it prevents Potassium's
-optional maintenance from adding work when the client is already overloaded.
-
-## Project structure
-
-~~~text
-src/main/java/com/predex/potassium/
-├── Potassium.java
-├── PotassiumEventHandler.java
-├── config/
-│   └── PotassiumConfig.java
-├── proxy/
-│   ├── PotassiumProxy.java
-│   └── PotassiumClientProxy.java
-└── optimization/
-    ├── PerformanceManager.java
-    ├── rendering/
-    │   ├── RenderOptimizer.java
-    │   ├── BlockRenderOptimizer.java
-    │   └── EntityRenderOptimizer.java
-    ├── chunks/
-    │   ├── ChunkOptimizer.java
-    │   ├── ChunkUpdateOptimizer.java
-    │   └── ChunkRenderScheduler.java
-    ├── entities/
-    │   ├── EntityOptimizer.java
-    │   └── EntityUpdateHandler.java
-    ├── particles/
-    │   ├── ParticleOptimizer.java
-    │   └── ParticleClientScheduler.java
-    └── system/
-        ├── MemoryOptimizer.java
-        ├── CpuOptimizer.java
-        └── SystemPerformanceScheduler.java
-~~~
+These metrics are instrumentation only; Potassium does not promise a fixed FPS
+gain without real hardware and scene benchmarks.
 
 ## Build
 
-This is an old ForgeGradle 2.1 project and is intended to be built with
-**JDK 8**.
+This is an old ForgeGradle 2.1 project and is intended to be built with **JDK 8**.
 
-~~~bash
-gradle setupDecompWorkspace
-gradle build
-~~~
+    gradle setupDecompWorkspace
+    gradle build
 
 The compiled mod JAR is produced under:
 
-~~~text
-build/libs/
-~~~
+    build/libs/
 
 ## Important
 
@@ -156,5 +136,6 @@ Potassium does not claim a fixed FPS increase. Actual gains depend on the
 Minecraft scene, entity count, render distance, GPU/CPU, drivers, launcher,
 resource pack, and other installed mods.
 
-Optimization modules are added incrementally and should be benchmarked before
-being treated as production-ready.
+The current advanced modules are intentionally conservative foundations. Actual
+1.8.9 renderer/chunk internals must be runtime-tested before enabling invasive
+bytecode/coremod hooks.
