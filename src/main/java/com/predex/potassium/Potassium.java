@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public final class Potassium {
     public static final String MOD_ID = "potassium";
     public static final String NAME = "Potassium";
-    public static final String VERSION = "0.1.0";
+    public static final String VERSION = "0.1.1";
 
     @SidedProxy(
             clientSide = "com.predex.potassium.proxy.PotassiumClientProxy",
