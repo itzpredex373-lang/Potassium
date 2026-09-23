@@ -26,7 +26,8 @@ public final class ParticleOptimizer {
         tick++;
         particlesThisTick = 0;
 
-        if (isEnabled()) {
+        if (isEnabled()
+                && com.predex.potassium.optimization.system.CpuOptimizer.shouldRunOptionalWork()) {
             trimParticleLayers(getEffectiveBudget());
         }
     }
