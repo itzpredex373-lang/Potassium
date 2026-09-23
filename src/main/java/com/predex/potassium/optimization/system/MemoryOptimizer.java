@@ -38,6 +38,11 @@ public final class MemoryOptimizer {
         return maxBytes;
     }
 
+    public static boolean shouldReduceOptionalWork() {
+        return PotassiumConfig.adaptivePerformance
+                && pressurePercent >= PotassiumConfig.memoryPressureThreshold;
+    }
+
     public static boolean isUnderPressure() {
         return PotassiumConfig.adaptivePerformance
                 && pressurePercent >= PotassiumConfig.memoryPressureThreshold;
