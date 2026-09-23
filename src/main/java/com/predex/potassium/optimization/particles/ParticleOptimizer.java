@@ -1,6 +1,7 @@
 package com.predex.potassium.optimization.particles;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.system.MemoryOptimizer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
@@ -12,9 +13,9 @@ import java.util.List;
 /**
  * Part 3 particle optimization.
  *
- * Forge/Minecraft 1.8.9 stores particles in EffectRenderer.fxLayers as a
- * two-dimensional List array: four render layers and two depth modes.
- * Potassium applies a bounded client-side particle budget to those lists.
+ * Minecraft 1.8.9 stores particles in EffectRenderer.fxLayers as a
+ * two-dimensional List array. Potassium applies a bounded client-side
+ * maintenance budget without creating replacement particle objects.
  */
 public final class ParticleOptimizer {
     private static long tick;
@@ -27,8 +28,7 @@ public final class ParticleOptimizer {
         tick++;
         particlesThisTick = 0;
 
-        if (isEnabled()
-                && com.predex.potassium.optimization.system.CpuOptimizer.shouldRunOptionalWork()) {
+        if (isEnabled() && CpuOptimizer.shouldRunOptionalWork()) {
             trimParticleLayers(getEffectiveBudget());
         }
     }
@@ -42,7 +42,9 @@ public final class ParticleOptimizer {
             return true;
         }
 
-        if (particlesThisTick >= getEffectiveBudget()) {
+        int budget = getEffectiveBudget();
+
+        if (particlesThisTick >= budget) {
             return false;
         }
 
@@ -51,15 +53,14 @@ public final class ParticleOptimizer {
     }
 
     public static int getEffectiveBudget() {
-        int configured = PotassiumConfig.maxParticlesPerTick;
+        int configured = Math.max(16, PotassiumConfig.maxParticlesPerTick);
 
-        // Part 4 may lower this budget when the JVM is under memory pressure.
-        try {
-            int multiplier = MemoryOptimizer.getParticleBudgetPercent();
-            return Math.max(16, configured * multiplier / 100);
-        } catch (Throwable ignored) {
+        if (!PotassiumConfig.adaptivePerformance) {
             return configured;
         }
+
+        int multiplier = MemoryOptimizer.getParticleBudgetPercent();
+        return Math.max(16, configured * multiplier / 100);
     }
 
     public static int getParticlesThisTick() {
@@ -106,7 +107,6 @@ public final class ParticleOptimizer {
                 return;
             }
 
-            // Preserve lower-numbered particle layers first.
             for (int group = layers.length - 1; group >= 0 && excess > 0; group--) {
                 List<?>[] layerGroup = layers[group];
                 if (layerGroup == null) {
@@ -120,9 +120,6 @@ public final class ParticleOptimizer {
                     }
 
                     int removeCount = Math.min(excess, layer.size());
-
-                    // ArrayList-backed layers support a single efficient range
-                    // removal instead of repeated remove(0) operations.
                     layer.subList(0, removeCount).clear();
                     excess -= removeCount;
                 }
