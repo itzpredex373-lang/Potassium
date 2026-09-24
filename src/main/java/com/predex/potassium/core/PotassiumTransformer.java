@@ -28,6 +28,9 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             if ("net.minecraft.client.renderer.chunk.ChunkRenderDispatcher".equals(transformedName)) {
                 return basicClass;
             }
+            if ("net.minecraft.client.renderer.chunk.RenderChunk".equals(transformedName)) {
+                return transformRenderChunk(basicClass);
+            }
             if ("net.minecraft.client.renderer.entity.RenderManager".equals(transformedName)) {
                 return transformRenderManager(basicClass);
             }
@@ -154,6 +157,40 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         }
 
         if (changed) LOGGER.info("[Potassium ASM] RenderGlobal chunk pipeline transformed");
+        return changed ? write(cn) : bytes;
+    }
+
+    private byte[] transformRenderChunk(byte[] bytes) {
+        ClassNode cn = read(bytes);
+        boolean changed = false;
+
+        for (MethodNode mn : cn.methods) {
+            if (!"(Z)V".equals(mn.desc)) continue;
+            if (!"setNeedsUpdate".equals(mn.name) && !"func_178575_a".equals(mn.name)) continue;
+
+            LabelNode allowed = new LabelNode();
+            InsnList hook = new InsnList();
+
+            // Only gate the dirty=true path. Clearing the flag must always
+            // remain vanilla-compatible.
+            hook.add(new VarInsnNode(Opcodes.ILOAD, 1));
+            hook.add(new JumpInsnNode(Opcodes.IFEQ, allowed));
+            hook.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            hook.add(new VarInsnNode(Opcodes.ILOAD, 1));
+            hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
+                    "allowChunkInvalidation",
+                    "(Lnet/minecraft/client/renderer/chunk/RenderChunk;Z)Z",
+                    false));
+            hook.add(new JumpInsnNode(Opcodes.IFNE, allowed));
+            hook.add(new InsnNode(Opcodes.RETURN));
+            hook.add(allowed);
+
+            mn.instructions.insert(hook);
+            changed = true;
+            break;
+        }
+
+        if (changed) LOGGER.info("[Potassium ASM] RenderChunk invalidation transformed");
         return changed ? write(cn) : bytes;
     }
 
