@@ -4,6 +4,8 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class PotassiumTransformer implements net.minecraft.launchwrapper.IClassTransformer {
     private static final String HOOK = "com/predex/potassium/core/PotassiumCoreHooks";
@@ -25,7 +27,8 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             if ("net.minecraft.client.renderer.BlockModelRenderer".equals(transformedName)) {
                 return transformBlockModelRenderer(basicClass);
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable error) {
+            LOGGER.warn("[Potassium ASM] Transformer failed for " + transformedName, error);
             // Never make the client unloadable because an optional hook failed.
         }
 
@@ -50,6 +53,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             changed = true;
         }
 
+        if (changed) LOGGER.info("[Potassium ASM] EffectRenderer transformed");
         return changed ? write(cn) : bytes;
     }
 
@@ -73,6 +77,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             break;
         }
 
+        if (changed) LOGGER.info("[Potassium ASM] Tessellator transformed");
         return changed ? write(cn) : bytes;
     }
 
@@ -96,6 +101,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             break;
         }
 
+        if (changed) LOGGER.info("[Potassium ASM] RenderGlobal transformed");
         return changed ? write(cn) : bytes;
     }
 
@@ -133,6 +139,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             break;
         }
 
+        if (changed) LOGGER.info("[Potassium ASM] BlockModelRenderer transformed");
         return changed ? write(cn) : bytes;
     }
 
