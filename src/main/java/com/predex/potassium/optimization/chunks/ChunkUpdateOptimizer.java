@@ -2,6 +2,7 @@ package com.predex.potassium.optimization.chunks;
 
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.adaptive.AdaptivePerformanceController;
+import com.predex.potassium.optimization.adaptive.DynamicQualityController;
 import com.predex.potassium.optimization.rendering.OptiFinePerformanceParity;
 import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.system.MemoryOptimizer;
@@ -24,15 +25,16 @@ public final class ChunkUpdateOptimizer {
         int dx = chunkX - playerChunkX;
         int dz = chunkZ - playerChunkZ;
         int distanceSq = dx * dx + dz * dz;
-        int radius = PotassiumConfig.chunkUpdateRadius;
+        int radius = AdaptivePerformanceController.scaleDistance(PotassiumConfig.chunkUpdateRadius);
 
         if (distanceSq > radius * radius) return false;
         if (MemoryOptimizer.isMemoryPressureHigh() && distanceSq > 16) return false;
 
-        int budget = OptiFinePerformanceParity.getChunkBudget(
+        int configured = OptiFinePerformanceParity.getChunkBudget(
                 PotassiumConfig.maxChunkUpdatesPerTick,
                 isPlayerStandingStill(),
                 isLocalWorld());
+        int budget = DynamicQualityController.scaleBudget(configured);
 
         if (processedThisTick >= budget) return false;
         processedThisTick++;
@@ -41,11 +43,22 @@ public final class ChunkUpdateOptimizer {
                 || AdaptivePerformanceController.isPerformanceDegraded();
     }
 
-    /** Real core hook: gates RenderGlobal.updateChunks without replacing vanilla's renderer. */
+    /**
+     * Keep the vanilla RenderGlobal update loop alive whenever possible.
+     * Fine-grained throttling happens in the candidate scheduler rather than
+     * starving the whole renderer update call.
+     */
     public static boolean shouldRunRendererUpdate() {
-        if (!PotassiumConfig.enabled || !PotassiumConfig.optimizeChunkUpdates) return true;
+        if (!PotassiumConfig.enabled
+                || !PotassiumConfig.rendererCoreHooks
+                || !PotassiumConfig.optimizeChunkUpdates) {
+            return true;
+        }
+
         if (MemoryOptimizer.isMemoryPressureHigh()) return false;
-        return CpuOptimizer.shouldRunOptionalWork()
+
+        return DynamicQualityController.allow(35)
+                || CpuOptimizer.shouldRunOptionalWork()
                 || AdaptivePerformanceController.isPerformanceDegraded();
     }
 
