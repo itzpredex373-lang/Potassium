@@ -9,7 +9,8 @@ public final class CompatibilityManager {
 
     public static boolean isOptiFinePresent() {
         try {
-            Class.forName("optifine.Installer", false, CompatibilityManager.class.getClassLoader());
+            ClassLoader loader = CompatibilityManager.class.getClassLoader();
+            Class.forName("optifine.OptiFineForgeTweaker", false, loader);
             return true;
         } catch (Throwable ignored) {
             return false;
