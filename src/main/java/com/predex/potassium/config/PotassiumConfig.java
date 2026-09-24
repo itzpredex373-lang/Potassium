@@ -45,8 +45,12 @@ public final class PotassiumConfig {
 
         performanceProfile = configuration.getString("performanceProfile", "performance",
                 "LOW_END",
-                new String[] {"BALANCED", "LOW_END", "ULTRA_LOW"},
                 "Potassium performance profile. Applied at startup.");
+        if (!"BALANCED".equals(performanceProfile)
+                && !"LOW_END".equals(performanceProfile)
+                && !"ULTRA_LOW".equals(performanceProfile)) {
+            performanceProfile = "LOW_END";
+        }
 
         memoryPressureThreshold = configuration.getInt("memoryPressureThreshold", "performance",
                 85, 60, 95,
