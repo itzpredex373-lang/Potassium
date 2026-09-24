@@ -21,7 +21,7 @@ public final class PotassiumCoreHooks {
     }
 
     public static boolean allowTessellatorDraw() {
-        if (!PotassiumConfig.enabled) return true;
+        if (!PotassiumConfig.enabled || !PotassiumConfig.skipEmptyDrawCalls) return true;
 
         try {
             WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
@@ -32,13 +32,13 @@ public final class PotassiumCoreHooks {
     }
 
     public static boolean allowChunkRendererUpdate() {
-        if (!PotassiumConfig.enabled || !PotassiumConfig.optimizeChunkUpdates) return true;
+        if (!PotassiumConfig.enabled || !PotassiumConfig.rendererCoreHooks || !PotassiumConfig.optimizeChunkUpdates) return true;
         return ChunkUpdateOptimizer.shouldRunRendererUpdate();
     }
 
     public static boolean skipFullyOccludedBlock(
             IBlockAccess world, IBlockState state, BlockPos pos) {
-        if (!PotassiumConfig.enabled || !PotassiumConfig.blockFaceCulling) return false;
+        if (!PotassiumConfig.enabled || !PotassiumConfig.rendererCoreHooks || !PotassiumConfig.blockFaceCulling) return false;
         return BlockRenderOptimizer.isFullyOccluded(world, state, pos);
     }
 }
