@@ -23,6 +23,17 @@ public final class PotassiumConfig {
     public static int entityUpdateDistance = 64;
     public static int maxParticlesPerTick = 80;
 
+    // OptiFine-inspired performance controls. These are performance controls,
+    // not visual/HD/shader features.
+    public static boolean smoothFps = true;
+    public static boolean smoothWorld = true;
+    public static boolean fastRender = true;
+    public static boolean fastMath = true;
+    public static boolean dynamicChunkUpdates = false;
+    public static boolean lazyChunkLoading = true;
+    public static boolean renderRegions = true;
+    public static boolean smartAnimations = true;
+
     private PotassiumConfig() {}
 
     public static void init(File file) {
@@ -44,8 +55,7 @@ public final class PotassiumConfig {
                 "Adapt optional optimization work to current memory pressure and client tick time.");
 
         performanceProfile = configuration.getString("performanceProfile", "performance",
-                "LOW_END",
-                "Potassium performance profile. Applied at startup.");
+                "LOW_END", "Potassium performance profile. Applied at startup.");
         if (!"BALANCED".equals(performanceProfile)
                 && !"LOW_END".equals(performanceProfile)
                 && !"ULTRA_LOW".equals(performanceProfile)) {
@@ -86,6 +96,30 @@ public final class PotassiumConfig {
 
         maxParticlesPerTick = configuration.getInt("maxParticlesPerTick", "particles", 80, 16, 512,
                 "Maximum optional particle-processing budget per client tick.");
+
+        smoothFps = configuration.getBoolean("smoothFps", "performance", true,
+                "Use adaptive workload control to reduce sudden frame-time spikes.");
+
+        smoothWorld = configuration.getBoolean("smoothWorld", "performance", true,
+                "Distribute optional single-player world work instead of doing large bursts.");
+
+        fastRender = configuration.getBoolean("fastRender", "performance", true,
+                "Enable Potassium fast-path rendering decisions where a safe hook is available.");
+
+        fastMath = configuration.getBoolean("fastMath", "performance", true,
+                "Use Potassium's cached trigonometry helpers for its own hot paths.");
+
+        dynamicChunkUpdates = configuration.getBoolean("dynamicChunkUpdates", "chunks", false,
+                "Allow extra chunk scheduling while the player is standing still.");
+
+        lazyChunkLoading = configuration.getBoolean("lazyChunkLoading", "chunks", true,
+                "Spread optional chunk preparation over multiple ticks to reduce spikes.");
+
+        renderRegions = configuration.getBoolean("renderRegions", "rendering", true,
+                "Enable region-aware render scheduling helpers.");
+
+        smartAnimations = configuration.getBoolean("smartAnimations", "rendering", true,
+                "Only admit optional animation work when its texture/region is visible.");
 
         if (configuration.hasChanged()) configuration.save();
     }
