@@ -10,7 +10,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
