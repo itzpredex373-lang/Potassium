@@ -1,14 +1,10 @@
 package com.predex.potassium.optimization.rendering;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.PerformanceManager;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Smart-animation admission cache inspired by OptiFine Smart Animations.
- * Callers mark visible animation regions during their render pass, then query
- * shouldAnimate() before doing optional animation work.
- */
 public final class AnimationVisibilityOptimizer {
     private static final Set<Long> visibleRegions = new HashSet<Long>();
 
@@ -19,12 +15,12 @@ public final class AnimationVisibilityOptimizer {
     }
 
     public static void markVisibleChunk(int chunkX, int chunkZ) {
-        if (!PotassiumConfig.enabled || !PotassiumConfig.smartAnimations) return;
+        if (!PerformanceManager.isOptimizationEnabled() || !PotassiumConfig.smartAnimations) return;
         visibleRegions.add(RenderRegionOptimizer.regionKey(chunkX, chunkZ));
     }
 
     public static boolean shouldAnimate(int chunkX, int chunkZ) {
-        if (!PotassiumConfig.enabled || !PotassiumConfig.smartAnimations) return true;
+        if (!PerformanceManager.isOptimizationEnabled() || !PotassiumConfig.smartAnimations) return true;
         return visibleRegions.contains(RenderRegionOptimizer.regionKey(chunkX, chunkZ));
     }
 }
