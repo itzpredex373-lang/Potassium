@@ -10,10 +10,33 @@ import net.minecraft.client.gui.GuiScreen;
 
 import java.io.IOException;
 
+/** Temporary developer panel for Dev Temp Version 1. */
 public final class PotassiumDevScreen extends GuiScreen {
     private static final int MASTER_ID = 1;
     private static final int PROFILE_ID = 2;
+    private static final int RESET_ID = 98;
     private static final int CLOSE_ID = 99;
+
+    private static final String[][] TOGGLES = new String[][] {
+            {"Entity Culling", "optimizeEntityRendering"},
+            {"Block Culling", "blockFaceCulling"},
+            {"Renderer Hooks", "rendererCoreHooks"},
+            {"Entity Occlusion", "entityOcclusionCulling"},
+            {"Smart Animations", "smartAnimations"},
+            {"Empty Draw Skip", "skipEmptyDrawCalls"},
+            {"Particles", "reduceParticles"},
+            {"Entity Updates", "reduceEntityUpdates"},
+            {"Chunk Updates", "optimizeChunkUpdates"},
+            {"Dynamic Chunks", "dynamicChunkUpdates"},
+            {"Lazy Chunks", "lazyChunkLoading"},
+            {"Render Regions", "renderRegions"},
+            {"Adaptive Performance", "adaptivePerformance"},
+            {"Low Memory Mode", "lowMemoryMode"},
+            {"Smooth FPS", "smoothFps"},
+            {"Smooth World", "smoothWorld"},
+            {"Fast Render", "fastRender"},
+            {"Fast Math", "fastMath"}
+    };
 
     private GuiButton masterButton;
     private GuiButton profileButton;
@@ -21,47 +44,30 @@ public final class PotassiumDevScreen extends GuiScreen {
     @Override
     public void initGui() {
         buttonList.clear();
-        int left = width / 2 - 220;
-        int y = 42;
+
+        int panelLeft = width / 2 - 225;
         int columnWidth = 145;
         int gap = 8;
+        int top = 54;
 
-        masterButton = new GuiButton(MASTER_ID, width / 2 - 220, y, 145, 20, "");
-        profileButton = new GuiButton(PROFILE_ID, width / 2 + 75, y, 145, 20, "");
-        buttonList.add(masterButton);
+        profileButton = new GuiButton(PROFILE_ID, panelLeft, 30, columnWidth, 20, "");
+        masterButton = new GuiButton(MASTER_ID, width / 2 + 5, 30, columnWidth, 20, "");
         buttonList.add(profileButton);
+        buttonList.add(masterButton);
 
-        String[][] toggles = new String[][] {
-                {"Particles", "reduceParticles"},
-                {"Entity Render", "optimizeEntityRendering"},
-                {"Entity Updates", "reduceEntityUpdates"},
-                {"Chunk Updates", "optimizeChunkUpdates"},
-                {"Renderer Hooks", "rendererCoreHooks"},
-                {"Block Culling", "blockFaceCulling"},
-                {"Entity Occlusion", "entityOcclusionCulling"},
-                {"Adaptive Performance", "adaptivePerformance"},
-                {"Low Memory Mode", "lowMemoryMode"},
-                {"Smooth FPS", "smoothFps"},
-                {"Smooth World", "smoothWorld"},
-                {"Fast Render", "fastRender"},
-                {"Fast Math", "fastMath"},
-                {"Lazy Chunks", "lazyChunkLoading"},
-                {"Render Regions", "renderRegions"},
-                {"Smart Animations", "smartAnimations"},
-                {"Empty Draw Skip", "skipEmptyDrawCalls"},
-                {"Dynamic Chunks", "dynamicChunkUpdates"}
-        };
-
-        for (int i = 0; i < toggles.length; i++) {
+        for (int i = 0; i < TOGGLES.length; i++) {
             int column = i % 3;
             int row = i / 3;
-            int bx = left + column * (columnWidth + gap);
-            int by = y + 28 + row * 23;
-            buttonList.add(new GuiButton(10 + i, bx, by, 145, 20,
-                    label(toggles[i][0], getToggle(toggles[i][1]))));
+            int x = panelLeft + column * (columnWidth + gap);
+            int y = top + 22 + row * 22;
+            buttonList.add(new GuiButton(10 + i, x, y, columnWidth, 20,
+                    label(TOGGLES[i][0], getToggle(TOGGLES[i][1]))));
         }
 
-        buttonList.add(new GuiButton(CLOSE_ID, width / 2 - 75, y + 28 + 6 * 23, 150, 20, "Close"));
+        int footerY = top + 6 * 22 + 20;
+        buttonList.add(new GuiButton(RESET_ID, width / 2 - 155, footerY + 54, 145, 20, "RESET"));
+        buttonList.add(new GuiButton(CLOSE_ID, width / 2 + 10, footerY + 54, 145, 20, "CLOSE"));
+
         updateTopButtons();
     }
 
@@ -109,13 +115,13 @@ public final class PotassiumDevScreen extends GuiScreen {
     }
 
     private String label(String name, boolean enabled) {
-        return name + ": " + (enabled ? "ON" : "OFF");
+        return name + "  [" + (enabled ? "ON" : "OFF") + "]";
     }
 
     private void updateTopButtons() {
-        masterButton.displayString = "ALL OPT: "
-                + (PerformanceManager.isOptimizationEnabled() ? "ON" : "OFF");
-        profileButton.displayString = "Profile: "
+        masterButton.displayString = "ALL OPTIMIZATION  ["
+                + (PerformanceManager.isOptimizationEnabled() ? "ON" : "OFF") + "]";
+        profileButton.displayString = "PROFILE: "
                 + PerformanceProfileManager.getActiveProfileName();
     }
 
@@ -123,6 +129,11 @@ public final class PotassiumDevScreen extends GuiScreen {
     protected void actionPerformed(GuiButton button) throws IOException {
         if (button.id == CLOSE_ID) {
             mc.displayGuiScreen(null);
+            return;
+        }
+
+        if (button.id == RESET_ID) {
+            PotassiumDevDiagnostics.resetBenchmark();
             return;
         }
 
@@ -142,35 +153,28 @@ public final class PotassiumDevScreen extends GuiScreen {
             PerformanceProfileManager.applyConfiguredProfile();
             saveConfig();
             updateTopButtons();
+            refreshToggleButtons();
             return;
         }
 
-        if (button.id >= 10 && button.id < 28) {
+        if (button.id >= 10 && button.id < 10 + TOGGLES.length) {
             int index = button.id - 10;
-            String[][] keys = new String[][] {
-                    {"Particles", "reduceParticles"},
-                    {"Entity Render", "optimizeEntityRendering"},
-                    {"Entity Updates", "reduceEntityUpdates"},
-                    {"Chunk Updates", "optimizeChunkUpdates"},
-                    {"Renderer Hooks", "rendererCoreHooks"},
-                    {"Block Culling", "blockFaceCulling"},
-                    {"Entity Occlusion", "entityOcclusionCulling"},
-                    {"Adaptive Performance", "adaptivePerformance"},
-                    {"Low Memory Mode", "lowMemoryMode"},
-                    {"Smooth FPS", "smoothFps"},
-                    {"Smooth World", "smoothWorld"},
-                    {"Fast Render", "fastRender"},
-                    {"Fast Math", "fastMath"},
-                    {"Lazy Chunks", "lazyChunkLoading"},
-                    {"Render Regions", "renderRegions"},
-                    {"Smart Animations", "smartAnimations"},
-                    {"Empty Draw Skip", "skipEmptyDrawCalls"},
-                    {"Dynamic Chunks", "dynamicChunkUpdates"}
-            };
-            String key = keys[index][1];
+            String key = TOGGLES[index][1];
             setToggle(key, !getToggle(key));
-            button.displayString = label(keys[index][0], getToggle(key));
+            button.displayString = label(TOGGLES[index][0], getToggle(key));
             saveConfig();
+        }
+    }
+
+    private void refreshToggleButtons() {
+        for (int i = 0; i < TOGGLES.length; i++) {
+            for (Object obj : buttonList) {
+                GuiButton button = (GuiButton) obj;
+                if (button.id == 10 + i) {
+                    button.displayString = label(TOGGLES[i][0], getToggle(TOGGLES[i][1]));
+                    break;
+                }
+            }
         }
     }
 
@@ -183,20 +187,61 @@ public final class PotassiumDevScreen extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
-        drawCenteredString(fontRendererObj, "POTASSIUM DEV PANEL", width / 2, 12, 0xFFFFFF);
-        drawCenteredString(fontRendererObj,
-                "ALL OPT toggles optimization only; FPS telemetry stays ON",
-                width / 2, 28, 0xAAAAAA);
 
+        drawCenteredString(fontRendererObj, "POTASSIUM DEV PANEL",
+                width / 2, 10, 0xFFFFFF);
         drawCenteredString(fontRendererObj,
-                "Benchmark: " + PotassiumDevDiagnostics.getBenchmarkStatus()
-                        + " | OFF Avg: " + PotassiumDevDiagnostics.getBaselineAverageFps()
-                        + " | ON Avg: " + PotassiumDevDiagnostics.getOptimizedAverageFps()
-                        + " | Diff: " + PotassiumDevDiagnostics.getFpsDifference()
-                        + " (" + String.format("%.1f", PotassiumDevDiagnostics.getFpsGainPercent()) + "%)",
-                width / 2, height - 26, 0xFFFFFF);
+                "Dev Temp V1  |  FPS telemetry stays ON",
+                width / 2, 22, 0xAAAAAA);
+
+        drawString(fontRendererObj, "RENDERING", width / 2 - 225, 79, 0xFFFFFF);
+        drawString(fontRendererObj, "CPU / MEMORY", width / 2 - 225, 123, 0xFFFFFF);
+        drawString(fontRendererObj, "WORLD / ENGINE", width / 2 - 225, 167, 0xFFFFFF);
+
+        int benchmarkY = 225;
+        drawString(fontRendererObj, "BENCHMARK", width / 2 - 225, benchmarkY, 0xFFFFFF);
+
+        drawString(fontRendererObj, "FPS Counter", width / 2 - 225, benchmarkY + 14, 0xAAAAAA);
+        drawString(fontRendererObj, "[ ON ]", width / 2 - 125, benchmarkY + 14, 0xFFFFFF);
+
+        drawString(fontRendererObj, "Average FPS", width / 2 - 225, benchmarkY + 28, 0xAAAAAA);
+        drawString(fontRendererObj, "[ ON ]", width / 2 - 125, benchmarkY + 28, 0xFFFFFF);
+
+        drawString(fontRendererObj, "1% Low", width / 2 - 225, benchmarkY + 42, 0xAAAAAA);
+        drawString(fontRendererObj, "[ ON ]", width / 2 - 125, benchmarkY + 42, 0xFFFFFF);
+
+        drawString(fontRendererObj, "Frame Time", width / 2 - 225, benchmarkY + 56, 0xAAAAAA);
+        drawString(fontRendererObj, "[ ON ]", width / 2 - 125, benchmarkY + 56, 0xFFFFFF);
+
+        int right = width / 2 + 5;
+        drawString(fontRendererObj, "WITHOUT OPT:", right, benchmarkY + 14, 0xFFFFFF);
+        drawString(fontRendererObj, formatFps(PotassiumDevDiagnostics.getBaselineAverageFps()),
+                right + 100, benchmarkY + 14, 0xFFFFFF);
+
+        drawString(fontRendererObj, "WITH OPT:", right, benchmarkY + 28, 0xFFFFFF);
+        drawString(fontRendererObj, formatFps(PotassiumDevDiagnostics.getOptimizedAverageFps()),
+                right + 100, benchmarkY + 28, 0xFFFFFF);
+
+        drawString(fontRendererObj, "DIFFERENCE:", right, benchmarkY + 42, 0xFFFFFF);
+        drawString(fontRendererObj, formatDifference(), right + 100, benchmarkY + 42, 0xFFFFFF);
+
+        drawString(fontRendererObj, "STATUS:", right, benchmarkY + 56, 0xFFFFFF);
+        drawString(fontRendererObj, PotassiumDevDiagnostics.getBenchmarkStatus(),
+                right + 100, benchmarkY + 56, 0xAAAAAA);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    private String formatFps(int fps) {
+        return fps > 0 ? fps + " FPS" : "-- FPS";
+    }
+
+    private String formatDifference() {
+        int difference = PotassiumDevDiagnostics.getFpsDifference();
+        double percent = PotassiumDevDiagnostics.getFpsGainPercent();
+        if (difference == 0) return "-- FPS";
+        return (difference > 0 ? "+" : "") + difference + " FPS ("
+                + String.format("%.1f", percent) + "%)";
     }
 
     @Override
