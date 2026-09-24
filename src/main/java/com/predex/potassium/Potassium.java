@@ -3,7 +3,6 @@ package com.predex.potassium;
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.proxy.PotassiumProxy;
 import com.predex.potassium.optimization.profile.PerformanceProfileManager;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -31,7 +30,6 @@ public final class Potassium {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(new PotassiumEventHandler());
         proxy.registerClientHooks();
     }
 
