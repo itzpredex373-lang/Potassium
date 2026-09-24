@@ -1,6 +1,7 @@
 package com.predex.potassium.optimization.rendering;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.PerformanceManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
@@ -11,10 +12,6 @@ import net.minecraft.util.Vec3;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-/**
- * CPU-side occlusion fallback. Results are cached for the current render frame
- * so an entity is not ray-traced repeatedly by multiple render hooks.
- */
 public final class EntityOcclusionOptimizer {
     private static final Map<Entity, Boolean> frameCache = new IdentityHashMap<Entity, Boolean>();
     private static long frameId = -1L;
@@ -41,7 +38,8 @@ public final class EntityOcclusionOptimizer {
     }
 
     public static boolean isVisible(Entity entity) {
-        if (!PotassiumConfig.entityOcclusionCulling || entity == null) return true;
+        if (!PerformanceManager.isOptimizationEnabled()
+                || !PotassiumConfig.entityOcclusionCulling || entity == null) return true;
 
         beginFrame();
         Boolean cached = frameCache.get(entity);
