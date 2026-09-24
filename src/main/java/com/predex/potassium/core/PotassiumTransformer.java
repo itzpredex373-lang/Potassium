@@ -31,6 +31,9 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             if ("net.minecraft.client.renderer.chunk.RenderChunk".equals(transformedName)) {
                 return transformRenderChunk(basicClass);
             }
+            if ("net.minecraft.client.renderer.chunk.RenderChunk".equals(transformedName)) {
+                return transformRenderChunk(basicClass);
+            }
             if ("net.minecraft.client.renderer.entity.RenderManager".equals(transformedName)) {
                 return transformRenderManager(basicClass);
             }
@@ -191,6 +194,50 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         }
 
         if (changed) LOGGER.info("[Potassium ASM] RenderChunk invalidation transformed");
+        return changed ? write(cn) : bytes;
+    }
+
+    private byte[] transformRenderChunk(byte[] bytes) {
+        ClassNode cn = read(bytes);
+        boolean changed = false;
+
+        for (MethodNode mn : cn.methods) {
+            if (!"(FFFLnet/minecraft/client/renderer/chunk/ChunkCompileTaskGenerator;)V".equals(mn.desc)) continue;
+            if (!"rebuildChunk".equals(mn.name) && !"func_178581_b".equals(mn.name)) continue;
+
+            LabelNode allowed = new LabelNode();
+            InsnList hook = new InsnList();
+            hook.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
+                    "allowChunkBuild",
+                    "(Lnet/minecraft/client/renderer/chunk/RenderChunk;)Z",
+                    false));
+            hook.add(new JumpInsnNode(Opcodes.IFNE, allowed));
+            hook.add(new InsnNode(Opcodes.RETURN));
+            hook.add(allowed);
+            mn.instructions.insert(hook);
+
+            // Release the controller slot immediately when the vanilla build
+            // returns. The dispatcher still owns the actual compile task.
+            for (AbstractInsnNode node = mn.instructions.getFirst(); node != null; ) {
+                AbstractInsnNode next = node.getNext();
+                if (node.getOpcode() == Opcodes.RETURN) {
+                    InsnList finish = new InsnList();
+                    finish.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    finish.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
+                            "finishChunkBuild",
+                            "(Lnet/minecraft/client/renderer/chunk/RenderChunk;)V",
+                            false));
+                    mn.instructions.insertBefore(node, finish);
+                }
+                node = next;
+            }
+
+            changed = true;
+            break;
+        }
+
+        if (changed) LOGGER.info("[Potassium ASM] RenderChunk build pipeline transformed");
         return changed ? write(cn) : bytes;
     }
 
