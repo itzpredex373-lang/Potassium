@@ -1,6 +1,7 @@
 package com.predex.potassium.optimization.rendering;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.PerformanceManager;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -38,14 +39,12 @@ public final class BlockRenderOptimizer {
         return dx * dx + dz * dz;
     }
 
-    /** Uses vanilla's own block rule, so transparent/non-cube blocks keep their faces. */
     public static boolean shouldRenderFace(IBlockAccess world, IBlockState state,
                                             BlockPos pos, EnumFacing side) {
         if (world == null || state == null || pos == null || side == null) return true;
         return state.getBlock().shouldSideBeRendered(world, pos, side);
     }
 
-    /** Skip a solid block only when every one of its six neighbors is a full opaque cube. */
     public static boolean isFullyOccluded(IBlockAccess world, IBlockState state, BlockPos pos) {
         if (world == null || state == null || pos == null) return false;
         if (!state.getBlock().isOpaqueCube() || !state.getBlock().isFullCube()) return false;
@@ -61,6 +60,6 @@ public final class BlockRenderOptimizer {
     }
 
     public static boolean isFaceCullingEnabled() {
-        return PotassiumConfig.enabled && PotassiumConfig.blockFaceCulling;
+        return PerformanceManager.isOptimizationEnabled() && PotassiumConfig.blockFaceCulling;
     }
 }
