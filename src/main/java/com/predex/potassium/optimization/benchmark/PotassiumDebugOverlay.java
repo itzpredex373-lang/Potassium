@@ -32,6 +32,10 @@ public final class PotassiumDebugOverlay {
         event.left.add("Potassium Culling: " + (render ? "ON" : "OFF"));
         event.left.add("Potassium Chunk: " + (chunk ? "ON" : "OFF"));
         event.left.add("Potassium Particles: " + (particles ? "ON" : "OFF"));
+        event.left.add("Potassium Fast Render: " + (enabled && PotassiumConfig.fastRender ? "ON" : "OFF"));
+        event.left.add("Potassium Fast Math: " + (enabled && PotassiumConfig.fastMath ? "ON" : "OFF"));
+        event.left.add("Potassium Smart Anim: " + (enabled && PotassiumConfig.smartAnimations ? "ON" : "OFF"));
+        event.left.add("Potassium Lazy Chunks: " + (enabled && PotassiumConfig.lazyChunkLoading ? "ON" : "OFF"));
         event.left.add("Potassium Profile: " + PotassiumConfig.performanceProfile);
     }
 }
