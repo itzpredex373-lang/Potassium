@@ -7,11 +7,10 @@ import com.predex.potassium.optimization.chunks.ChunkRenderScheduler;
 import com.predex.potassium.optimization.system.SystemPerformanceScheduler;
 import com.predex.potassium.optimization.benchmark.PotassiumDebugOverlay;
 import com.predex.potassium.PotassiumEventHandler;
+import com.predex.potassium.dev.PotassiumDevCommand;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.client.ClientCommandHandler;
 
-/**
- * Client-only initialization.
- */
 public final class PotassiumClientProxy extends PotassiumProxy {
     @Override
     public void registerClientHooks() {
@@ -22,5 +21,6 @@ public final class PotassiumClientProxy extends PotassiumProxy {
         MinecraftForge.EVENT_BUS.register(new ParticleClientScheduler());
         MinecraftForge.EVENT_BUS.register(new ChunkRenderScheduler());
         MinecraftForge.EVENT_BUS.register(new PotassiumDebugOverlay());
+        ClientCommandHandler.instance.registerCommand(new PotassiumDevCommand());
     }
 }

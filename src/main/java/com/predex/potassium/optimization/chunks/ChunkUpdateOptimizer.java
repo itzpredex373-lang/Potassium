@@ -1,6 +1,7 @@
 package com.predex.potassium.optimization.chunks;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.adaptive.AdaptivePerformanceController;
 import com.predex.potassium.optimization.adaptive.DynamicQualityController;
 import com.predex.potassium.optimization.rendering.OptiFinePerformanceParity;
@@ -20,7 +21,8 @@ public final class ChunkUpdateOptimizer {
     }
 
     public static boolean shouldProcessChunk(int chunkX, int chunkZ, int playerChunkX, int playerChunkZ) {
-        if (!PotassiumConfig.enabled || !PotassiumConfig.optimizeChunkUpdates) return true;
+        if (!PerformanceManager.isOptimizationEnabled()
+                || !PotassiumConfig.optimizeChunkUpdates) return true;
 
         int dx = chunkX - playerChunkX;
         int dz = chunkZ - playerChunkZ;
@@ -42,18 +44,12 @@ public final class ChunkUpdateOptimizer {
         return CpuOptimizer.shouldRunOptionalWork();
     }
 
-    /**
-     * Keep the vanilla RenderGlobal update loop alive whenever possible.
-     * Fine-grained throttling happens in the candidate scheduler rather than
-     * starving the whole renderer update call.
-     */
     public static boolean shouldRunRendererUpdate() {
-        if (!PotassiumConfig.enabled
+        if (!PerformanceManager.isOptimizationEnabled()
                 || !PotassiumConfig.rendererCoreHooks
                 || !PotassiumConfig.optimizeChunkUpdates) {
             return true;
         }
-
 
         return DynamicQualityController.allow(35)
                 || CpuOptimizer.shouldRunOptionalWork();

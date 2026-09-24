@@ -1,6 +1,7 @@
 package com.predex.potassium.optimization.adaptive;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.system.MemoryOptimizer;
 
@@ -12,7 +13,8 @@ public final class AdaptivePerformanceController {
     private AdaptivePerformanceController() {}
 
     public static void update() {
-        if (!PotassiumConfig.enabled || !PotassiumConfig.adaptivePerformance) {
+        if (!PerformanceManager.isOptimizationEnabled()
+                || !PotassiumConfig.adaptivePerformance) {
             qualityPercent = 100;
             pressureTicks = 0;
             recoveryTicks = 0;
@@ -49,13 +51,19 @@ public final class AdaptivePerformanceController {
     }
 
     public static int scaleBudget(int configured) {
-        if (!PotassiumConfig.adaptivePerformance) return Math.max(1, configured);
+        if (!PerformanceManager.isOptimizationEnabled()
+                || !PotassiumConfig.adaptivePerformance) {
+            return Math.max(1, configured);
+        }
         int scaled = configured * qualityPercent / 100;
         return Math.max(1, HardwareWorkScaler.scale(scaled));
     }
 
     public static int scaleDistance(int configured) {
-        if (!PotassiumConfig.adaptivePerformance) return Math.max(1, configured);
+        if (!PerformanceManager.isOptimizationEnabled()
+                || !PotassiumConfig.adaptivePerformance) {
+            return Math.max(1, configured);
+        }
         int scaled = configured * (70 + qualityPercent / 3) / 100;
         return Math.max(16, Math.min(configured, scaled));
     }

@@ -1,7 +1,6 @@
 package com.predex.potassium.optimization.benchmark;
 
 import com.predex.potassium.optimization.profile.PerformanceProfileManager;
-import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
 
 /** Temporary developer diagnostics for Potassium Dev Temp Version 1. */
 public final class PotassiumDevDiagnostics {
@@ -16,6 +15,8 @@ public final class PotassiumDevDiagnostics {
     public static volatile long chunkHookCalls;
     public static volatile long blockHookCalls;
     private static volatile int minimumFps;
+    private static volatile int baselineAverageFps;
+    private static volatile int optimizedAverageFps;
 
     private PotassiumDevDiagnostics() {}
 
@@ -45,5 +46,33 @@ public final class PotassiumDevDiagnostics {
 
     public static int getOnePercentLowFps() {
         return (int) Math.round(PerformanceTelemetry.getOnePercentLowFps());
+    }
+
+    public static void captureBenchmarkState(boolean optimized) {
+        int fps = getAverageFps();
+        if (optimized) {
+            optimizedAverageFps = fps;
+        } else {
+            baselineAverageFps = fps;
+        }
+    }
+
+    public static int getBaselineAverageFps() {
+        return baselineAverageFps;
+    }
+
+    public static int getOptimizedAverageFps() {
+        return optimizedAverageFps;
+    }
+
+    public static int getFpsDifference() {
+        if (baselineAverageFps == 0 || optimizedAverageFps == 0) return 0;
+        return optimizedAverageFps - baselineAverageFps;
+    }
+
+    public static double getFpsGainPercent() {
+        if (baselineAverageFps == 0 || optimizedAverageFps == 0) return 0.0D;
+        return ((optimizedAverageFps - baselineAverageFps) * 100.0D)
+                / baselineAverageFps;
     }
 }

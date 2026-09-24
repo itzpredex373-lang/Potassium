@@ -30,11 +30,16 @@ public final class PotassiumEventHandler {
             PerformanceManager.onClientTick();
             if (PotassiumDevDiagnostics.ENABLED) {
                 devChatTicks++;
-                if (devChatTicks >= 600) { devChatTicks = 0; sendDevStatus(); }
+                if (devChatTicks >= 600) {
+                    devChatTicks = 0;
+                    sendDevStatus();
+                }
             }
+
             AdaptivePerformanceController.update();
 
-            if (PerformanceManager.isMaintenanceTick()
+            if (PerformanceManager.isOptimizationEnabled()
+                    && PerformanceManager.isMaintenanceTick()
                     && StabilityGuard.allowOptionalWork()
                     && SmoothWorldOptimizer.allowOptionalWork()) {
                 runMaintenance();
@@ -52,11 +57,14 @@ public final class PotassiumEventHandler {
         if (event.phase == TickEvent.Phase.START) {
             RenderFrameCounter.beginFrame();
             PerformanceTelemetry.beginFrame();
-            RenderStateOptimizer.beginFrame();
-            TextureBindingOptimizer.beginFrame();
-            FrustumRenderOptimizer.beginFrame();
-            AnimationVisibilityOptimizer.beginFrame();
-            EntityOcclusionOptimizer.beginFrame();
+
+            if (PerformanceManager.isOptimizationEnabled()) {
+                RenderStateOptimizer.beginFrame();
+                TextureBindingOptimizer.beginFrame();
+                FrustumRenderOptimizer.beginFrame();
+                AnimationVisibilityOptimizer.beginFrame();
+                EntityOcclusionOptimizer.beginFrame();
+            }
         } else if (event.phase == TickEvent.Phase.END) {
             FrameTimeMonitor.frame();
             PerformanceTelemetry.endFrame();
@@ -66,19 +74,33 @@ public final class PotassiumEventHandler {
 
     @SubscribeEvent
     public void onDebugOverlay(RenderGameOverlayEvent.Text event) {
-        if (!PotassiumDevDiagnostics.ENABLED || event.type != RenderGameOverlayEvent.ElementType.TEXT) return;
+        if (!PotassiumDevDiagnostics.ENABLED
+                || event.type != RenderGameOverlayEvent.ElementType.TEXT) return;
         Minecraft mc = Minecraft.getMinecraft();
         event.left.add("§6Potassium Dev Temp V1");
         event.left.add("§7Profile: §f" + PotassiumDevDiagnostics.getProfile());
+        event.left.add("§7Optimization: §f"
+                + (PerformanceManager.isOptimizationEnabled() ? "ON" : "OFF"));
         event.left.add("§7ASM E/T/G/B: §f" + PotassiumDevDiagnostics.getAsmStatus());
         event.left.add("§7ASM Fail: §f" + PotassiumDevDiagnostics.asmFailures);
-        event.left.add("§7Hooks P/T/C/B: §f" + PotassiumDevDiagnostics.particleHookCalls + "/" + PotassiumDevDiagnostics.tessellatorHookCalls + "/" + PotassiumDevDiagnostics.chunkHookCalls + "/" + PotassiumDevDiagnostics.blockHookCalls);
+        event.left.add("§7Hooks P/T/C/B: §f"
+                + PotassiumDevDiagnostics.particleHookCalls + "/"
+                + PotassiumDevDiagnostics.tessellatorHookCalls + "/"
+                + PotassiumDevDiagnostics.chunkHookCalls + "/"
+                + PotassiumDevDiagnostics.blockHookCalls);
         event.right.add("§7FPS: §f" + mc.getDebugFPS());
         event.right.add("§7Avg: §f" + PotassiumDevDiagnostics.getAverageFps());
         event.right.add("§7Min: §f" + PotassiumDevDiagnostics.getMinimumFps());
         event.right.add("§71% Low: §f" + PotassiumDevDiagnostics.getOnePercentLowFps());
-        event.right.add("§7Frame: §f" + String.format("%.1f", PerformanceTelemetry.getLastFrameMillis()) + " ms");
-        event.right.add("§7Guard: §f" + (StabilityGuard.isDegraded() ? "DEGRADED" : "OK") + " (" + StabilityGuard.getFailures() + ")");
+        event.right.add("§7Frame: §f"
+                + String.format("%.1f", PerformanceTelemetry.getLastFrameMillis()) + " ms");
+        event.right.add("§7OFF Avg: §f" + PotassiumDevDiagnostics.getBaselineAverageFps());
+        event.right.add("§7ON Avg: §f" + PotassiumDevDiagnostics.getOptimizedAverageFps());
+        event.right.add("§7Δ FPS: §f" + PotassiumDevDiagnostics.getFpsDifference()
+                + " (" + String.format("%.1f", PotassiumDevDiagnostics.getFpsGainPercent()) + "%)");
+        event.right.add("§7Guard: §f"
+                + (StabilityGuard.isDegraded() ? "DEGRADED" : "OK")
+                + " (" + StabilityGuard.getFailures() + ")");
     }
 
     private void sendDevStatus() {
@@ -88,8 +110,11 @@ public final class PotassiumEventHandler {
                 "§6[Potassium Dev] §fFPS " + mc.getDebugFPS()
                 + " | Avg " + PotassiumDevDiagnostics.getAverageFps()
                 + " | 1% Low " + PotassiumDevDiagnostics.getOnePercentLowFps()
-                + " | ASM " + PotassiumDevDiagnostics.getAsmStatus()
-                + " | Fail " + PotassiumDevDiagnostics.asmFailures));
+                + " | Opt "
+                + (PerformanceManager.isOptimizationEnabled() ? "ON" : "OFF")
+                + " | OFF " + PotassiumDevDiagnostics.getBaselineAverageFps()
+                + " | ON " + PotassiumDevDiagnostics.getOptimizedAverageFps()
+                + " | Δ " + PotassiumDevDiagnostics.getFpsDifference()));
     }
 
     private void runMaintenance() {
