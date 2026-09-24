@@ -54,7 +54,6 @@ public final class ChunkUpdateOptimizer {
             return true;
         }
 
-        if (MemoryOptimizer.isMemoryPressureHigh()) return false;
 
         return DynamicQualityController.allow(35)
                 || CpuOptimizer.shouldRunOptionalWork();
