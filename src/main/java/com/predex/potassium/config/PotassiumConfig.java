@@ -33,6 +33,10 @@ public final class PotassiumConfig {
     public static boolean lazyChunkLoading = true;
     public static boolean renderRegions = true;
     public static boolean smartAnimations = true;
+    public static boolean blockFaceCulling = true;
+    public static boolean entityOcclusionCulling = true;
+    public static boolean rendererCoreHooks = true;
+    public static boolean skipEmptyDrawCalls = true;
 
     private PotassiumConfig() {}
 
@@ -120,6 +124,18 @@ public final class PotassiumConfig {
 
         smartAnimations = configuration.getBoolean("smartAnimations", "rendering", true,
                 "Only admit optional animation work when its texture/region is visible.");
+
+        blockFaceCulling = configuration.getBoolean("blockFaceCulling", "rendering", true,
+                "Skip fully hidden opaque blocks during the baked-model render path.");
+
+        entityOcclusionCulling = configuration.getBoolean("entityOcclusionCulling", "rendering", true,
+                "Hide entities whose bounding-box sample points are fully behind opaque blocks.");
+
+        rendererCoreHooks = configuration.getBoolean("rendererCoreHooks", "rendering", true,
+                "Enable Potassium's Forge 1.8.9 bytecode renderer hooks.");
+
+        skipEmptyDrawCalls = configuration.getBoolean("skipEmptyDrawCalls", "rendering", true,
+                "Skip Tessellator submissions that contain zero vertices.");
 
         if (configuration.hasChanged()) configuration.save();
     }
