@@ -22,12 +22,13 @@ public final class PotassiumDevScreen extends GuiScreen {
     @Override
     public void initGui() {
         buttonList.clear();
-        int left = width / 2 - 150;
-        int right = width / 2 + 5;
+        int left = width / 2 - 220;
         int y = 42;
+        int columnWidth = 145;
+        int gap = 8;
 
-        masterButton = new GuiButton(MASTER_ID, left, y, 145, 20, "");
-        profileButton = new GuiButton(PROFILE_ID, right, y, 145, 20, "");
+        masterButton = new GuiButton(MASTER_ID, width / 2 - 220, y, 145, 20, "");
+        profileButton = new GuiButton(PROFILE_ID, width / 2 + 75, y, 145, 20, "");
         buttonList.add(masterButton);
         buttonList.add(profileButton);
 
@@ -54,15 +55,15 @@ public final class PotassiumDevScreen extends GuiScreen {
 
         int id = nextToggleId;
         for (int i = 0; i < toggles.length; i++) {
-            int column = i & 1;
-            int row = i >> 1;
-            int bx = column == 0 ? left : right;
+            int column = i % 3;
+            int row = i / 3;
+            int bx = left + column * (columnWidth + gap);
             int by = y + 28 + row * 23;
             buttonList.add(new GuiButton(id++, bx, by, 145, 20,
                     label(toggles[i][0], getToggle(toggles[i][1]))));
         }
 
-        buttonList.add(new GuiButton(CLOSE_ID, width / 2 - 75, y + 28 + 9 * 23, 150, 20, "Close"));
+        buttonList.add(new GuiButton(CLOSE_ID, width / 2 - 75, y + 28 + 6 * 23, 150, 20, "Close"));
         updateTopButtons();
     }
 
