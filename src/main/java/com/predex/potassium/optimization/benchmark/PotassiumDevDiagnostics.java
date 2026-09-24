@@ -87,6 +87,16 @@ public final class PotassiumDevDiagnostics {
         startBenchmark(optimized);
     }
 
+    public static void resetBenchmark() {
+        baselineAverageFps = 0;
+        optimizedAverageFps = 0;
+        benchmarkRunning = false;
+        benchmarkTargetOptimized = false;
+        benchmarkFramesRemaining = 0;
+        minimumFps = 0;
+        PerformanceTelemetry.reset();
+    }
+
     public static int getBaselineAverageFps() {
         return baselineAverageFps;
     }
