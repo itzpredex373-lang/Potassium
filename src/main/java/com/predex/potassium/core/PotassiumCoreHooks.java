@@ -1,6 +1,7 @@
 package com.predex.potassium.core;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.chunks.ChunkUpdateOptimizer;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
@@ -20,16 +21,18 @@ public final class PotassiumCoreHooks {
 
     public static boolean allowParticleSpawn() {
         PotassiumDevDiagnostics.particleHookCalls++;
+        if (!PerformanceManager.isOptimizationEnabled()) return true;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
-        boolean allowed = !PotassiumConfig.enabled || ParticleOptimizer.tryAcquire();
+        boolean allowed = ParticleOptimizer.tryAcquire();
         if (!allowed) PerformanceTelemetry.skippedParticle();
         return allowed;
     }
 
     public static boolean allowTessellatorDraw() {
         PotassiumDevDiagnostics.tessellatorHookCalls++;
+        if (!PerformanceManager.isOptimizationEnabled()) return true;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
-        if (!PotassiumConfig.enabled || !PotassiumConfig.skipEmptyDrawCalls) return true;
+        if (!PotassiumConfig.skipEmptyDrawCalls) return true;
 
         try {
             WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
@@ -43,8 +46,9 @@ public final class PotassiumCoreHooks {
 
     public static boolean allowChunkRendererUpdate() {
         PotassiumDevDiagnostics.chunkHookCalls++;
+        if (!PerformanceManager.isOptimizationEnabled()) return true;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
-        if (!PotassiumConfig.enabled || !PotassiumConfig.rendererCoreHooks || !PotassiumConfig.optimizeChunkUpdates) return true;
+        if (!PotassiumConfig.rendererCoreHooks || !PotassiumConfig.optimizeChunkUpdates) return true;
         boolean allowed = ChunkUpdateOptimizer.shouldRunRendererUpdate();
         if (!allowed) PerformanceTelemetry.skippedChunk();
         return allowed;
@@ -53,8 +57,9 @@ public final class PotassiumCoreHooks {
     public static boolean skipFullyOccludedBlock(
             IBlockAccess world, IBlockState state, BlockPos pos) {
         PotassiumDevDiagnostics.blockHookCalls++;
+        if (!PerformanceManager.isOptimizationEnabled()) return false;
         if (!CompatibilityManager.allowRiskyHooks()) return false;
-        if (!PotassiumConfig.enabled || !PotassiumConfig.rendererCoreHooks || !PotassiumConfig.blockFaceCulling) return false;
+        if (!PotassiumConfig.rendererCoreHooks || !PotassiumConfig.blockFaceCulling) return false;
         return BlockRenderOptimizer.isFullyOccluded(world, state, pos);
     }
 }
