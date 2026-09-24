@@ -15,7 +15,6 @@ import com.predex.potassium.optimization.rendering.FrustumRenderOptimizer;
 import com.predex.potassium.optimization.world.SmoothWorldOptimizer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
 public final class PotassiumEventHandler {
 
