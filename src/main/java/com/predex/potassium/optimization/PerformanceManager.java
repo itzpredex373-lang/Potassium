@@ -7,6 +7,7 @@ import com.predex.potassium.config.PotassiumConfig;
  */
 public final class PerformanceManager {
     private static long clientTickCount;
+    private static boolean optimizationsEnabled = true;
 
     private PerformanceManager() {}
 
@@ -14,16 +15,24 @@ public final class PerformanceManager {
         return PotassiumConfig.enabled;
     }
 
+    public static boolean isOptimizationEnabled() {
+        return PotassiumConfig.enabled && optimizationsEnabled;
+    }
+
+    public static void setOptimizationsEnabled(boolean enabled) {
+        optimizationsEnabled = enabled;
+    }
+
     public static boolean isLowMemoryMode() {
-        return PotassiumConfig.lowMemoryMode;
+        return isOptimizationEnabled() && PotassiumConfig.lowMemoryMode;
     }
 
     public static boolean shouldReduceParticles() {
-        return isEnabled() && PotassiumConfig.reduceParticles;
+        return isOptimizationEnabled() && PotassiumConfig.reduceParticles;
     }
 
     public static boolean shouldReduceEntityUpdates() {
-        return isEnabled() && PotassiumConfig.reduceEntityUpdates;
+        return isOptimizationEnabled() && PotassiumConfig.reduceEntityUpdates;
     }
 
     public static int getEntityRenderDistance() {
@@ -38,9 +47,6 @@ public final class PerformanceManager {
         return clientTickCount;
     }
 
-    /**
-     * Small periodic-task gate. It avoids doing optional maintenance every tick.
-     */
     public static boolean isMaintenanceTick() {
         return (clientTickCount & 31L) == 0L;
     }
