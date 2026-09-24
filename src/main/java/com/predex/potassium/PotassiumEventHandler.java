@@ -69,6 +69,7 @@ public final class PotassiumEventHandler {
             FrameTimeMonitor.frame();
             PerformanceTelemetry.endFrame();
             PotassiumDevDiagnostics.sampleFps(Minecraft.getMinecraft().getDebugFPS());
+            PotassiumDevDiagnostics.tickBenchmark();
         }
     }
 
@@ -81,6 +82,7 @@ public final class PotassiumEventHandler {
         event.left.add("§7Profile: §f" + PotassiumDevDiagnostics.getProfile());
         event.left.add("§7Optimization: §f"
                 + (PerformanceManager.isOptimizationEnabled() ? "ON" : "OFF"));
+        event.left.add("§7Benchmark: §f" + PotassiumDevDiagnostics.getBenchmarkStatus());
         event.left.add("§7ASM E/T/G/B: §f" + PotassiumDevDiagnostics.getAsmStatus());
         event.left.add("§7ASM Fail: §f" + PotassiumDevDiagnostics.asmFailures);
         event.left.add("§7Hooks P/T/C/B: §f"
@@ -112,6 +114,7 @@ public final class PotassiumEventHandler {
                 + " | 1% Low " + PotassiumDevDiagnostics.getOnePercentLowFps()
                 + " | Opt "
                 + (PerformanceManager.isOptimizationEnabled() ? "ON" : "OFF")
+                + " | Bench " + PotassiumDevDiagnostics.getBenchmarkStatus()
                 + " | OFF " + PotassiumDevDiagnostics.getBaselineAverageFps()
                 + " | ON " + PotassiumDevDiagnostics.getOptimizedAverageFps()
                 + " | Δ " + PotassiumDevDiagnostics.getFpsDifference()));
