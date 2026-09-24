@@ -3,6 +3,7 @@ package com.predex.potassium.core;
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.chunks.ChunkRenderPipeline;
+import com.predex.potassium.optimization.chunks.PotassiumChunkBuildController;
 import com.predex.potassium.optimization.chunks.ChunkUpdateOptimizer;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
@@ -78,6 +79,22 @@ public final class PotassiumCoreHooks {
         if (!PerformanceManager.isOptimizationEnabled()) return true;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
         return ChunkRenderPipeline.allowChunkDispatch(dispatcher, renderChunk);
+    }
+
+    public static void beginChunkBuildTick() {
+        if (PerformanceManager.isOptimizationEnabled()) {
+            PotassiumChunkBuildController.beginTick();
+        }
+    }
+
+    public static boolean allowChunkBuild(RenderChunk renderChunk) {
+        if (!PerformanceManager.isOptimizationEnabled()) return true;
+        if (!CompatibilityManager.allowRiskyHooks()) return true;
+        return PotassiumChunkBuildController.allowBuild(renderChunk);
+    }
+
+    public static void finishChunkBuild(RenderChunk renderChunk) {
+        PotassiumChunkBuildController.finishBuild(renderChunk);
     }
 
     public static boolean allowChunkInvalidation(RenderChunk renderChunk, boolean requested) {
