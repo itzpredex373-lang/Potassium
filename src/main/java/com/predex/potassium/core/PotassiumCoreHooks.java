@@ -2,6 +2,7 @@ package com.predex.potassium.core;
 
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.PerformanceManager;
+import com.predex.potassium.optimization.chunks.ChunkRenderPipeline;
 import com.predex.potassium.optimization.chunks.ChunkUpdateOptimizer;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
@@ -11,6 +12,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
+import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -55,6 +58,26 @@ public final class PotassiumCoreHooks {
         boolean allowed = ChunkUpdateOptimizer.shouldRunRendererUpdate();
         if (!allowed) PerformanceTelemetry.skippedChunk();
         return allowed;
+    }
+
+    public static void beginChunkRenderPipeline(long finishTimeNano) {
+        if (!PerformanceManager.isOptimizationEnabled()
+                || !PotassiumConfig.rendererCoreHooks
+                || !PotassiumConfig.optimizeChunkUpdates) {
+            return;
+        }
+        ChunkRenderPipeline.beginUpdateWindow(finishTimeNano);
+    }
+
+    public static void finishChunkRenderPipeline() {
+        ChunkRenderPipeline.finishUpdateWindow();
+    }
+
+    public static boolean allowChunkDispatch(
+            ChunkRenderDispatcher dispatcher, RenderChunk renderChunk) {
+        if (!PerformanceManager.isOptimizationEnabled()) return true;
+        if (!CompatibilityManager.allowRiskyHooks()) return true;
+        return ChunkRenderPipeline.allowChunkDispatch(dispatcher, renderChunk);
     }
 
     public static boolean skipFullyOccludedBlock(
