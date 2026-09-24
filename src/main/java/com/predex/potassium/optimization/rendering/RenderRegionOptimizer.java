@@ -1,19 +1,15 @@
 package com.predex.potassium.optimization.rendering;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.PerformanceManager;
 
-/**
- * Region-aware batching helper inspired by OptiFine Render Regions.
- * It only supplies grouping decisions; actual RenderGlobal integration remains
- * renderer-hook dependent on the legacy 1.8.9 client.
- */
 public final class RenderRegionOptimizer {
     private static final int REGION_SHIFT = 4;
 
     private RenderRegionOptimizer() {}
 
     public static boolean enabled() {
-        return PotassiumConfig.enabled && PotassiumConfig.renderRegions;
+        return PerformanceManager.isOptimizationEnabled() && PotassiumConfig.renderRegions;
     }
 
     public static int regionX(int chunkX) {
