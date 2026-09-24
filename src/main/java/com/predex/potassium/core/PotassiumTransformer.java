@@ -153,9 +153,9 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             }
 
             InsnList hook = new InsnList();
-            hook.add(new VarInsnNode(Opcodes.ALOAD, 0));
-            hook.add(new VarInsnNode(Opcodes.ALOAD, 2));
+            hook.add(new VarInsnNode(Opcodes.ALOAD, 1));
             hook.add(new VarInsnNode(Opcodes.ALOAD, 3));
+            hook.add(new VarInsnNode(Opcodes.ALOAD, 4));
             hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
                     "skipFullyOccludedBlock",
                     "(Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;)Z",
