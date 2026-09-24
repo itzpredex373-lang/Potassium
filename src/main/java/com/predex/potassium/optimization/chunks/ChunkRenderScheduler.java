@@ -18,6 +18,7 @@ public final class ChunkRenderScheduler {
         if (event.phase != TickEvent.Phase.END) return;
 
         ChunkUpdateOptimizer.beginTick();
+        com.predex.potassium.core.PotassiumCoreHooks.beginChunkBuildTick();
 
         Minecraft minecraft = Minecraft.getMinecraft();
         if (minecraft.theWorld == null || minecraft.thePlayer == null) {
