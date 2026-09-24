@@ -5,7 +5,6 @@ import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.chunks.ChunkUpdateOptimizer;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
-import com.predex.potassium.optimization.benchmark.PotassiumDevDiagnostics;
 import com.predex.potassium.optimization.particles.ParticleOptimizer;
 import com.predex.potassium.optimization.rendering.BlockRenderOptimizer;
 import net.minecraft.block.state.IBlockState;
@@ -20,7 +19,6 @@ public final class PotassiumCoreHooks {
     private PotassiumCoreHooks() {}
 
     public static boolean allowParticleSpawn() {
-        PotassiumDevDiagnostics.particleHookCalls++;
         if (!PerformanceManager.isOptimizationEnabled()) return true;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
         boolean allowed = ParticleOptimizer.tryAcquire();
@@ -29,7 +27,6 @@ public final class PotassiumCoreHooks {
     }
 
     public static boolean allowTessellatorDraw() {
-        PotassiumDevDiagnostics.tessellatorHookCalls++;
         if (!PerformanceManager.isOptimizationEnabled()) return true;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
         if (!PotassiumConfig.skipEmptyDrawCalls) return true;
@@ -45,7 +42,6 @@ public final class PotassiumCoreHooks {
     }
 
     public static boolean allowChunkRendererUpdate() {
-        PotassiumDevDiagnostics.chunkHookCalls++;
         if (!PerformanceManager.isOptimizationEnabled()) return true;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
         if (!PotassiumConfig.rendererCoreHooks || !PotassiumConfig.optimizeChunkUpdates) return true;
@@ -56,7 +52,6 @@ public final class PotassiumCoreHooks {
 
     public static boolean skipFullyOccludedBlock(
             IBlockAccess world, IBlockState state, BlockPos pos) {
-        PotassiumDevDiagnostics.blockHookCalls++;
         if (!PerformanceManager.isOptimizationEnabled()) return false;
         if (!CompatibilityManager.allowRiskyHooks()) return false;
         if (!PotassiumConfig.rendererCoreHooks || !PotassiumConfig.blockFaceCulling) return false;
