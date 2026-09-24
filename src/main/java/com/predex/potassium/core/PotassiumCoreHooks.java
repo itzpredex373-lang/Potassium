@@ -80,6 +80,25 @@ public final class PotassiumCoreHooks {
         return ChunkRenderPipeline.allowChunkDispatch(dispatcher, renderChunk);
     }
 
+    public static boolean allowChunkInvalidation(RenderChunk renderChunk, boolean requested) {
+        if (!requested) return true;
+        if (!PerformanceManager.isOptimizationEnabled()
+                || !PotassiumConfig.rendererCoreHooks
+                || !PotassiumConfig.optimizeChunkUpdates
+                || renderChunk == null) {
+            return true;
+        }
+
+        // setNeedsUpdate(true) is frequently called by neighboring block
+        // updates. Once the chunk is already dirty, another invalidation adds
+        // no useful work and only increases queue pressure.
+        try {
+            return !renderChunk.isNeedsUpdate();
+        } catch (Throwable ignored) {
+            return true;
+        }
+    }
+
     public static boolean skipFullyOccludedBlock(
             IBlockAccess world, IBlockState state, BlockPos pos) {
         if (!PerformanceManager.isOptimizationEnabled()) return false;
