@@ -6,6 +6,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.predex.potassium.optimization.benchmark.PotassiumDevDiagnostics;
 
 public final class PotassiumTransformer implements net.minecraft.launchwrapper.IClassTransformer {
     private static final String HOOK = "com/predex/potassium/core/PotassiumCoreHooks";
@@ -28,7 +29,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
                 return transformBlockModelRenderer(basicClass);
             }
         } catch (Throwable error) {
-            LOGGER.warn("[Potassium ASM] Transformer failed for " + transformedName, error);
+            LOGGER.warn("[Potassium ASM] Transformer failed for " + transformedName, error); PotassiumDevDiagnostics.asmFailures++;
             // Never make the client unloadable because an optional hook failed.
         }
 
@@ -53,7 +54,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             changed = true;
         }
 
-        if (changed) LOGGER.info("[Potassium ASM] EffectRenderer transformed");
+        if (changed) { LOGGER.info("[Potassium ASM] EffectRenderer transformed"); PotassiumDevDiagnostics.asmEffectRenderer = true; }
         return changed ? write(cn) : bytes;
     }
 
@@ -77,7 +78,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             break;
         }
 
-        if (changed) LOGGER.info("[Potassium ASM] Tessellator transformed");
+        if (changed) { LOGGER.info("[Potassium ASM] Tessellator transformed"); PotassiumDevDiagnostics.asmTessellator = true; }
         return changed ? write(cn) : bytes;
     }
 
@@ -101,7 +102,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             break;
         }
 
-        if (changed) LOGGER.info("[Potassium ASM] RenderGlobal transformed");
+        if (changed) { LOGGER.info("[Potassium ASM] RenderGlobal transformed"); PotassiumDevDiagnostics.asmRenderGlobal = true; }
         return changed ? write(cn) : bytes;
     }
 
@@ -139,7 +140,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             break;
         }
 
-        if (changed) LOGGER.info("[Potassium ASM] BlockModelRenderer transformed");
+        if (changed) { LOGGER.info("[Potassium ASM] BlockModelRenderer transformed"); PotassiumDevDiagnostics.asmBlockModelRenderer = true; }
         return changed ? write(cn) : bytes;
     }
 
