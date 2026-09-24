@@ -28,7 +28,7 @@ public final class ChunkUpdateOptimizer {
         int radius = AdaptivePerformanceController.scaleDistance(PotassiumConfig.chunkUpdateRadius);
 
         if (distanceSq > radius * radius) return false;
-        if (MemoryOptimizer.isMemoryPressureHigh() && distanceSq > 16) return false;
+        if (MemoryOptimizer.isUnderPressure() && distanceSq > 16) return false;
 
         int configured = OptiFinePerformanceParity.getChunkBudget(
                 PotassiumConfig.maxChunkUpdatesPerTick,
@@ -39,8 +39,7 @@ public final class ChunkUpdateOptimizer {
         if (processedThisTick >= budget) return false;
         processedThisTick++;
 
-        return CpuOptimizer.shouldRunOptionalWork()
-                || AdaptivePerformanceController.isPerformanceDegraded();
+        return CpuOptimizer.shouldRunOptionalWork();
     }
 
     /**
@@ -58,8 +57,7 @@ public final class ChunkUpdateOptimizer {
         if (MemoryOptimizer.isMemoryPressureHigh()) return false;
 
         return DynamicQualityController.allow(35)
-                || CpuOptimizer.shouldRunOptionalWork()
-                || AdaptivePerformanceController.isPerformanceDegraded();
+                || CpuOptimizer.shouldRunOptionalWork();
     }
 
     private static boolean isPlayerStandingStill() {
