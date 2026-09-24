@@ -18,6 +18,13 @@ import net.minecraft.world.IBlockAccess;
 public final class PotassiumCoreHooks {
     private PotassiumCoreHooks() {}
 
+    public static boolean allowEntityRender(Entity entity) {
+        if (!PerformanceManager.isOptimizationEnabled()) return true;
+        if (!CompatibilityManager.allowRiskyHooks()) return true;
+        if (!PotassiumConfig.rendererCoreHooks || !PotassiumConfig.fastRender) return true;
+        return com.predex.potassium.optimization.rendering.RenderOptimizer.shouldRenderEntity(entity);
+    }
+
     public static boolean allowParticleSpawn() {
         if (!PerformanceManager.isOptimizationEnabled()) return true;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
