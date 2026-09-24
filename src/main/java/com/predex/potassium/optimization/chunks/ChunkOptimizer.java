@@ -1,6 +1,7 @@
 package com.predex.potassium.optimization.chunks;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.PerformanceManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.chunk.Chunk;
 
@@ -11,7 +12,7 @@ public final class ChunkOptimizer {
     private ChunkOptimizer() {}
 
     public static boolean isEnabled() {
-        return PotassiumConfig.enabled && PotassiumConfig.optimizeChunkUpdates;
+        return PerformanceManager.isOptimizationEnabled() && PotassiumConfig.optimizeChunkUpdates;
     }
 
     public static boolean isChunkUseful(Chunk chunk) {
