@@ -14,7 +14,6 @@ public final class PotassiumDevScreen extends GuiScreen {
     private static final int MASTER_ID = 1;
     private static final int PROFILE_ID = 2;
     private static final int CLOSE_ID = 99;
-    private int nextToggleId = 10;
 
     private GuiButton masterButton;
     private GuiButton profileButton;
@@ -53,13 +52,12 @@ public final class PotassiumDevScreen extends GuiScreen {
                 {"Dynamic Chunks", "dynamicChunkUpdates"}
         };
 
-        int id = nextToggleId;
         for (int i = 0; i < toggles.length; i++) {
             int column = i % 3;
             int row = i / 3;
             int bx = left + column * (columnWidth + gap);
             int by = y + 28 + row * 23;
-            buttonList.add(new GuiButton(id++, bx, by, 145, 20,
+            buttonList.add(new GuiButton(10 + i, bx, by, 145, 20,
                     label(toggles[i][0], getToggle(toggles[i][1]))));
         }
 
@@ -130,8 +128,8 @@ public final class PotassiumDevScreen extends GuiScreen {
 
         if (button.id == MASTER_ID) {
             boolean next = !PerformanceManager.isOptimizationEnabled();
-            PotassiumDevDiagnostics.captureBenchmarkState(next);
             PerformanceManager.setOptimizationsEnabled(next);
+            PotassiumDevDiagnostics.startBenchmark(next);
             updateTopButtons();
             return;
         }
@@ -187,13 +185,14 @@ public final class PotassiumDevScreen extends GuiScreen {
         drawDefaultBackground();
         drawCenteredString(fontRendererObj, "POTASSIUM DEV PANEL", width / 2, 12, 0xFFFFFF);
         drawCenteredString(fontRendererObj,
-                "FPS benchmark: toggle ALL OPT OFF -> wait -> ON",
+                "ALL OPT toggles optimization only; FPS telemetry stays ON",
                 width / 2, 28, 0xAAAAAA);
 
         drawCenteredString(fontRendererObj,
-                "OFF Avg: " + PotassiumDevDiagnostics.getBaselineAverageFps()
-                        + "  |  ON Avg: " + PotassiumDevDiagnostics.getOptimizedAverageFps()
-                        + "  |  Diff: " + PotassiumDevDiagnostics.getFpsDifference()
+                "Benchmark: " + PotassiumDevDiagnostics.getBenchmarkStatus()
+                        + " | OFF Avg: " + PotassiumDevDiagnostics.getBaselineAverageFps()
+                        + " | ON Avg: " + PotassiumDevDiagnostics.getOptimizedAverageFps()
+                        + " | Diff: " + PotassiumDevDiagnostics.getFpsDifference()
                         + " (" + String.format("%.1f", PotassiumDevDiagnostics.getFpsGainPercent()) + "%)",
                 width / 2, height - 26, 0xFFFFFF);
 
