@@ -39,9 +39,9 @@ public final class ChunkUpdateOptimizer {
         int budget = DynamicQualityController.scaleBudget(configured);
 
         if (processedThisTick >= budget) return false;
+        if (!CpuOptimizer.shouldRunOptionalWork()) return false;
         processedThisTick++;
-
-        return CpuOptimizer.shouldRunOptionalWork();
+        return true;
     }
 
     public static boolean shouldRunRendererUpdate() {
