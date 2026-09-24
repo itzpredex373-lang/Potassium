@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import com.predex.potassium.optimization.benchmark.PotassiumDevDiagnostics;
 
 public final class PotassiumTransformer implements net.minecraft.launchwrapper.IClassTransformer {
+    private static final Logger LOGGER = LogManager.getLogger("Potassium-ASM");
     private static final String HOOK = "com/predex/potassium/core/PotassiumCoreHooks";
 
     @Override
