@@ -2,6 +2,7 @@ package com.predex.potassium.optimization.particles;
 
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.system.CpuOptimizer;
+import com.predex.potassium.optimization.adaptive.DynamicQualityController;
 import com.predex.potassium.optimization.system.MemoryOptimizer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
@@ -60,7 +61,7 @@ public final class ParticleOptimizer {
         }
 
         int multiplier = MemoryOptimizer.getParticleBudgetPercent();
-        return Math.max(16, configured * multiplier / 100);
+        return Math.max(16, DynamicQualityController.scaleBudget(configured * multiplier / 100));
     }
 
     public static int getParticlesThisTick() {
