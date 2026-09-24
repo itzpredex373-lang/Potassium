@@ -1,6 +1,7 @@
 package com.predex.potassium.optimization.benchmark;
 
 import com.predex.potassium.optimization.profile.PerformanceProfileManager;
+import com.predex.potassium.optimization.telemetry.PerformanceTelemetry;
 
 /** Temporary developer diagnostics for Potassium Dev Temp Version 1. */
 public final class PotassiumDevDiagnostics {
