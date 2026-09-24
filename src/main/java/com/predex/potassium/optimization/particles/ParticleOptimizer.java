@@ -1,6 +1,7 @@
 package com.predex.potassium.optimization.particles;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.adaptive.DynamicQualityController;
 import com.predex.potassium.optimization.system.MemoryOptimizer;
@@ -11,13 +12,6 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import java.lang.reflect.Field;
 import java.util.List;
 
-/**
- * Part 3 particle optimization.
- *
- * Minecraft 1.8.9 stores particles in EffectRenderer.fxLayers as a
- * two-dimensional List array. Potassium applies a bounded client-side
- * maintenance budget without creating replacement particle objects.
- */
 public final class ParticleOptimizer {
     private static long tick;
     private static int particlesThisTick;
@@ -35,7 +29,7 @@ public final class ParticleOptimizer {
     }
 
     public static boolean isEnabled() {
-        return PotassiumConfig.enabled && PotassiumConfig.reduceParticles;
+        return PerformanceManager.isOptimizationEnabled() && PotassiumConfig.reduceParticles;
     }
 
     public static boolean tryAcquire() {
@@ -93,32 +87,22 @@ public final class ParticleOptimizer {
             int total = 0;
 
             for (List<?>[] layerGroup : layers) {
-                if (layerGroup == null) {
-                    continue;
-                }
+                if (layerGroup == null) continue;
                 for (List<?> layer : layerGroup) {
-                    if (layer != null) {
-                        total += layer.size();
-                    }
+                    if (layer != null) total += layer.size();
                 }
             }
 
             int excess = total - budget;
-            if (excess <= 0) {
-                return;
-            }
+            if (excess <= 0) return;
 
             for (int group = layers.length - 1; group >= 0 && excess > 0; group--) {
                 List<?>[] layerGroup = layers[group];
-                if (layerGroup == null) {
-                    continue;
-                }
+                if (layerGroup == null) continue;
 
                 for (int mode = layerGroup.length - 1; mode >= 0 && excess > 0; mode--) {
                     List<?> layer = layerGroup[mode];
-                    if (layer == null || layer.isEmpty()) {
-                        continue;
-                    }
+                    if (layer == null || layer.isEmpty()) continue;
 
                     int removeCount = Math.min(excess, layer.size());
                     layer.subList(0, removeCount).clear();
@@ -126,14 +110,11 @@ public final class ParticleOptimizer {
                 }
             }
         } catch (Throwable ignored) {
-            // Optimization must never crash the client.
         }
     }
 
     private static Field getParticleLayersField() {
-        if (particleLayersField != null) {
-            return particleLayersField;
-        }
+        if (particleLayersField != null) return particleLayersField;
 
         try {
             particleLayersField = ReflectionHelper.findField(
