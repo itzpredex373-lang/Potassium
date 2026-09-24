@@ -2,6 +2,7 @@ package com.predex.potassium.core;
 
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.chunks.ChunkUpdateOptimizer;
+import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
 import com.predex.potassium.optimization.particles.ParticleOptimizer;
 import com.predex.potassium.optimization.rendering.BlockRenderOptimizer;
 import net.minecraft.block.state.IBlockState;
@@ -17,7 +18,9 @@ public final class PotassiumCoreHooks {
     private PotassiumCoreHooks() {}
 
     public static boolean allowParticleSpawn() {
-        return !PotassiumConfig.enabled || ParticleOptimizer.tryAcquire();
+        boolean allowed = !PotassiumConfig.enabled || ParticleOptimizer.tryAcquire();
+        if (!allowed) PerformanceTelemetry.skippedParticle();
+        return allowed;
     }
 
     public static boolean allowTessellatorDraw() {
@@ -25,7 +28,9 @@ public final class PotassiumCoreHooks {
 
         try {
             WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
-            return renderer == null || renderer.getVertexCount() > 0;
+            boolean allowed = renderer == null || renderer.getVertexCount() > 0;
+            if (!allowed) PerformanceTelemetry.skippedDraw();
+            return allowed;
         } catch (Throwable ignored) {
             return true;
         }
@@ -33,7 +38,9 @@ public final class PotassiumCoreHooks {
 
     public static boolean allowChunkRendererUpdate() {
         if (!PotassiumConfig.enabled || !PotassiumConfig.rendererCoreHooks || !PotassiumConfig.optimizeChunkUpdates) return true;
-        return ChunkUpdateOptimizer.shouldRunRendererUpdate();
+        boolean allowed = ChunkUpdateOptimizer.shouldRunRendererUpdate();
+        if (!allowed) PerformanceTelemetry.skippedChunk();
+        return allowed;
     }
 
     public static boolean skipFullyOccludedBlock(
