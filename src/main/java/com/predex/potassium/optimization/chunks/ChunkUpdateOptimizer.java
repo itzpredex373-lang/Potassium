@@ -2,8 +2,10 @@ package com.predex.potassium.optimization.chunks;
 
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.adaptive.AdaptivePerformanceController;
+import com.predex.potassium.optimization.rendering.OptiFinePerformanceParity;
 import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.world.WorldUpdateOptimizer;
+import net.minecraft.client.Minecraft;
 
 public final class ChunkUpdateOptimizer {
     private static long tick;
@@ -36,9 +38,18 @@ public final class ChunkUpdateOptimizer {
 
     private static int getEffectiveBudget() {
         int configured = Math.max(1, PotassiumConfig.maxChunkUpdatesPerTick);
-        return PotassiumConfig.adaptivePerformance
-                ? AdaptivePerformanceController.scaleBudget(configured)
-                : configured;
+        if (PotassiumConfig.adaptivePerformance) {
+            configured = AdaptivePerformanceController.scaleBudget(configured);
+        }
+
+        Minecraft minecraft = Minecraft.getMinecraft();
+        boolean standingStill = minecraft.thePlayer != null
+                && Math.abs(minecraft.thePlayer.motionX) < 0.001D
+                && Math.abs(minecraft.thePlayer.motionZ) < 0.001D;
+        boolean localWorld = minecraft.isIntegratedServerRunning();
+
+        return OptiFinePerformanceParity.getChunkBudget(
+                configured, standingStill, localWorld);
     }
 
     public static int getUpdatesThisTick() { return updatesThisTick; }
