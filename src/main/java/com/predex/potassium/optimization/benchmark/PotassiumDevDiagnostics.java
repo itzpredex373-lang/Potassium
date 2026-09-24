@@ -5,6 +5,8 @@ import com.predex.potassium.optimization.profile.PerformanceProfileManager;
 /** Temporary developer diagnostics for Potassium Dev Temp Version 1. */
 public final class PotassiumDevDiagnostics {
     public static final boolean ENABLED = true;
+    private static final int BENCHMARK_FRAMES = 120;
+
     public static volatile boolean asmEffectRenderer;
     public static volatile boolean asmTessellator;
     public static volatile boolean asmRenderGlobal;
@@ -14,9 +16,13 @@ public final class PotassiumDevDiagnostics {
     public static volatile long tessellatorHookCalls;
     public static volatile long chunkHookCalls;
     public static volatile long blockHookCalls;
+
     private static volatile int minimumFps;
     private static volatile int baselineAverageFps;
     private static volatile int optimizedAverageFps;
+    private static volatile boolean benchmarkRunning;
+    private static volatile boolean benchmarkTargetOptimized;
+    private static volatile int benchmarkFramesRemaining;
 
     private PotassiumDevDiagnostics() {}
 
@@ -48,13 +54,37 @@ public final class PotassiumDevDiagnostics {
         return (int) Math.round(PerformanceTelemetry.getOnePercentLowFps());
     }
 
-    public static void captureBenchmarkState(boolean optimized) {
+    /** Start a clean 120-frame A/B measurement after the master switch changes. */
+    public static void startBenchmark(boolean optimized) {
+        benchmarkTargetOptimized = optimized;
+        benchmarkFramesRemaining = BENCHMARK_FRAMES;
+        benchmarkRunning = true;
+        PerformanceTelemetry.reset();
+    }
+
+    /** Called once per completed render frame. */
+    public static void tickBenchmark() {
+        if (!benchmarkRunning) return;
+        if (--benchmarkFramesRemaining > 0) return;
+
         int fps = getAverageFps();
-        if (optimized) {
+        if (benchmarkTargetOptimized) {
             optimizedAverageFps = fps;
         } else {
             baselineAverageFps = fps;
         }
+        benchmarkRunning = false;
+    }
+
+    public static String getBenchmarkStatus() {
+        if (!benchmarkRunning) return "READY";
+        return (benchmarkTargetOptimized ? "ON" : "OFF")
+                + " " + (BENCHMARK_FRAMES - benchmarkFramesRemaining)
+                + "/" + BENCHMARK_FRAMES;
+    }
+
+    public static void captureBenchmarkState(boolean optimized) {
+        startBenchmark(optimized);
     }
 
     public static int getBaselineAverageFps() {
