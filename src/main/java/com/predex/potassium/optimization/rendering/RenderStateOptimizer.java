@@ -1,19 +1,17 @@
 package com.predex.potassium.optimization.rendering;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public final class RenderStateOptimizer {
+    private static final Map<String, Boolean> cache = new HashMap<String, Boolean>();
     private RenderStateOptimizer() {}
-
-    public static boolean shouldUseFastPath(boolean translucent, boolean hasAnimation) {
-        return !translucent && !hasAnimation;
-    }
-
-    public static boolean canReuseState(int previousTexture, int currentTexture,
-                                        int previousBlendMode, int currentBlendMode) {
-        return previousTexture == currentTexture
-                && previousBlendMode == currentBlendMode;
-    }
-
-    public static int normalizeRenderPass(int pass) {
-        return pass < 0 ? 0 : pass;
+    public static void beginFrame() { cache.clear(); }
+    public static boolean shouldApply(String state, boolean enabled) {
+        if (state == null) return true;
+        Boolean old = cache.get(state);
+        if (old != null && old.booleanValue() == enabled) return false;
+        cache.put(state, Boolean.valueOf(enabled));
+        return true;
     }
 }
