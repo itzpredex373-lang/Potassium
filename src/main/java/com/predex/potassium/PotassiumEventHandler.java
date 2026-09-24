@@ -6,6 +6,7 @@ import com.predex.potassium.optimization.benchmark.StabilityGuard;
 import com.predex.potassium.optimization.benchmark.FrameTimeMonitor;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.rendering.AnimationVisibilityOptimizer;
+import com.predex.potassium.optimization.rendering.FrustumRenderOptimizer;
 import com.predex.potassium.optimization.world.SmoothWorldOptimizer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -36,6 +37,7 @@ public final class PotassiumEventHandler {
         if (!PerformanceManager.isEnabled()) return;
 
         if (event.phase == TickEvent.Phase.START) {
+            FrustumRenderOptimizer.beginFrame();
             AnimationVisibilityOptimizer.beginFrame();
         } else if (event.phase == TickEvent.Phase.END) {
             FrameTimeMonitor.frame();
@@ -43,8 +45,6 @@ public final class PotassiumEventHandler {
     }
 
     private void runMaintenance() {
-        // Compatibility detection is cached by the JVM and used as a safe
-        // fallback gate for future renderer hooks.
         CompatibilityManager.isForgePresent();
     }
 }
