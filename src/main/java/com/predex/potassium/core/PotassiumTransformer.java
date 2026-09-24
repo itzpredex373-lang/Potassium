@@ -25,6 +25,9 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             if ("net.minecraft.client.renderer.RenderGlobal".equals(transformedName)) {
                 return transformRenderGlobal(basicClass);
             }
+            if ("net.minecraft.client.renderer.chunk.ChunkRenderDispatcher".equals(transformedName)) {
+                return basicClass;
+            }
             if ("net.minecraft.client.renderer.entity.RenderManager".equals(transformedName)) {
                 return transformRenderManager(basicClass);
             }
@@ -33,7 +36,6 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             }
         } catch (Throwable error) {
             LOGGER.warn("[Potassium ASM] Transformer failed for " + transformedName, error);
-            // Never make the client unloadable because an optional hook failed.
         }
 
         return basicClass;
@@ -57,7 +59,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             changed = true;
         }
 
-        if (changed) { LOGGER.info("[Potassium ASM] EffectRenderer transformed"); }
+        if (changed) LOGGER.info("[Potassium ASM] EffectRenderer transformed");
         return changed ? write(cn) : bytes;
     }
 
@@ -81,7 +83,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             break;
         }
 
-        if (changed) { LOGGER.info("[Potassium ASM] Tessellator transformed"); }
+        if (changed) LOGGER.info("[Potassium ASM] Tessellator transformed");
         return changed ? write(cn) : bytes;
     }
 
@@ -91,21 +93,93 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
 
         for (MethodNode mn : cn.methods) {
             if (!"(J)V".equals(mn.desc)) continue;
-            if (!"updateChunks".equals(mn.name) && !"func_72716_a".equals(mn.name)) continue;
+            if (!"updateChunks".equals(mn.name) && !"func_174967_a".equals(mn.name)
+                    && !"func_72716_a".equals(mn.name)) continue;
 
-            InsnList hook = new InsnList();
-            hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
-                    "allowChunkRendererUpdate", "()Z", false));
-            LabelNode allowed = new LabelNode();
-            hook.add(new JumpInsnNode(Opcodes.IFNE, allowed));
-            hook.add(new InsnNode(Opcodes.RETURN));
-            hook.add(allowed);
-            mn.instructions.insert(hook);
+            // Keep the existing safety gate, then open a bounded dispatch window.
+            InsnList begin = new InsnList();
+            begin.add(new VarInsnNode(Opcodes.LLOAD, 1));
+            begin.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
+                    "beginChunkRenderPipeline", "(J)V", false));
+            mn.instructions.insert(begin);
+
+            // Close the window on normal returns.
+            for (AbstractInsnNode node = mn.instructions.getFirst(); node != null; ) {
+                AbstractInsnNode next = node.getNext();
+                if (node.getOpcode() == Opcodes.RETURN) {
+                    InsnList finish = new InsnList();
+                    finish.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
+                            "finishChunkRenderPipeline", "()V", false));
+                    mn.instructions.insertBefore(node, finish);
+                }
+                node = next;
+            }
+
+            // The vanilla RenderGlobal scheduler dispatches rebuild work through
+            // ChunkRenderDispatcher.updateChunkLater(RenderChunk). Replace the
+            // raw call with a conservative admission check while preserving the
+            // original return value semantics.
+            for (AbstractInsnNode node = mn.instructions.getFirst(); node != null; ) {
+                AbstractInsnNode next = node.getNext();
+                if (node instanceof MethodInsnNode) {
+                    MethodInsnNode call = (MethodInsnNode) node;
+                    if ("(Lnet/minecraft/client/renderer/chunk/RenderChunk;)Z".equals(call.desc)
+                            && ("updateChunkLater".equals(call.name)
+                            || "func_178507_a".equals(call.name))) {
+
+                        InsnList gate = new InsnList();
+                        gate.add(new InsnNode(Opcodes.DUP2));
+                        gate.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
+                                "allowChunkDispatch",
+                                "(Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher;Lnet/minecraft/client/renderer/chunk/RenderChunk;)Z",
+                                false));
+
+                        LabelNode allowed = new LabelNode();
+                        LabelNode done = new LabelNode();
+
+                        gate.add(new JumpInsnNode(Opcodes.IFNE, allowed));
+                        gate.add(new InsnNode(Opcodes.POP2));
+                        gate.add(new InsnNode(Opcodes.ICONST_0));
+                        gate.add(new JumpInsnNode(Opcodes.GOTO, done));
+                        gate.add(allowed);
+                        gate.add(done);
+
+                        mn.instructions.insertBefore(node, gate);
+
+                        // Original invocation must only execute on the allowed path.
+                        // The generated branch leaves the original dispatcher and
+                        // RenderChunk arguments on the stack for the call.
+                        InsnList replacement = new InsnList();
+                        LabelNode callAllowed = new LabelNode();
+
+                        // Rebuild the sequence with a branch around the original call.
+                        mn.instructions.remove(node);
+
+                        replacement.add(new InsnNode(Opcodes.DUP2));
+                        replacement.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
+                                "allowChunkDispatch",
+                                "(Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher;Lnet/minecraft/client/renderer/chunk/RenderChunk;)Z",
+                                false));
+                        replacement.add(new JumpInsnNode(Opcodes.IFNE, callAllowed));
+                        replacement.add(new InsnNode(Opcodes.POP2));
+                        replacement.add(new InsnNode(Opcodes.ICONST_0));
+                        replacement.add(new JumpInsnNode(Opcodes.GOTO, done));
+                        replacement.add(callAllowed);
+                        replacement.add(new MethodInsnNode(call.getOpcode(), call.owner,
+                                call.name, call.desc, call.itf));
+                        replacement.add(done);
+
+                        mn.instructions.insertBefore(next, replacement);
+                        changed = true;
+                }
+                node = next;
+            }
+
             changed = true;
             break;
         }
 
-        if (changed) { LOGGER.info("[Potassium ASM] RenderGlobal transformed"); }
+        if (changed) LOGGER.info("[Potassium ASM] RenderGlobal chunk pipeline transformed");
         return changed ? write(cn) : bytes;
     }
 
@@ -132,7 +206,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             break;
         }
 
-        if (changed) { LOGGER.info("[Potassium ASM] RenderManager transformed"); }
+        if (changed) LOGGER.info("[Potassium ASM] RenderManager transformed");
         return changed ? write(cn) : bytes;
     }
 
@@ -144,10 +218,6 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             if (!"()Z".equals(mn.desc)) continue;
             if (mn.instructions == null || mn.instructions.size() == 0) continue;
 
-            // 1.8.9's main block-model method is:
-            // (IBlockAccess, IBakedModel, IBlockState, BlockPos, WorldRenderer, boolean)boolean
-            // We identify it by its six parameters rather than relying on a
-            // particular MCP method name.
             if (!"(Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/block/model/IBakedModel;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/client/renderer/WorldRenderer;Z)Z".equals(mn.desc)) {
                 continue;
             }
@@ -170,7 +240,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             break;
         }
 
-        if (changed) { LOGGER.info("[Potassium ASM] BlockModelRenderer transformed"); }
+        if (changed) LOGGER.info("[Potassium ASM] BlockModelRenderer transformed");
         return changed ? write(cn) : bytes;
     }
 
