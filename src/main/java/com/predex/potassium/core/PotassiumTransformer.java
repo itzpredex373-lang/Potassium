@@ -96,65 +96,36 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             if (!"updateChunks".equals(mn.name) && !"func_174967_a".equals(mn.name)
                     && !"func_72716_a".equals(mn.name)) continue;
 
-            // Keep the existing safety gate, then open a bounded dispatch window.
             InsnList begin = new InsnList();
             begin.add(new VarInsnNode(Opcodes.LLOAD, 1));
             begin.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
                     "beginChunkRenderPipeline", "(J)V", false));
             mn.instructions.insert(begin);
 
-            // Close the window on normal returns.
             for (AbstractInsnNode node = mn.instructions.getFirst(); node != null; ) {
                 AbstractInsnNode next = node.getNext();
+
                 if (node.getOpcode() == Opcodes.RETURN) {
                     InsnList finish = new InsnList();
                     finish.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
                             "finishChunkRenderPipeline", "()V", false));
                     mn.instructions.insertBefore(node, finish);
+                    changed = true;
                 }
-                node = next;
-            }
 
-            // The vanilla RenderGlobal scheduler dispatches rebuild work through
-            // ChunkRenderDispatcher.updateChunkLater(RenderChunk). Replace the
-            // raw call with a conservative admission check while preserving the
-            // original return value semantics.
-            for (AbstractInsnNode node = mn.instructions.getFirst(); node != null; ) {
-                AbstractInsnNode next = node.getNext();
                 if (node instanceof MethodInsnNode) {
                     MethodInsnNode call = (MethodInsnNode) node;
                     if ("(Lnet/minecraft/client/renderer/chunk/RenderChunk;)Z".equals(call.desc)
                             && ("updateChunkLater".equals(call.name)
                             || "func_178507_a".equals(call.name))) {
 
-                        InsnList gate = new InsnList();
-                        gate.add(new InsnNode(Opcodes.DUP2));
-                        gate.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
-                                "allowChunkDispatch",
-                                "(Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher;Lnet/minecraft/client/renderer/chunk/RenderChunk;)Z",
-                                false));
-
-                        LabelNode allowed = new LabelNode();
+                        LabelNode callAllowed = new LabelNode();
                         LabelNode done = new LabelNode();
 
-                        gate.add(new JumpInsnNode(Opcodes.IFNE, allowed));
-                        gate.add(new InsnNode(Opcodes.POP2));
-                        gate.add(new InsnNode(Opcodes.ICONST_0));
-                        gate.add(new JumpInsnNode(Opcodes.GOTO, done));
-                        gate.add(allowed);
-                        gate.add(done);
-
-                        mn.instructions.insertBefore(node, gate);
-
-                        // Original invocation must only execute on the allowed path.
-                        // The generated branch leaves the original dispatcher and
-                        // RenderChunk arguments on the stack for the call.
                         InsnList replacement = new InsnList();
-                        LabelNode callAllowed = new LabelNode();
-
-                        // Rebuild the sequence with a branch around the original call.
-                        mn.instructions.remove(node);
-
+                        // Stack before this sequence: dispatcher, renderChunk.
+                        // DUP2 preserves the original arguments for the actual
+                        // vanilla call if the pipeline admits the job.
                         replacement.add(new InsnNode(Opcodes.DUP2));
                         replacement.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
                                 "allowChunkDispatch",
@@ -169,9 +140,12 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
                                 call.name, call.desc, call.itf));
                         replacement.add(done);
 
-                        mn.instructions.insertBefore(next, replacement);
+                        mn.instructions.insertBefore(node, replacement);
+                        mn.instructions.remove(node);
                         changed = true;
+                    }
                 }
+
                 node = next;
             }
 
