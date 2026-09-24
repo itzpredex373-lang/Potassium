@@ -106,6 +106,33 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         return changed ? write(cn) : bytes;
     }
 
+    private byte[] transformRenderManager(byte[] bytes) {
+        ClassNode cn = read(bytes);
+        boolean changed = false;
+
+        for (MethodNode mn : cn.methods) {
+            if (!"(Lnet/minecraft/entity/Entity;DDDFF)V".equals(mn.desc)) continue;
+            if (!"renderEntity".equals(mn.name) && !"func_147939_a".equals(mn.name)) continue;
+
+            InsnList hook = new InsnList();
+            hook.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
+                    "allowEntityRender",
+                    "(Lnet/minecraft/entity/Entity;)Z",
+                    false));
+            LabelNode allowed = new LabelNode();
+            hook.add(new JumpInsnNode(Opcodes.IFNE, allowed));
+            hook.add(new InsnNode(Opcodes.RETURN));
+            hook.add(allowed);
+            mn.instructions.insert(hook);
+            changed = true;
+            break;
+        }
+
+        if (changed) { LOGGER.info("[Potassium ASM] RenderManager transformed"); }
+        return changed ? write(cn) : bytes;
+    }
+
     private byte[] transformBlockModelRenderer(byte[] bytes) {
         ClassNode cn = read(bytes);
         boolean changed = false;
