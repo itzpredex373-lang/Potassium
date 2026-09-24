@@ -4,6 +4,7 @@ import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.chunks.ChunkUpdateOptimizer;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
+import com.predex.potassium.optimization.benchmark.PotassiumDevDiagnostics;
 import com.predex.potassium.optimization.particles.ParticleOptimizer;
 import com.predex.potassium.optimization.rendering.BlockRenderOptimizer;
 import net.minecraft.block.state.IBlockState;
@@ -18,6 +19,7 @@ public final class PotassiumCoreHooks {
     private PotassiumCoreHooks() {}
 
     public static boolean allowParticleSpawn() {
+        PotassiumDevDiagnostics.particleHookCalls++;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
         boolean allowed = !PotassiumConfig.enabled || ParticleOptimizer.tryAcquire();
         if (!allowed) PerformanceTelemetry.skippedParticle();
@@ -25,6 +27,7 @@ public final class PotassiumCoreHooks {
     }
 
     public static boolean allowTessellatorDraw() {
+        PotassiumDevDiagnostics.tessellatorHookCalls++;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
         if (!PotassiumConfig.enabled || !PotassiumConfig.skipEmptyDrawCalls) return true;
 
@@ -39,6 +42,7 @@ public final class PotassiumCoreHooks {
     }
 
     public static boolean allowChunkRendererUpdate() {
+        PotassiumDevDiagnostics.chunkHookCalls++;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
         if (!PotassiumConfig.enabled || !PotassiumConfig.rendererCoreHooks || !PotassiumConfig.optimizeChunkUpdates) return true;
         boolean allowed = ChunkUpdateOptimizer.shouldRunRendererUpdate();
@@ -48,6 +52,7 @@ public final class PotassiumCoreHooks {
 
     public static boolean skipFullyOccludedBlock(
             IBlockAccess world, IBlockState state, BlockPos pos) {
+        PotassiumDevDiagnostics.blockHookCalls++;
         if (!CompatibilityManager.allowRiskyHooks()) return false;
         if (!PotassiumConfig.enabled || !PotassiumConfig.rendererCoreHooks || !PotassiumConfig.blockFaceCulling) return false;
         return BlockRenderOptimizer.isFullyOccluded(world, state, pos);
