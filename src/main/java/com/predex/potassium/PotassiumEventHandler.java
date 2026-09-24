@@ -5,6 +5,8 @@ import com.predex.potassium.optimization.adaptive.AdaptivePerformanceController;
 import com.predex.potassium.optimization.benchmark.StabilityGuard;
 import com.predex.potassium.optimization.benchmark.FrameTimeMonitor;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
+import com.predex.potassium.optimization.rendering.AnimationVisibilityOptimizer;
+import com.predex.potassium.optimization.world.SmoothWorldOptimizer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -18,7 +20,9 @@ public final class PotassiumEventHandler {
             PerformanceManager.onClientTick();
             AdaptivePerformanceController.update();
 
-            if (PerformanceManager.isMaintenanceTick() && StabilityGuard.allowOptionalWork()) {
+            if (PerformanceManager.isMaintenanceTick()
+                    && StabilityGuard.allowOptionalWork()
+                    && SmoothWorldOptimizer.allowOptionalWork()) {
                 runMaintenance();
             }
             StabilityGuard.reportSuccess();
@@ -29,7 +33,11 @@ public final class PotassiumEventHandler {
 
     @SubscribeEvent
     public void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && PerformanceManager.isEnabled()) {
+        if (!PerformanceManager.isEnabled()) return;
+
+        if (event.phase == TickEvent.Phase.START) {
+            AnimationVisibilityOptimizer.beginFrame();
+        } else if (event.phase == TickEvent.Phase.END) {
             FrameTimeMonitor.frame();
         }
     }
