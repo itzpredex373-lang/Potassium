@@ -1,21 +1,15 @@
 package com.predex.potassium.optimization.entities;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.PerformanceManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 
-/**
- * Part 3 entity optimization.
- *
- * Distant living-entity updates are throttled only when the experimental
- * setting is enabled. The default remains disabled because LivingUpdateEvent
- * cancellation can affect AI and gameplay behavior.
- */
 public final class EntityOptimizer {
     private EntityOptimizer() {}
 
     public static boolean isUpdateThrottleEnabled() {
-        return PotassiumConfig.enabled && PotassiumConfig.reduceEntityUpdates;
+        return PerformanceManager.isOptimizationEnabled() && PotassiumConfig.reduceEntityUpdates;
     }
 
     public static boolean shouldUpdate(EntityLivingBase entity) {
