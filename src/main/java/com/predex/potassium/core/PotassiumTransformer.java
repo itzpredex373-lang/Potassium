@@ -31,9 +31,6 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             if ("net.minecraft.client.renderer.chunk.RenderChunk".equals(transformedName)) {
                 return transformRenderChunk(basicClass);
             }
-            if ("net.minecraft.client.renderer.chunk.RenderChunk".equals(transformedName)) {
-                return transformRenderChunk(basicClass);
-            }
             if ("net.minecraft.client.renderer.entity.RenderManager".equals(transformedName)) {
                 return transformRenderManager(basicClass);
             }
