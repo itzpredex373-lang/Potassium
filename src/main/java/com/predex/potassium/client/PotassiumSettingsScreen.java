@@ -76,6 +76,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(47, right, y + 92, 150, "Mesh Uploads: " + PotassiumConfig.maxMeshUploadsPerFrame);
             addButton(48, left, y + 116, 150, "Mesh Prep Workers: " + onOff(PotassiumConfig.customMeshPreparation));
             addButton(49, right, y + 116, 150, "Occlusion Budget: " + PotassiumConfig.maxEntityOcclusionTestsPerFrame);
+            addButton(50, left, y + 140, 150, "Mesh Upload Pipeline: " + onOff(PotassiumConfig.meshUploadPipeline));
 
             drawCenteredString(fontRendererObj,
                     "Advanced controls are conservative and fail open.",
@@ -219,6 +220,9 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 49:
                 PotassiumConfig.maxEntityOcclusionTestsPerFrame =
                         cycle(PotassiumConfig.maxEntityOcclusionTestsPerFrame, 8, 256, 8);
+                break;
+            case 50:
+                PotassiumConfig.meshUploadPipeline = !PotassiumConfig.meshUploadPipeline;
                 break;
             case 90:
                 page = Math.max(0, page - 1);
