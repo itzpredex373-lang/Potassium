@@ -107,6 +107,14 @@ public final class PotassiumCoreHooks {
         }
     }
 
+    public static void finishChunkMeshUpload(RenderChunk renderChunk) {
+        if (renderChunk == null) return;
+        try {
+            PotassiumChunkMeshCache.markClean(renderChunk);
+        } catch (Throwable ignored) {
+        }
+    }
+
     public static void beginChunkBuildTick() {
         if (PerformanceManager.isOptimizationEnabled()) {
             PotassiumChunkBuildController.beginTick();
