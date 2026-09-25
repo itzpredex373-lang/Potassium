@@ -57,31 +57,6 @@ public final class ChunkUpdateOptimizer {
         return true;
     }
 
-    public static boolean shouldProcessChunk(int chunkX, int chunkZ, int playerChunkX, int playerChunkZ) {
-        if (!isChunkEligible(chunkX, chunkZ, playerChunkX, playerChunkZ)) return false;
-
-        int configured = OptiFinePerformanceParity.getChunkBudget(
-                PotassiumConfig.maxChunkUpdatesPerTick,
-                isPlayerStandingStill(),
-                isLocalWorld());
-        int budget = DynamicQualityController.scaleBudget(configured);
-
-        if (PotassiumConfig.mobileChunkStreaming) {
-            budget = Math.min(budget, Math.max(1, MobileChunkStreaming.getBudget()));
-        }
-
-        if (processedThisTick >= budget) return false;
-        if (!CpuOptimizer.shouldRunOptionalWork()) return false;
-
-        if (PotassiumConfig.mobileChunkStreaming
-                && !MobileChunkStreaming.tryAcquireBudget()) {
-            return false;
-        }
-
-        processedThisTick++;
-        return true;
-    }
-
     /**
      * Admission-only check used by the scheduler. It deliberately does not
      * consume the per-tick budget; the actual render-dispatch boundary does.
