@@ -14,6 +14,7 @@ public final class FrameTimeMonitor {
     private static final int METRIC_REFRESH_INTERVAL = 64;
 
     private static final double[] samples = new double[SAMPLE_SIZE];
+    private static final double[] worstSamples = new double[5];
 
     private static volatile long lastNanos;
     private static volatile double averageMs;
@@ -96,7 +97,9 @@ public final class FrameTimeMonitor {
      */
     private static void refreshLowFpsMetrics(int count) {
         int worstCount = Math.max(1, (int) Math.ceil(count * 0.01D));
-        double[] worst = new double[Math.min(5, worstCount)];
+        double[] worst = worstSamples;
+        Arrays.fill(worst, 0.0D);
+        int activeWorstCount = Math.min(5, worstCount);
 
         // Keep the slowest samples in ascending order. This array is tiny;
         // allocation happens only once per metric refresh, not per frame.
@@ -106,7 +109,7 @@ public final class FrameTimeMonitor {
                 continue;
             }
 
-            int limit = worst.length;
+            int limit = activeWorstCount;
             int insert = limit;
 
             for (int j = 0; j < limit; j++) {
@@ -124,7 +127,7 @@ public final class FrameTimeMonitor {
             }
         }
 
-        double onePercentMs = worst.length == 0 ? 0.0D : worst[worst.length - 1];
+        double onePercentMs = activeWorstCount == 0 ? 0.0D : worst[activeWorstCount - 1];
 
         // The single slowest frame is a useful approximation for the 0.1%
         // metric in this short rolling window.
