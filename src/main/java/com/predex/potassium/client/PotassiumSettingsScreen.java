@@ -2,6 +2,9 @@ package com.predex.potassium.client;
 
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.profile.PerformanceProfileManager;
+import com.predex.potassium.optimization.benchmark.BenchmarkMonitor;
+import com.predex.potassium.optimization.benchmark.FrameTimeMonitor;
+import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -30,7 +33,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         int center = width / 2;
         int left = center - 155;
         int right = center + 5;
-        int y = 52;
+        int y = page == 2 ? 70 : 52;
 
         if (page == 0) {
             addButton(1, left, y, 310, masterText());
@@ -105,6 +108,11 @@ public final class PotassiumSettingsScreen extends GuiScreen {
 
     private String onOff(boolean value) {
         return value ? "ON" : "OFF";
+    }
+
+    private String benchmarkState() {
+        double fps = BenchmarkMonitor.getMeasuredFps();
+        return fps <= 0.0D ? "READY" : String.format(java.util.Locale.ROOT, "%.0f FPS", fps);
     }
 
     @Override
@@ -224,6 +232,16 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 50:
                 PotassiumConfig.meshUploadPipeline = !PotassiumConfig.meshUploadPipeline;
                 break;
+            case 51:
+                FrameTimeMonitor.reset();
+                PerformanceTelemetry.reset();
+                BenchmarkMonitor.reset();
+                break;
+            case 52:
+                BenchmarkMonitor.reset();
+                FrameTimeMonitor.reset();
+                PerformanceTelemetry.reset();
+                break;
             case 90:
                 page = Math.max(0, page - 1);
                 break;
@@ -311,6 +329,24 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                 width / 2,
                 30,
                 0xAAAAAA);
+
+        if (page == 2) {
+            drawCenteredString(fontRendererObj,
+                    String.format(java.util.Locale.ROOT,
+                            "FPS %.0f  |  1%% low %.0f  |  0.1%% low %.0f  |  frame %.2f ms",
+                            BenchmarkMonitor.getMeasuredFps(),
+                            FrameTimeMonitor.getOnePercentLowFps(),
+                            FrameTimeMonitor.getZeroPointOnePercentLowFps(),
+                            FrameTimeMonitor.getAverageMs()),
+                    width / 2, 40, 0xFFFFFF);
+            drawCenteredString(fontRendererObj,
+                    String.format(java.util.Locale.ROOT,
+                            "Variance %.2f  |  Adaptive %d%%  |  Samples %d",
+                            FrameTimeMonitor.getVarianceMs(),
+                            com.predex.potassium.optimization.adaptive.AdaptivePerformanceController.getQualityPercent(),
+                            FrameTimeMonitor.getSampleCount()),
+                    width / 2, 52, 0xAAAAAA);
+        }
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
