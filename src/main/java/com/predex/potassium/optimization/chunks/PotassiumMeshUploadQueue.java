@@ -2,6 +2,7 @@ package com.predex.potassium.optimization.chunks;
 
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.PerformanceManager;
+import com.predex.potassium.optimization.network.MultiplayerPerformanceOptimizer;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -40,7 +41,8 @@ public final class PotassiumMeshUploadQueue {
             return;
         }
 
-        int budget = Math.max(1, PotassiumConfig.maxMeshUploadsPerFrame);
+        int budget = MultiplayerPerformanceOptimizer.getMeshUploadBudget(
+                Math.max(1, PotassiumConfig.maxMeshUploadsPerFrame));
         int drained = 0;
 
         while (drained < budget) {
