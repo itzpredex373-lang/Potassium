@@ -5,7 +5,8 @@ package com.predex.potassium.proxy;
  */
 public class PotassiumProxy {
     public void registerCommonHooks() {
-        // Common/server registration lives here.
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(
+                com.predex.potassium.pet.PotassiumPetManager.class);
     }
 
     public void registerClientHooks() {
