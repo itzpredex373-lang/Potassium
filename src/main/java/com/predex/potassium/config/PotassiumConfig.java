@@ -37,6 +37,8 @@ public final class PotassiumConfig {
     public static boolean entityOcclusionCulling = true;
     public static boolean rendererCoreHooks = true;
     public static boolean skipEmptyDrawCalls = true;
+    public static boolean customGpuRenderer = true;
+    public static boolean customDrawSubmission = true;
 
     private PotassiumConfig() {}
 
@@ -136,6 +138,12 @@ public final class PotassiumConfig {
 
         skipEmptyDrawCalls = configuration.getBoolean("skipEmptyDrawCalls", "rendering", true,
                 "Skip Tessellator submissions that contain zero vertices.");
+
+        customGpuRenderer = configuration.getBoolean("customGpuRenderer", "rendering", true,
+                "Use Potassium-owned VBO storage for compiled chunk meshes when the GPU supports it.");
+
+        customDrawSubmission = configuration.getBoolean("customDrawSubmission", "rendering", true,
+                "Submit ready chunk meshes through Potassium's custom VBO renderer; fall back to vanilla when incomplete.");
 
         renderSections = configuration.getBoolean("renderSections", "rendering", true,
                 "Track chunk sections separately for visibility and rebuild scheduling.");
