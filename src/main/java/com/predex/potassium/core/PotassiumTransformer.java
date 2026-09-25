@@ -320,6 +320,13 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
                         "onMultiplayerJoin", "()V", false));
                 changed = true;
             }
+            if (("handleDisconnect".equals(name) || "func_147280_a".equals(name))
+                    && "(Lnet/minecraft/network/play/server/S40PacketDisconnect;)V".equals(desc)) {
+                mn.instructions.insert(new MethodInsnNode(
+                        Opcodes.INVOKESTATIC, HOOK,
+                        "onMultiplayerDisconnect", "()V", false));
+                changed = true;
+            }
         }
 
         if (changed) LOGGER.info("[Potassium ASM] NetHandlerPlayClient multiplayer workload hooks transformed");
