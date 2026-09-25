@@ -11,6 +11,9 @@ import com.predex.potassium.optimization.rendering.TextureBindingOptimizer;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.rendering.AnimationVisibilityOptimizer;
 import com.predex.potassium.optimization.rendering.EntityOcclusionOptimizer;
+import com.predex.potassium.optimization.chunks.PotassiumRenderSectionManager;
+import com.predex.potassium.optimization.chunks.PotassiumMeshUploadQueue;
+import com.predex.potassium.optimization.chunks.PotassiumChunkMeshBuildQueue;
 import com.predex.potassium.optimization.rendering.FrustumRenderOptimizer;
 import com.predex.potassium.optimization.world.SmoothWorldOptimizer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -35,6 +38,10 @@ public final class PotassiumEventHandler {
             PerformanceManager.onClientTick();
 
             if (PerformanceManager.isOptimizationEnabled()) {
+                PotassiumChunkMeshBuildQueue.start();
+            }
+
+            if (PerformanceManager.isOptimizationEnabled()) {
                 AdaptivePerformanceController.update();
 
                 if (PerformanceManager.isMaintenanceTick()
@@ -55,6 +62,7 @@ public final class PotassiumEventHandler {
         if (event.phase == TickEvent.Phase.START) {
             RenderFrameCounter.beginFrame();
             PerformanceTelemetry.beginFrame();
+            PotassiumRenderSectionManager.beginFrame();
 
             if (PerformanceManager.isOptimizationEnabled()) {
                 RenderStateOptimizer.beginFrame();
@@ -64,6 +72,7 @@ public final class PotassiumEventHandler {
                 EntityOcclusionOptimizer.beginFrame();
             }
         } else if (event.phase == TickEvent.Phase.END) {
+            PotassiumMeshUploadQueue.drainFrame();
             FrameTimeMonitor.frame();
             PerformanceTelemetry.endFrame();
         }
