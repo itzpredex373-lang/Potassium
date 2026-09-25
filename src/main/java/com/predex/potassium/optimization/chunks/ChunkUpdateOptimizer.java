@@ -57,6 +57,56 @@ public final class ChunkUpdateOptimizer {
         return true;
     }
 
+    public static boolean shouldProcessChunk(int chunkX, int chunkZ, int playerChunkX, int playerChunkZ) {
+        if (!isChunkEligible(chunkX, chunkZ, playerChunkX, playerChunkZ)) return false;
+
+        int configured = OptiFinePerformanceParity.getChunkBudget(
+                PotassiumConfig.maxChunkUpdatesPerTick,
+                isPlayerStandingStill(),
+                isLocalWorld());
+        int budget = DynamicQualityController.scaleBudget(configured);
+
+        if (PotassiumConfig.mobileChunkStreaming) {
+            budget = Math.min(budget, Math.max(1, MobileChunkStreaming.getBudget()));
+        }
+
+        if (processedThisTick >= budget) return false;
+        if (!CpuOptimizer.shouldRunOptionalWork()) return false;
+
+        if (PotassiumConfig.mobileChunkStreaming
+                && !MobileChunkStreaming.tryAcquireBudget()) {
+            return false;
+        }
+
+        processedThisTick++;
+        return true;
+    }
+
+    /**
+     * Admission-only check used by the scheduler. It deliberately does not
+     * consume the per-tick budget; the actual render-dispatch boundary does.
+     */
+    public static boolean isChunkEligible(int chunkX, int chunkZ,
+                                          int playerChunkX, int playerChunkZ) {
+        if (!PerformanceManager.isOptimizationEnabled()
+                || !PotassiumConfig.optimizeChunkUpdates) return true;
+
+        int dx = chunkX - playerChunkX;
+        int dz = chunkZ - playerChunkZ;
+        int distanceSq = dx * dx + dz * dz;
+        int radius = AdaptivePerformanceController.scaleDistance(PotassiumConfig.chunkUpdateRadius);
+
+        if (distanceSq > radius * radius) return false;
+        if (MemoryOptimizer.isUnderPressure() && distanceSq > 16) return false;
+
+        if (PotassiumConfig.mobileChunkStreaming
+                && !MobileChunkStreaming.shouldPrefer(chunkX, chunkZ)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public static boolean shouldRunRendererUpdate() {
         if (!PerformanceManager.isOptimizationEnabled()
                 || !PotassiumConfig.rendererCoreHooks
