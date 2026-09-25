@@ -4,6 +4,7 @@ import com.predex.potassium.config.PotassiumConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiOptionsRowList;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.GameSettings;
 
@@ -50,6 +51,7 @@ public final class PotassiumVideoSettingsScreen extends GuiScreen {
     public void initGui() {
         buttonList.clear();
 
+        GameSettings.Options[] options = videoOptions();
         optionsRowList = new GuiOptionsRowList(
                 Minecraft.getMinecraft(),
                 width,
@@ -57,7 +59,7 @@ public final class PotassiumVideoSettingsScreen extends GuiScreen {
                 32,
                 height - 58,
                 25,
-                VIDEO_OPTIONS);
+                options);
 
         buttonList.add(new GuiButton(
                 300,
@@ -82,6 +84,22 @@ public final class PotassiumVideoSettingsScreen extends GuiScreen {
                 200,
                 20,
                 "Done"));
+    }
+
+    private GameSettings.Options[] videoOptions() {
+        if (OpenGlHelper.vboSupported) {
+            return VIDEO_OPTIONS;
+        }
+
+        GameSettings.Options[] filtered = new GameSettings.Options[VIDEO_OPTIONS.length - 1];
+        int index = 0;
+        for (GameSettings.Options option : VIDEO_OPTIONS) {
+            if (option == GameSettings.Options.USE_VBO) {
+                continue;
+            }
+            filtered[index++] = option;
+        }
+        return filtered;
     }
 
     @Override
