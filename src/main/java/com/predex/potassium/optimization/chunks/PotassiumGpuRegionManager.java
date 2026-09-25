@@ -127,8 +127,9 @@ public final class PotassiumGpuRegionManager {
             return false;
         }
 
+        List<RenderChunk> renderList = null;
         try {
-            List<RenderChunk> renderList = getRenderChunks(container);
+            renderList = getRenderChunks(container);
             if (renderList == null || renderList.isEmpty()) {
                 return false;
             }
