@@ -144,6 +144,12 @@ public final class PotassiumGpuRegionManager {
                 draw(container, chunk, layer);
             }
 
+            // Match VboRenderList's post-layer cleanup so the transformed
+            // method can safely return before its vanilla body executes.
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+            GlStateManager.resetColor();
+            renderList.clear();
+
             return true;
         } catch (Throwable failure) {
             failures++;
