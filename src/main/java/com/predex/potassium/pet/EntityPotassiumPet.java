@@ -124,7 +124,7 @@ public final class EntityPotassiumPet extends EntityCreature {
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound tag) {
+    public void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
         tag.setString("PetType", getPetType());
         UUID owner = getOwnerUuid();
@@ -132,7 +132,7 @@ public final class EntityPotassiumPet extends EntityCreature {
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound tag) {
+    public void readEntityFromNBT(NBTTagCompound tag) {
         super.readEntityFromNBT(tag);
         setPetType(tag.getString("PetType"));
         String owner = tag.getString("OwnerUUID");
