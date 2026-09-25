@@ -1,130 +1,152 @@
 package com.predex.potassium.optimization.benchmark;
 
+import java.util.Arrays;
+
 /**
- * Frame-time sampler used for stability metrics.
+ * Low-overhead frame-time sampler used for stability metrics.
  *
- * The ring buffer is allocation-free during normal rendering. Percentiles use
- * a reusable scratch buffer only when the cached low-FPS metrics are refreshed.
+ * The render hot path only records one sample. Low-FPS metrics are refreshed
+ * periodically with a linear scan instead of sorting hundreds of samples on
+ * the client tick thread.
  */
 public final class FrameTimeMonitor {
     private static final int SAMPLE_SIZE = 512;
-    private static final double[] samples = new double[SAMPLE_SIZE];
-    private static final double[] percentileScratch = new double[SAMPLE_SIZE];
+    private static final int METRIC_REFRESH_INTERVAL = 64;
 
-    private static long lastNanos;
-    private static double averageMs;
-    private static double varianceMs;
-    private static int sampleCount;
+    private static final double[] samples = new double[SAMPLE_SIZE];
+
+    private static volatile long lastNanos;
+    private static volatile double averageMs;
+    private static volatile double varianceMs;
+    private static volatile int sampleCount;
+    private static volatile int percentileSampleCount;
+    private static volatile double cachedOnePercentLow;
+    private static volatile double cachedZeroPointOnePercentLow;
+
     private static int cursor;
-    private static int percentileSampleCount;
-    private static double cachedOnePercentLow;
-    private static double cachedZeroPointOnePercentLow;
 
     private FrameTimeMonitor() {}
 
-    public static synchronized void frame() {
+    public static void frame() {
         long now = System.nanoTime();
-        if (lastNanos != 0L) {
-            double ms = (now - lastNanos) / 1_000_000.0D;
+        long previous = lastNanos;
+
+        if (previous != 0L) {
+            double ms = (now - previous) / 1_000_000.0D;
             if (ms < 0.0D || ms > 10000.0D) {
                 ms = 0.0D;
             }
 
-            averageMs = averageMs == 0.0D ? ms : (averageMs * 0.9D + ms * 0.1D);
+            double oldAverage = averageMs;
+            double nextAverage = oldAverage == 0.0D
+                    ? ms
+                    : oldAverage * 0.9D + ms * 0.1D;
+
+            averageMs = nextAverage;
             samples[cursor] = ms;
             cursor = (cursor + 1) % SAMPLE_SIZE;
-            if (sampleCount < SAMPLE_SIZE) {
-                sampleCount++;
+
+            int count = sampleCount;
+            if (count < SAMPLE_SIZE) {
+                count++;
+                sampleCount = count;
             }
 
-            double delta = ms - averageMs;
-            varianceMs = varianceMs == 0.0D
+            double delta = ms - nextAverage;
+            double oldVariance = varianceMs;
+            varianceMs = oldVariance == 0.0D
                     ? delta * delta
-                    : (varianceMs * 0.95D + delta * delta * 0.05D);
+                    : oldVariance * 0.95D + delta * delta * 0.05D;
+
+            if (count >= 32
+                    && (count - percentileSampleCount) >= METRIC_REFRESH_INTERVAL) {
+                refreshLowFpsMetrics(count);
+            }
         }
 
         lastNanos = now;
         BenchmarkMonitor.recordFrame();
     }
 
-    public static synchronized double getAverageMs() {
+    public static double getAverageMs() {
         return averageMs;
     }
 
-    public static synchronized double getVarianceMs() {
+    public static double getVarianceMs() {
         return Math.max(0.0D, varianceMs);
     }
 
     /**
-     * 1% low FPS: FPS corresponding to the 99th percentile frame time.
+     * 1% low FPS represented by the 99th-percentile frame time.
      */
-    public static synchronized double getOnePercentLowFps() {
-        refreshPercentilesIfNeeded();
+    public static double getOnePercentLowFps() {
         return cachedOnePercentLow;
     }
 
     /**
-     * 0.1% low FPS: FPS corresponding to the 99.9th percentile frame time.
+     * 0.1% low FPS represented by the 99.9th-percentile frame time.
      */
-    public static synchronized double getZeroPointOnePercentLowFps() {
-        refreshPercentilesIfNeeded();
+    public static double getZeroPointOnePercentLowFps() {
         return cachedZeroPointOnePercentLow;
     }
 
-    private static void refreshPercentilesIfNeeded() {
-        if (sampleCount < 2) {
-            return;
-        }
-        if (sampleCount - percentileSampleCount < 8 && percentileSampleCount != 0) {
-            return;
-        }
+    /**
+     * Finds the slowest 1% without sorting the full ring buffer.
+     * For 512 samples this means tracking only the five slowest frames.
+     */
+    private static void refreshLowFpsMetrics(int count) {
+        int worstCount = Math.max(1, (int) Math.ceil(count * 0.01D));
+        double[] worst = new double[Math.min(5, worstCount)];
 
-        int count = sampleCount;
-        if (count < SAMPLE_SIZE) {
-            System.arraycopy(samples, 0, percentileScratch, 0, count);
-        } else {
-            // The ring is full. Reconstruct chronological order without
-            // allocating a temporary array.
-            int tail = cursor;
-            int first = SAMPLE_SIZE - tail;
-            System.arraycopy(samples, tail, percentileScratch, 0, first);
-            System.arraycopy(samples, 0, percentileScratch, first, tail);
-        }
-
-        insertionSort(percentileScratch, count);
-        cachedOnePercentLow = percentileFps(0.99D, count);
-        cachedZeroPointOnePercentLow = percentileFps(0.999D, count);
-        percentileSampleCount = sampleCount;
-    }
-
-    private static void insertionSort(double[] values, int count) {
-        for (int i = 1; i < count; i++) {
-            double value = values[i];
-            int j = i - 1;
-            while (j >= 0 && values[j] > value) {
-                values[j + 1] = values[j];
-                j--;
+        // Keep the slowest samples in ascending order. This array is tiny;
+        // allocation happens only once per metric refresh, not per frame.
+        for (int i = 0; i < count; i++) {
+            double value = samples[i];
+            if (value <= 0.0D) {
+                continue;
             }
-            values[j + 1] = value;
+
+            int limit = worst.length;
+            int insert = limit;
+
+            for (int j = 0; j < limit; j++) {
+                if (value > worst[j]) {
+                    insert = j;
+                    break;
+                }
+            }
+
+            if (insert < limit) {
+                for (int j = limit - 1; j > insert; j--) {
+                    worst[j] = worst[j - 1];
+                }
+                worst[insert] = value;
+            }
         }
+
+        double onePercentMs = worst.length == 0 ? 0.0D : worst[worst.length - 1];
+
+        // The single slowest frame is a useful approximation for the 0.1%
+        // metric in this short rolling window.
+        double worstFrameMs = 0.0D;
+        for (int i = 0; i < count; i++) {
+            worstFrameMs = Math.max(worstFrameMs, samples[i]);
+        }
+
+        cachedOnePercentLow = onePercentMs <= 0.0D
+                ? 0.0D
+                : 1000.0D / onePercentMs;
+        cachedZeroPointOnePercentLow = worstFrameMs <= 0.0D
+                ? 0.0D
+                : 1000.0D / worstFrameMs;
+        percentileSampleCount = count;
     }
 
-    private static double percentileFps(double percentile, int count) {
-        if (count < 2) {
-            return 0.0D;
-        }
-
-        int index = (int) Math.ceil((count - 1) * percentile);
-        index = Math.max(0, Math.min(count - 1, index));
-        double ms = percentileScratch[index];
-        return ms <= 0.0D ? 0.0D : 1000.0D / ms;
-    }
-
-    public static synchronized int getSampleCount() {
+    public static int getSampleCount() {
         return sampleCount;
     }
 
-    public static synchronized void reset() {
+    public static void reset() {
         lastNanos = 0L;
         averageMs = 0.0D;
         varianceMs = 0.0D;
@@ -133,7 +155,6 @@ public final class FrameTimeMonitor {
         percentileSampleCount = 0;
         cachedOnePercentLow = 0.0D;
         cachedZeroPointOnePercentLow = 0.0D;
-        java.util.Arrays.fill(samples, 0.0D);
-        java.util.Arrays.fill(percentileScratch, 0.0D);
+        Arrays.fill(samples, 0.0D);
     }
 }
