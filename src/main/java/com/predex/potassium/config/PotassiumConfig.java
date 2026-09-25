@@ -20,6 +20,9 @@ public final class PotassiumConfig {
     public static boolean optimizeChunkUpdates = true;
     public static int chunkUpdateRadius = 12;
     public static int maxChunkUpdatesPerTick = 2;
+    public static boolean mobileChunkStreaming = true;
+    public static int mobileChunkLoadBudget = 2;
+    public static int movementPredictionChunks = 2;
     public static int entityUpdateDistance = 64;
     public static int maxParticlesPerTick = 80;
 
@@ -101,6 +104,15 @@ public final class PotassiumConfig {
 
         maxChunkUpdatesPerTick = configuration.getInt("maxChunkUpdatesPerTick", "chunks", 2, 1, 16,
                 "Maximum optional chunk-work slots reserved per client tick.");
+
+        mobileChunkStreaming = configuration.getBoolean("mobileChunkStreaming", "chunks", true,
+                "Use mobile-first chunk streaming with directional admission and bounded load budgets.");
+
+        mobileChunkLoadBudget = configuration.getInt("mobileChunkLoadBudget", "chunks", 2, 1, 4,
+                "Maximum chunk rebuilds admitted per client tick by the mobile streaming governor.");
+
+        movementPredictionChunks = configuration.getInt("movementPredictionChunks", "chunks", 2, 1, 3,
+                "How many chunks ahead Potassium may predict from player movement.");
 
         entityUpdateDistance = configuration.getInt("entityUpdateDistance", "entities", 64, 16, 128,
                 "Distance in blocks beyond which experimental living-entity updates may be throttled.");
