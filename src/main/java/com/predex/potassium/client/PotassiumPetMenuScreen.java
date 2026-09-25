@@ -1,8 +1,7 @@
 package com.predex.potassium.client;
 
 import com.predex.potassium.config.PotassiumConfig;
-import com.predex.potassium.pet.PotassiumPetNetwork;
-import com.predex.potassium.pet.PotassiumPetTypes;
+import com.predex.potassium.client.PotassiumPetTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -41,7 +40,6 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
         switch (button.id) {
             case 1:
                 PotassiumConfig.miniPetEnabled = !PotassiumConfig.miniPetEnabled;
-                syncPet();
                 break;
             case 2:
                 PotassiumConfig.miniPetScale = cycle(PotassiumConfig.miniPetScale, 25, 75, 8);
@@ -67,15 +65,6 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
         PotassiumConfig.miniPetType = PotassiumPetTypes.TYPES[
                 (PotassiumPetTypes.indexOf(PotassiumConfig.miniPetType) + 1)
                         % PotassiumPetTypes.TYPES.length];
-    }
-
-    private void syncPet() {
-        if (Minecraft.getMinecraft().theWorld != null) {
-            PotassiumPetNetwork.CHANNEL.sendToServer(
-                    new PotassiumPetNetwork.PetSelectionMessage(
-                            PotassiumConfig.miniPetType,
-                            PotassiumConfig.miniPetEnabled));
-        }
     }
 
     private int cycle(int value, int min, int max, int step) {
@@ -104,7 +93,7 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
                 "Open with /pet or your Potassium Pet Menu keybind.",
                 width / 2, 140, 0xAAAAAA);
         drawCenteredString(fontRendererObj,
-                "Server-visible: Potassium must be installed on the server.",
+                "Client-only • visible only to you.",
                 width / 2, 154, 0x777777);
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
