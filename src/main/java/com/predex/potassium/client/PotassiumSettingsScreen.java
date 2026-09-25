@@ -79,7 +79,9 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(67, right, y + 66, 150, "Biome: " + onOff(PotassiumConfig.qolShowBiome));
             addButton(68, left, y + 88, 150, "Memory: " + onOff(PotassiumConfig.qolShowMemory));
             addButton(69, right, y + 88, 150, "Session Timer: " + onOff(PotassiumConfig.qolShowSessionTime));
-            drawCenteredString(fontRendererObj, "QoL is independent from Optimization.", center, y + 116, 0xAAAAAA);
+            addButton(70, left, y + 110, 150, "Mini Pet: " + onOff(PotassiumConfig.miniPetEnabled));
+            addButton(71, right, y + 110, 150, "Pet Scale: " + PotassiumConfig.miniPetScale + "%");
+            drawCenteredString(fontRendererObj, "QoL is independent from Optimization.", center, y + 138, 0xAAAAAA);
             drawCenteredString(fontRendererObj, "Lightweight HUD features remain active when Optimization is OFF.", center, y + 128, 0xAAAAAA);
         } else {
             addButton(40, left, y, 150, "Potassium Video Settings");
@@ -241,6 +243,12 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 69:
                 PotassiumConfig.qolShowSessionTime = !PotassiumConfig.qolShowSessionTime;
                 break;
+            case 70:
+                PotassiumConfig.miniPetEnabled = !PotassiumConfig.miniPetEnabled;
+                break;
+            case 71:
+                PotassiumConfig.miniPetScale = cycle(PotassiumConfig.miniPetScale, 25, 75, 8);
+                break;
             case 40:
                 Minecraft.getMinecraft().displayGuiScreen(new PotassiumVideoSettingsScreen(this));
                 return;
@@ -360,6 +368,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.qolShowMemory = false;
         PotassiumConfig.qolShowSessionTime = false;
         PotassiumConfig.qolHudScale = 100;
+        PotassiumConfig.miniPetEnabled = false;
+        PotassiumConfig.miniPetScale = 42;
     }
 
     private void save() {
