@@ -29,6 +29,8 @@ public final class PotassiumRenderSection {
         this.sectionY = sectionY;
         this.chunkZ = chunkZ;
         this.key = key(chunkX, sectionY, chunkZ);
+        // Newly observed sections are rendered until the next frustum refresh.
+        this.visible = true;
     }
 
     public static long key(int chunkX, int sectionY, int chunkZ) {
