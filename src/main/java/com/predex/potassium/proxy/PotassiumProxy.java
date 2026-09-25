@@ -1,12 +1,11 @@
 package com.predex.potassium.proxy;
 
 /**
- * Common proxy. Client-only classes are kept out of the common bootstrap path.
+ * Common proxy. Client-only features are kept out of the server bootstrap path.
  */
 public class PotassiumProxy {
     public void registerCommonHooks() {
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(
-                com.predex.potassium.pet.PotassiumPetManager.class);
+        // No server-side pet registration or entity spawning.
     }
 
     public void registerClientHooks() {
