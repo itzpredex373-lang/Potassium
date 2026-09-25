@@ -29,11 +29,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
                 return basicClass;
             }
             if ("net.minecraft.client.renderer.chunk.RenderChunk".equals(transformedName)) {
-                // Do not short-circuit rebuildChunk. Returning early from the
-                // vanilla worker-thread build can leave ChunkCompileTaskGenerator
-                // state incomplete and can starve the render queue. Chunk work is
-                // admitted safely at the dispatcher/update stage instead.
-                return transformRenderChunkInvalidation(basicClass);
+                return transformRenderChunk(basicClass);
             }
             if ("net.minecraft.client.renderer.entity.RenderManager".equals(transformedName)) {
                 return transformRenderManager(basicClass);
@@ -161,6 +157,42 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         }
 
         if (changed) LOGGER.info("[Potassium ASM] RenderGlobal chunk pipeline transformed");
+        return changed ? write(cn) : bytes;
+    }
+
+    private byte[] transformRenderChunk(byte[] bytes) {
+        ClassNode cn = read(bytes);
+        boolean changed = false;
+
+        for (MethodNode mn : cn.methods) {
+            if (!"(FFFLnet/minecraft/client/renderer/chunk/ChunkCompileTaskGenerator;)V".equals(mn.desc)) {
+                continue;
+            }
+            if (!"rebuildChunk".equals(mn.name) && !"func_178581_b".equals(mn.name)) {
+                continue;
+            }
+
+            LabelNode vanilla = new LabelNode();
+            InsnList hook = new InsnList();
+            hook.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            hook.add(new VarInsnNode(Opcodes.FLOAD, 1));
+            hook.add(new VarInsnNode(Opcodes.FLOAD, 2));
+            hook.add(new VarInsnNode(Opcodes.FLOAD, 3));
+            hook.add(new VarInsnNode(Opcodes.ALOAD, 4));
+            hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
+                    "rebuildChunkWithPotassium",
+                    "(Lnet/minecraft/client/renderer/chunk/RenderChunk;FFFLnet/minecraft/client/renderer/chunk/ChunkCompileTaskGenerator;)Z",
+                    false));
+            hook.add(new JumpInsnNode(Opcodes.IFEQ, vanilla));
+            hook.add(new InsnNode(Opcodes.RETURN));
+            hook.add(vanilla);
+
+            mn.instructions.insert(hook);
+            changed = true;
+            break;
+        }
+
+        if (changed) LOGGER.info("[Potassium ASM] RenderChunk mesh engine transformed");
         return changed ? write(cn) : bytes;
     }
 
