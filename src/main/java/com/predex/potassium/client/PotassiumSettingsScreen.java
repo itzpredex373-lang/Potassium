@@ -350,6 +350,16 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.customMeshPreparation = true;
         PotassiumConfig.maxMeshUploadsPerFrame = 2;
         PotassiumConfig.maxEntityOcclusionTestsPerFrame = 64;
+        PotassiumConfig.qolHud = true;
+        PotassiumConfig.qolShowFps = true;
+        PotassiumConfig.qolShowLowFps = true;
+        PotassiumConfig.qolShowFrameTime = false;
+        PotassiumConfig.qolShowCoordinates = false;
+        PotassiumConfig.qolShowDirection = false;
+        PotassiumConfig.qolShowBiome = false;
+        PotassiumConfig.qolShowMemory = false;
+        PotassiumConfig.qolShowSessionTime = false;
+        PotassiumConfig.qolHudScale = 100;
     }
 
     private void save() {
