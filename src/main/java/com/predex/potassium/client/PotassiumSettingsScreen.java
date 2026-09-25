@@ -72,6 +72,10 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(43, right, y + 34, 150, "Renderer Hooks: " + onOff(PotassiumConfig.rendererCoreHooks));
             addButton(44, left, y + 58, 150, "Master Optimization: " + onOff(PotassiumConfig.enabled));
             addButton(45, right, y + 58, 150, "Profile: " + PerformanceProfileManager.getActiveProfileName());
+            addButton(46, left, y + 92, 150, "Render Sections: " + onOff(PotassiumConfig.renderSections));
+            addButton(47, right, y + 92, 150, "Mesh Uploads: " + PotassiumConfig.maxMeshUploadsPerFrame);
+            addButton(48, left, y + 116, 150, "Mesh Prep Workers: " + onOff(PotassiumConfig.customMeshPreparation));
+            addButton(49, right, y + 116, 150, "Occlusion Budget: " + PotassiumConfig.maxEntityOcclusionTestsPerFrame);
 
             drawCenteredString(fontRendererObj,
                     "Advanced controls are conservative and fail open.",
@@ -202,6 +206,20 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 45:
                 cycleProfile();
                 break;
+            case 46:
+                PotassiumConfig.renderSections = !PotassiumConfig.renderSections;
+                break;
+            case 47:
+                PotassiumConfig.maxMeshUploadsPerFrame =
+                        cycle(PotassiumConfig.maxMeshUploadsPerFrame, 1, 8, 1);
+                break;
+            case 48:
+                PotassiumConfig.customMeshPreparation = !PotassiumConfig.customMeshPreparation;
+                break;
+            case 49:
+                PotassiumConfig.maxEntityOcclusionTestsPerFrame =
+                        cycle(PotassiumConfig.maxEntityOcclusionTestsPerFrame, 8, 256, 8);
+                break;
             case 90:
                 page = Math.max(0, page - 1);
                 break;
@@ -261,6 +279,11 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.entityOcclusionCulling = true;
         PotassiumConfig.rendererCoreHooks = true;
         PotassiumConfig.skipEmptyDrawCalls = true;
+        PotassiumConfig.renderSections = true;
+        PotassiumConfig.meshUploadPipeline = true;
+        PotassiumConfig.customMeshPreparation = true;
+        PotassiumConfig.maxMeshUploadsPerFrame = 2;
+        PotassiumConfig.maxEntityOcclusionTestsPerFrame = 64;
     }
 
     private void save() {
