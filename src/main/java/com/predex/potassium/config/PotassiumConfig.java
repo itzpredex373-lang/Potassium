@@ -48,6 +48,19 @@ public final class PotassiumConfig {
     public static int maxMeshUploadsPerFrame = 2;
     public static int maxEntityOcclusionTestsPerFrame = 64;
 
+    // Lightweight quality-of-life features. These remain independent from
+    // the master optimization switch and are intentionally low-cost.
+    public static boolean qolHud = true;
+    public static boolean qolShowFps = true;
+    public static boolean qolShowLowFps = true;
+    public static boolean qolShowFrameTime = false;
+    public static boolean qolShowCoordinates = false;
+    public static boolean qolShowDirection = false;
+    public static boolean qolShowBiome = false;
+    public static boolean qolShowMemory = false;
+    public static boolean qolShowSessionTime = false;
+    public static int qolHudScale = 100;
+
     private PotassiumConfig() {}
 
     public static void init(File file) {
@@ -177,6 +190,27 @@ public final class PotassiumConfig {
         maxEntityOcclusionTestsPerFrame = configuration.getInt("maxEntityOcclusionTestsPerFrame",
                 "rendering", 64, 8, 256,
                 "Maximum entity occlusion ray-test groups per render frame.");
+
+        qolHud = configuration.getBoolean("qolHud", "qol", true,
+                "Show Potassium's lightweight in-game information HUD.");
+        qolShowFps = configuration.getBoolean("qolShowFps", "qol", true,
+                "Show current FPS in the Potassium HUD.");
+        qolShowLowFps = configuration.getBoolean("qolShowLowFps", "qol", true,
+                "Show 1% low and 0.1% low FPS in the Potassium HUD.");
+        qolShowFrameTime = configuration.getBoolean("qolShowFrameTime", "qol", false,
+                "Show average frame time in milliseconds in the Potassium HUD.");
+        qolShowCoordinates = configuration.getBoolean("qolShowCoordinates", "qol", false,
+                "Show player coordinates in the Potassium HUD.");
+        qolShowDirection = configuration.getBoolean("qolShowDirection", "qol", false,
+                "Show the player's facing direction in the Potassium HUD.");
+        qolShowBiome = configuration.getBoolean("qolShowBiome", "qol", false,
+                "Show the current biome name in the Potassium HUD.");
+        qolShowMemory = configuration.getBoolean("qolShowMemory", "qol", false,
+                "Show current Java heap usage in the Potassium HUD.");
+        qolShowSessionTime = configuration.getBoolean("qolShowSessionTime", "qol", false,
+                "Show elapsed client session time in the Potassium HUD.");
+        qolHudScale = configuration.getInt("qolHudScale", "qol", 100, 75, 150,
+                "Scale percentage for the Potassium HUD.");
 
         if (configuration.hasChanged()) configuration.save();
     }
