@@ -92,7 +92,7 @@ public final class PotassiumGpuRegionManager {
             }
 
             OpenGlHelper.glBindBuffer(GL15.GL_ARRAY_BUFFER, mesh.vbo);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, data, GL15.GL_STATIC_DRAW);
+            OpenGlHelper.glBufferData(GL15.GL_ARRAY_BUFFER, data, GL15.GL_STATIC_DRAW);
             OpenGlHelper.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 
             mesh.vertexCount = vertexCount;
