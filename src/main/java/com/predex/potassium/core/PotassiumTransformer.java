@@ -98,6 +98,17 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         boolean changed = false;
 
         for (MethodNode mn : cn.methods) {
+            if (!"()V".equals(mn.desc)) continue;
+            if (!"loadRenderers".equals(mn.name) && !"func_72732_a".equals(mn.name)) continue;
+
+            mn.instructions.insert(new MethodInsnNode(
+                    Opcodes.INVOKESTATIC, HOOK,
+                    "clearCustomGpuRegions", "()V", false));
+            changed = true;
+            break;
+        }
+
+        for (MethodNode mn : cn.methods) {
             if (!"(J)V".equals(mn.desc)) continue;
             if (!"updateChunks".equals(mn.name) && !"func_174967_a".equals(mn.name)
                     && !"func_72716_a".equals(mn.name)) continue;
