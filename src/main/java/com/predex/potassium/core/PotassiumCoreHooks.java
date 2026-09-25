@@ -110,7 +110,12 @@ public final class PotassiumCoreHooks {
         // updates. Once the chunk is already dirty, another invalidation adds
         // no useful work and only increases queue pressure.
         try {
-            return !renderChunk.isNeedsUpdate();
+            boolean alreadyDirty = renderChunk.isNeedsUpdate();
+            if (!alreadyDirty) {
+                com.predex.potassium.optimization.chunks.PotassiumChunkMeshCache.markDirty(renderChunk);
+                com.predex.potassium.optimization.chunks.PotassiumRenderSectionManager.markDirty(renderChunk);
+            }
+            return !alreadyDirty;
         } catch (Throwable ignored) {
             return true;
         }
