@@ -33,7 +33,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         int center = width / 2;
         int left = center - 155;
         int right = center + 5;
-        // Keep the layout inside the smallest common 1.8.9 GUI sizes.\n        int y = 40;
+        // Keep the layout inside the smallest common 1.8.9 GUI sizes.
+        int y = 40;
 
         if (page == 0) {
             addButton(1, left, y, 310, masterText());
@@ -67,6 +68,19 @@ public final class PotassiumSettingsScreen extends GuiScreen {
 
             addButton(32, left, y + 154, 150, "Empty Draw Skip: " + onOff(PotassiumConfig.skipEmptyDrawCalls));
             addButton(33, right, y + 154, 150, "Smooth World: " + onOff(PotassiumConfig.smoothWorld));
+        } else if (page == 2) {
+            addButton(60, left, y, 150, "QoL HUD: " + onOff(PotassiumConfig.qolHud));
+            addButton(61, right, y, 150, "HUD Scale: " + PotassiumConfig.qolHudScale + "%");
+            addButton(62, left, y + 22, 150, "FPS: " + onOff(PotassiumConfig.qolShowFps));
+            addButton(63, right, y + 22, 150, "1% / 0.1% Low: " + onOff(PotassiumConfig.qolShowLowFps));
+            addButton(64, left, y + 44, 150, "Frame Time: " + onOff(PotassiumConfig.qolShowFrameTime));
+            addButton(65, right, y + 44, 150, "Coordinates: " + onOff(PotassiumConfig.qolShowCoordinates));
+            addButton(66, left, y + 66, 150, "Direction: " + onOff(PotassiumConfig.qolShowDirection));
+            addButton(67, right, y + 66, 150, "Biome: " + onOff(PotassiumConfig.qolShowBiome));
+            addButton(68, left, y + 88, 150, "Memory: " + onOff(PotassiumConfig.qolShowMemory));
+            addButton(69, right, y + 88, 150, "Session Timer: " + onOff(PotassiumConfig.qolShowSessionTime));
+            drawCenteredString(fontRendererObj, "QoL is independent from Optimization.", center, y + 116, 0xAAAAAA);
+            drawCenteredString(fontRendererObj, "Lightweight HUD features remain active when Optimization is OFF.", center, y + 128, 0xAAAAAA);
         } else {
             addButton(40, left, y, 150, "Potassium Video Settings");
             addButton(41, right, y, 150, "Reset Potassium Defaults");
