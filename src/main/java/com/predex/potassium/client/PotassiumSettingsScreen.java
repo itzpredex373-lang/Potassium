@@ -197,6 +197,36 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 33:
                 PotassiumConfig.smoothWorld = !PotassiumConfig.smoothWorld;
                 break;
+            case 60:
+                PotassiumConfig.qolHud = !PotassiumConfig.qolHud;
+                break;
+            case 61:
+                PotassiumConfig.qolHudScale = cycle(PotassiumConfig.qolHudScale, 75, 150, 25);
+                break;
+            case 62:
+                PotassiumConfig.qolShowFps = !PotassiumConfig.qolShowFps;
+                break;
+            case 63:
+                PotassiumConfig.qolShowLowFps = !PotassiumConfig.qolShowLowFps;
+                break;
+            case 64:
+                PotassiumConfig.qolShowFrameTime = !PotassiumConfig.qolShowFrameTime;
+                break;
+            case 65:
+                PotassiumConfig.qolShowCoordinates = !PotassiumConfig.qolShowCoordinates;
+                break;
+            case 66:
+                PotassiumConfig.qolShowDirection = !PotassiumConfig.qolShowDirection;
+                break;
+            case 67:
+                PotassiumConfig.qolShowBiome = !PotassiumConfig.qolShowBiome;
+                break;
+            case 68:
+                PotassiumConfig.qolShowMemory = !PotassiumConfig.qolShowMemory;
+                break;
+            case 69:
+                PotassiumConfig.qolShowSessionTime = !PotassiumConfig.qolShowSessionTime;
+                break;
             case 40:
                 Minecraft.getMinecraft().displayGuiScreen(new PotassiumVideoSettingsScreen(this));
                 return;
@@ -246,7 +276,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                 page = Math.max(0, page - 1);
                 break;
             case 91:
-                page = Math.min(2, page + 1);
+                page = Math.min(3, page + 1);
                 break;
             case 99:
                 Minecraft.getMinecraft().displayGuiScreen(parent);
@@ -325,12 +355,12 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                 0xFFFFFF);
 
         drawCenteredString(fontRendererObj,
-                "Page " + (page + 1) + "/3  |  Performance controls only",
+                "Page " + (page + 1) + "/4  |  Performance + Quality of Life",
                 width / 2,
                 30,
                 0xAAAAAA);
 
-        if (page == 2) {
+        if (page == 3) {
             drawCenteredString(fontRendererObj,
                     String.format(java.util.Locale.ROOT,
                             "FPS %.0f  |  1%% low %.0f  |  0.1%% low %.0f  |  frame %.2f ms",
