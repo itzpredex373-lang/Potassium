@@ -81,8 +81,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(69, right, y + 88, 150, "Session Timer: " + onOff(PotassiumConfig.qolShowSessionTime));
             addButton(70, left, y + 110, 150, "Mini Pet: " + onOff(PotassiumConfig.miniPetEnabled));
             addButton(71, right, y + 110, 150, "Pet Scale: " + PotassiumConfig.miniPetScale + "%");
-            drawCenteredString(fontRendererObj, "QoL is independent from Optimization.", center, y + 138, 0xAAAAAA);
-            drawCenteredString(fontRendererObj, "Lightweight HUD features remain active when Optimization is OFF.", center, y + 128, 0xAAAAAA);
+            addButton(72, left, y + 132, 310, "Pet: " + petName(PotassiumConfig.miniPetType));
+            drawCenteredString(fontRendererObj, "QoL is independent from Optimization.", center, y + 156, 0xAAAAAA);
         } else {
             addButton(40, left, y, 150, "Potassium Video Settings");
             addButton(41, right, y, 150, "Reset Potassium Defaults");
@@ -249,6 +249,9 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 71:
                 PotassiumConfig.miniPetScale = cycle(PotassiumConfig.miniPetScale, 25, 75, 8);
                 break;
+            case 72:
+                cyclePetType();
+                break;
             case 40:
                 Minecraft.getMinecraft().displayGuiScreen(new PotassiumVideoSettingsScreen(this));
                 return;
@@ -370,6 +373,34 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.qolHudScale = 100;
         PotassiumConfig.miniPetEnabled = false;
         PotassiumConfig.miniPetScale = 42;
+        PotassiumConfig.miniPetType = "predex";
+    }
+
+    private void cyclePetType() {
+        String[] types = {
+                "predex", "wolf", "dragon", "devil", "blaze",
+                "slime", "endermite", "bat", "chicken", "rabbit", "ocelot"
+        };
+        int current = 0;
+        for (int i = 0; i < types.length; i++) {
+            if (types[i].equals(PotassiumConfig.miniPetType)) {
+                current = i;
+                break;
+            }
+        }
+        PotassiumConfig.miniPetType = types[(current + 1) % types.length];
+    }
+
+    private String petName(String type) {
+        if ("predex".equals(type)) return "Predex Pet";
+        if ("dragon".equals(type)) return "Mini King Dragon";
+        if ("devil".equals(type)) return "Mini Devil";
+        if ("blaze".equals(type)) return "Blaze";
+        if ("slime".equals(type)) return "Slime";
+        if ("endermite".equals(type)) return "Endermite";
+        if ("rabbit".equals(type)) return "Rabbit";
+        if ("ocelot".equals(type)) return "Ocelot";
+        return type.substring(0, 1).toUpperCase() + type.substring(1);
     }
 
     private void save() {
