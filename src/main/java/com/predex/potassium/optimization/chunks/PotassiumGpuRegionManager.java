@@ -146,13 +146,14 @@ public final class PotassiumGpuRegionManager {
 
             // Match VboRenderList's post-layer cleanup so the transformed
             // method can safely return before its vanilla body executes.
-            cleanupRenderState(renderList);
+            cleanupRenderState(renderList, true);
             return true;
         } catch (Throwable failure) {
             failures++;
-            // Never leave an array buffer/client texture/matrix state dirty
-            // when the optional renderer falls back to vanilla.
-            cleanupRenderState(renderList);
+            // Never leave an array buffer/client texture state dirty when the
+            // optional renderer falls back to vanilla. Keep the render list
+            // intact so vanilla can still submit it.
+            cleanupRenderState(renderList, false);
             CompatibilityManager.recordRendererFailure();
             return false;
         }
@@ -196,7 +197,7 @@ public final class PotassiumGpuRegionManager {
         }
     }
 
-    private static void cleanupRenderState(List<RenderChunk> renderList) {
+    private static void cleanupRenderState(List<RenderChunk> renderList, boolean clearRenderList) {
         try {
             OpenGlHelper.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         } catch (Throwable ignored) {
@@ -209,7 +210,7 @@ public final class PotassiumGpuRegionManager {
             GlStateManager.resetColor();
         } catch (Throwable ignored) {
         }
-        if (renderList != null) {
+        if (clearRenderList && renderList != null) {
             try {
                 renderList.clear();
             } catch (Throwable ignored) {
