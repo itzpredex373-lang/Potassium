@@ -33,65 +33,65 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         int center = width / 2;
         int left = center - 155;
         int right = center + 5;
-        int y = page == 2 ? 70 : 52;
+        // Keep the layout inside the smallest common 1.8.9 GUI sizes.\n        int y = 40;
 
         if (page == 0) {
             addButton(1, left, y, 310, masterText());
-            addButton(2, left, y + 24, 310, profileText());
+            addButton(2, left, y + 22, 310, profileText());
 
-            addButton(10, left, y + 58, 150, "Fast Render: " + onOff(PotassiumConfig.fastRender));
-            addButton(11, right, y + 58, 150, "Fast Math: " + onOff(PotassiumConfig.fastMath));
-            addButton(12, left, y + 82, 150, "Smart Animations: " + onOff(PotassiumConfig.smartAnimations));
-            addButton(13, right, y + 82, 150, "Block Face Culling: " + onOff(PotassiumConfig.blockFaceCulling));
-            addButton(14, left, y + 106, 150, "Entity Culling: " + onOff(PotassiumConfig.entityOcclusionCulling));
-            addButton(15, right, y + 106, 150, "Render Regions: " + onOff(PotassiumConfig.renderRegions));
+            addButton(10, left, y + 44, 150, "Fast Render: " + onOff(PotassiumConfig.fastRender));
+            addButton(11, right, y + 44, 150, "Fast Math: " + onOff(PotassiumConfig.fastMath));
+            addButton(12, left, y + 66, 150, "Smart Animations: " + onOff(PotassiumConfig.smartAnimations));
+            addButton(13, right, y + 66, 150, "Block Face Culling: " + onOff(PotassiumConfig.blockFaceCulling));
+            addButton(14, left, y + 88, 150, "Entity Culling: " + onOff(PotassiumConfig.entityOcclusionCulling));
+            addButton(15, right, y + 88, 150, "Render Regions: " + onOff(PotassiumConfig.renderRegions));
 
-            addButton(16, left, y + 140, 150, "Chunk Optimization: " + onOff(PotassiumConfig.optimizeChunkUpdates));
-            addButton(17, right, y + 140, 150, "Lazy Chunk Loading: " + onOff(PotassiumConfig.lazyChunkLoading));
-            addButton(18, left, y + 164, 150, "Dynamic Chunk Updates: " + onOff(PotassiumConfig.dynamicChunkUpdates));
-            addButton(19, right, y + 164, 150, "Adaptive Performance: " + onOff(PotassiumConfig.adaptivePerformance));
+            addButton(16, left, y + 110, 150, "Chunk Optimization: " + onOff(PotassiumConfig.optimizeChunkUpdates));
+            addButton(17, right, y + 110, 150, "Lazy Chunk Loading: " + onOff(PotassiumConfig.lazyChunkLoading));
+            addButton(18, left, y + 132, 150, "Dynamic Chunk Updates: " + onOff(PotassiumConfig.dynamicChunkUpdates));
+            addButton(19, right, y + 132, 150, "Adaptive Performance: " + onOff(PotassiumConfig.adaptivePerformance));
         } else if (page == 1) {
             addButton(20, left, y, 150, "Entity Rendering: " + onOff(PotassiumConfig.optimizeEntityRendering));
             addButton(21, right, y, 150, "Entity Updates: " + onOff(PotassiumConfig.reduceEntityUpdates));
-            addButton(22, left, y + 24, 150, "Particles: " + onOff(PotassiumConfig.reduceParticles));
-            addButton(23, right, y + 24, 150, "Low Memory Mode: " + onOff(PotassiumConfig.lowMemoryMode));
+            addButton(22, left, y + 22, 150, "Particles: " + onOff(PotassiumConfig.reduceParticles));
+            addButton(23, right, y + 22, 150, "Low Memory Mode: " + onOff(PotassiumConfig.lowMemoryMode));
 
-            addButton(24, left, y + 58, 150, "Entity Distance: " + PotassiumConfig.entityRenderDistance);
-            addButton(25, right, y + 58, 150, "Entity Update Distance: " + PotassiumConfig.entityUpdateDistance);
-            addButton(26, left, y + 82, 150, "Particle Budget: " + PotassiumConfig.maxParticlesPerTick);
-            addButton(27, right, y + 82, 150, "Chunk Radius: " + PotassiumConfig.chunkUpdateRadius);
-            addButton(28, left, y + 106, 150, "Chunk Budget: " + PotassiumConfig.maxChunkUpdatesPerTick);
-            addButton(29, right, y + 106, 150, "CPU Budget: " + PotassiumConfig.cpuBudgetMillis + "ms");
-            addButton(30, left, y + 140, 150, "Memory Threshold: " + PotassiumConfig.memoryPressureThreshold + "%");
-            addButton(31, right, y + 140, 150, "Core Renderer Hooks: " + onOff(PotassiumConfig.rendererCoreHooks));
+            addButton(24, left, y + 44, 150, "Entity Distance: " + PotassiumConfig.entityRenderDistance);
+            addButton(25, right, y + 44, 150, "Entity Update Distance: " + PotassiumConfig.entityUpdateDistance);
+            addButton(26, left, y + 66, 150, "Particle Budget: " + PotassiumConfig.maxParticlesPerTick);
+            addButton(27, right, y + 66, 150, "Chunk Radius: " + PotassiumConfig.chunkUpdateRadius);
+            addButton(28, left, y + 88, 150, "Chunk Budget: " + PotassiumConfig.maxChunkUpdatesPerTick);
+            addButton(29, right, y + 88, 150, "CPU Budget: " + PotassiumConfig.cpuBudgetMillis + "ms");
+            addButton(30, left, y + 110, 150, "Memory Threshold: " + PotassiumConfig.memoryPressureThreshold + "%");
+            addButton(31, right, y + 110, 150, "Core Renderer Hooks: " + onOff(PotassiumConfig.rendererCoreHooks));
 
-            addButton(32, left, y + 174, 150, "Empty Draw Skip: " + onOff(PotassiumConfig.skipEmptyDrawCalls));
-            addButton(33, right, y + 174, 150, "Smooth World: " + onOff(PotassiumConfig.smoothWorld));
+            addButton(32, left, y + 154, 150, "Empty Draw Skip: " + onOff(PotassiumConfig.skipEmptyDrawCalls));
+            addButton(33, right, y + 154, 150, "Smooth World: " + onOff(PotassiumConfig.smoothWorld));
         } else {
             addButton(40, left, y, 150, "Potassium Video Settings");
             addButton(41, right, y, 150, "Reset Potassium Defaults");
 
-            addButton(42, left, y + 34, 150, "FPS Smoothing: " + onOff(PotassiumConfig.smoothFps));
-            addButton(43, right, y + 34, 150, "Renderer Hooks: " + onOff(PotassiumConfig.rendererCoreHooks));
-            addButton(44, left, y + 58, 150, "Master Optimization: " + onOff(PotassiumConfig.enabled));
-            addButton(45, right, y + 58, 150, "Profile: " + PerformanceProfileManager.getActiveProfileName());
-            addButton(46, left, y + 92, 150, "Render Sections: " + onOff(PotassiumConfig.renderSections));
-            addButton(47, right, y + 92, 150, "Mesh Uploads: " + PotassiumConfig.maxMeshUploadsPerFrame);
-            addButton(48, left, y + 116, 150, "Mesh Prep Workers: " + onOff(PotassiumConfig.customMeshPreparation));
-            addButton(49, right, y + 116, 150, "Occlusion Budget: " + PotassiumConfig.maxEntityOcclusionTestsPerFrame);
-            addButton(50, left, y + 140, 150, "Mesh Upload Pipeline: " + onOff(PotassiumConfig.meshUploadPipeline));
+            addButton(42, left, y + 22, 150, "FPS Smoothing: " + onOff(PotassiumConfig.smoothFps));
+            addButton(43, right, y + 22, 150, "Renderer Hooks: " + onOff(PotassiumConfig.rendererCoreHooks));
+            addButton(44, left, y + 44, 150, "Master Optimization: " + onOff(PotassiumConfig.enabled));
+            addButton(45, right, y + 44, 150, "Profile: " + PerformanceProfileManager.getActiveProfileName());
+            addButton(46, left, y + 88, 150, "Render Sections: " + onOff(PotassiumConfig.renderSections));
+            addButton(47, right, y + 88, 150, "Mesh Uploads: " + PotassiumConfig.maxMeshUploadsPerFrame);
+            addButton(48, left, y + 110, 150, "Mesh Prep Workers: " + onOff(PotassiumConfig.customMeshPreparation));
+            addButton(49, right, y + 110, 150, "Occlusion Budget: " + PotassiumConfig.maxEntityOcclusionTestsPerFrame);
+            addButton(50, left, y + 110, 150, "Mesh Upload Pipeline: " + onOff(PotassiumConfig.meshUploadPipeline));
 
             drawCenteredString(fontRendererObj,
                     "Advanced controls are conservative and fail open.",
                     center, y + 100, 0xAAAAAA);
             drawCenteredString(fontRendererObj,
                     "Disabling optimization never disables frame-time monitoring.",
-                    center, y + 116, 0xAAAAAA);
+                    center, y + 110, 0xAAAAAA);
         }
 
-        addButton(90, center - 100, height - 28, 95, "< Previous");
-        addButton(91, center + 5, height - 28, 95, "Next >");
-        addButton(99, center - 100, height - 52, 200, "Done");
+        addButton(90, center - 155, height - 26, 95, "< Previous");
+        addButton(91, center + 60, height - 26, 95, "Next >");
+        addButton(99, center - 50, height - 26, 100, "Done");
     }
 
     private void addButton(int id, int x, int y, int width, String text) {
