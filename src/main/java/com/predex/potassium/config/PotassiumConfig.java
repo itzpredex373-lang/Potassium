@@ -39,6 +39,11 @@ public final class PotassiumConfig {
     public static boolean skipEmptyDrawCalls = true;
     public static boolean customGpuRenderer = true;
     public static boolean customDrawSubmission = true;
+    public static boolean renderSections = true;
+    public static boolean meshUploadPipeline = true;
+    public static boolean customMeshPreparation = true;
+    public static int maxMeshUploadsPerFrame = 2;
+    public static int maxEntityOcclusionTestsPerFrame = 64;
 
     private PotassiumConfig() {}
 
