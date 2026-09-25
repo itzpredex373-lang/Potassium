@@ -69,6 +69,8 @@ public final class ChunkRenderPipeline {
             return false;
         }
 
+        PotassiumRenderSectionManager.observe(renderChunk);
+
         BlockPos position = renderChunk.getPosition();
         if (position == null) return true;
 
