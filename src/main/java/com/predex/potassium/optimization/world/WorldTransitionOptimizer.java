@@ -21,6 +21,10 @@ public final class WorldTransitionOptimizer {
     private WorldTransitionOptimizer() {}
 
     public static synchronized void beginTransition() {
+        // Join/load/unload hooks can fire more than once for the same world
+        // transition. Do not restart the warm-up every time, otherwise a
+        // busy server can remain in transition mode indefinitely.
+        if (ticksRemaining > 0) return;
         ticksRemaining = WARMUP_TICKS;
         totalTicks = 0;
     }
