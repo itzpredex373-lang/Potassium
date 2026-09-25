@@ -36,4 +36,13 @@ public final class PerformanceMetrics {
     public static int getVisibleSections() { return PotassiumRenderSectionManager.getVisibleSections(); }
     public static int getObservedSections() { return PotassiumRenderSectionManager.getObservedSections(); }
     public static int getSectionCount() { return PotassiumRenderSectionManager.getSectionCount(); }
+
+    public static long getGpuUploads() { return PotassiumGpuRegionManager.getUploads(); }
+    public static long getGpuUploadBytes() { return PotassiumGpuRegionManager.getUploadBytes(); }
+    public static long getGpuDrawCalls() { return PotassiumGpuRegionManager.getDrawCalls(); }
+    public static long getGpuDrawnVertices() { return PotassiumGpuRegionManager.getDrawnVertices(); }
+    public static long getGpuFailures() { return PotassiumGpuRegionManager.getFailures(); }
+    public static int getGpuRegionCount() { return PotassiumGpuRegionManager.getRegionCount(); }
+    public static int getGpuChunkCount() { return PotassiumGpuRegionManager.getChunkCount(); }
+
 }
