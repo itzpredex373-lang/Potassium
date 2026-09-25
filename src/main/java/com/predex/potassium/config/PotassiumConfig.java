@@ -64,6 +64,7 @@ public final class PotassiumConfig {
     // Client-only cosmetic companion. This never affects the server/world state.
     public static boolean miniPetEnabled = false;
     public static int miniPetScale = 42;
+    public static String miniPetType = "predex";
 
     private PotassiumConfig() {}
 
@@ -220,6 +221,8 @@ public final class PotassiumConfig {
                 "Show Potassium's client-only mini pet companion.");
         miniPetScale = configuration.getInt("miniPetScale", "qol", 42, 25, 75,
                 "Mini pet render scale percentage.");
+        miniPetType = configuration.getString("miniPetType", "qol", "predex",
+                "Mini pet type: predex, wolf, dragon, devil, blaze, slime, endermite, bat, chicken, rabbit or ocelot.");
 
         if (configuration.hasChanged()) configuration.save();
     }
