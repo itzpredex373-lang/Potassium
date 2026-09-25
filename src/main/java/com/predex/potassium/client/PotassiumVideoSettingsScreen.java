@@ -3,14 +3,43 @@ package com.predex.potassium.client;
 import com.predex.potassium.config.PotassiumConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiOptionsRowList;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.GameSettings;
 
 import java.io.IOException;
 
+/**
+ * Potassium's OptiFine-style video page.
+ *
+ * The first page is the complete vanilla 1.8.9 video option set, presented
+ * using the same two-column/scrolling control model as the vanilla video GUI.
+ * Potassium-specific performance controls live in Potassium Settings so the
+ * two configuration layers never fight over the same option.
+ */
 public final class PotassiumVideoSettingsScreen extends GuiScreen {
+    private static final GameSettings.Options[] VIDEO_OPTIONS = new GameSettings.Options[] {
+            GameSettings.Options.GRAPHICS,
+            GameSettings.Options.RENDER_DISTANCE,
+            GameSettings.Options.AMBIENT_OCCLUSION,
+            GameSettings.Options.FRAMERATE_LIMIT,
+            GameSettings.Options.ANAGLYPH,
+            GameSettings.Options.VIEW_BOBBING,
+            GameSettings.Options.GUI_SCALE,
+            GameSettings.Options.GAMMA,
+            GameSettings.Options.RENDER_CLOUDS,
+            GameSettings.Options.PARTICLES,
+            GameSettings.Options.USE_FULLSCREEN,
+            GameSettings.Options.ENABLE_VSYNC,
+            GameSettings.Options.MIPMAP_LEVELS,
+            GameSettings.Options.BLOCK_ALTERNATIVES,
+            GameSettings.Options.USE_VBO,
+            GameSettings.Options.ENTITY_SHADOWS
+    };
+
     private final GuiScreen parent;
     private final GameSettings gameSettings;
+    private GuiOptionsRowList optionsRowList;
 
     public PotassiumVideoSettingsScreen(GuiScreen parent) {
         this.parent = parent;
@@ -20,33 +49,105 @@ public final class PotassiumVideoSettingsScreen extends GuiScreen {
     @Override
     public void initGui() {
         buttonList.clear();
-        int center = width / 2;
-        int y = 45;
 
-        buttonList.add(new GuiButton(1, center - 155, y, 310, 20, graphicsText()));
-        buttonList.add(new GuiButton(2, center - 155, y + 24, 150, 20, renderDistanceText()));
-        buttonList.add(new GuiButton(3, center + 5, y + 24, 150, 20, "Smooth FPS: " + onOff(PotassiumConfig.smoothFps)));
-        buttonList.add(new GuiButton(4, center - 155, y + 48, 150, 20, "Smooth World: " + onOff(PotassiumConfig.smoothWorld)));
-        buttonList.add(new GuiButton(5, center + 5, y + 48, 150, 20, "Fast Render: " + onOff(PotassiumConfig.fastRender)));
-        buttonList.add(new GuiButton(6, center - 155, y + 72, 150, 20, "Fast Math: " + onOff(PotassiumConfig.fastMath)));
-        buttonList.add(new GuiButton(7, center + 5, y + 72, 150, 20, "Smart Animations: " + onOff(PotassiumConfig.smartAnimations)));
-        buttonList.add(new GuiButton(8, center - 155, y + 96, 150, 20, "Chunk Loading: " + chunkText()));
-        buttonList.add(new GuiButton(9, center + 5, y + 96, 150, 20, "Render Regions: " + onOff(PotassiumConfig.renderRegions)));
-        buttonList.add(new GuiButton(10, center - 155, y + 120, 150, 20, "Block Face Culling: " + onOff(PotassiumConfig.blockFaceCulling)));
-        buttonList.add(new GuiButton(11, center + 5, y + 120, 150, 20, "Entity Culling: " + onOff(PotassiumConfig.entityOcclusionCulling)));
-        buttonList.add(new GuiButton(99, center - 100, height - 28, 200, 20, "Done"));
+        optionsRowList = new GuiOptionsRowList(
+                Minecraft.getMinecraft(),
+                width,
+                height,
+                32,
+                height - 58,
+                25,
+                VIDEO_OPTIONS);
+
+        buttonList.add(new GuiButton(
+                300,
+                width / 2 - 155,
+                height - 52,
+                150,
+                20,
+                "Potassium Performance"));
+
+        buttonList.add(new GuiButton(
+                301,
+                width / 2 + 5,
+                height - 52,
+                150,
+                20,
+                "Fast Render: " + onOff(PotassiumConfig.fastRender)));
+
+        buttonList.add(new GuiButton(
+                200,
+                width / 2 - 100,
+                height - 27,
+                200,
+                20,
+                "Done"));
     }
 
-    private String graphicsText() {
-        return "Graphics: " + (gameSettings.fancyGraphics ? "Fancy" : "Fast");
+    @Override
+    public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
+        if (optionsRowList != null) {
+            optionsRowList.handleMouseInput();
+        }
     }
 
-    private String renderDistanceText() {
-        return "Render Distance: " + gameSettings.renderDistanceChunks;
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        int oldGuiScale = gameSettings.guiScale;
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+
+        if (optionsRowList != null) {
+            optionsRowList.mouseClicked(mouseX, mouseY, mouseButton);
+        }
+
+        if (gameSettings.guiScale != oldGuiScale) {
+            net.minecraft.client.gui.ScaledResolution resolution =
+                    new net.minecraft.client.gui.ScaledResolution(Minecraft.getMinecraft());
+            setWorldAndResolution(Minecraft.getMinecraft(),
+                    resolution.getScaledWidth(),
+                    resolution.getScaledHeight());
+        }
     }
 
-    private String chunkText() {
-        return PotassiumConfig.lazyChunkLoading ? "Lazy" : "Immediate";
+    @Override
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        int oldGuiScale = gameSettings.guiScale;
+        super.mouseReleased(mouseX, mouseY, state);
+
+        if (optionsRowList != null) {
+            optionsRowList.mouseReleased(mouseX, mouseY, state);
+        }
+
+        if (gameSettings.guiScale != oldGuiScale) {
+            net.minecraft.client.gui.ScaledResolution resolution =
+                    new net.minecraft.client.gui.ScaledResolution(Minecraft.getMinecraft());
+            setWorldAndResolution(Minecraft.getMinecraft(),
+                    resolution.getScaledWidth(),
+                    resolution.getScaledHeight());
+        }
+    }
+
+    @Override
+    protected void actionPerformed(GuiButton button) throws IOException {
+        if (button.id == 200) {
+            gameSettings.saveOptions();
+            Minecraft.getMinecraft().displayGuiScreen(parent);
+        } else if (button.id == 300) {
+            gameSettings.saveOptions();
+            Minecraft.getMinecraft().displayGuiScreen(
+                    new PotassiumSettingsScreen(this));
+        } else if (button.id == 301) {
+            PotassiumConfig.fastRender = !PotassiumConfig.fastRender;
+            savePotassium();
+            button.displayString = "Fast Render: " + onOff(PotassiumConfig.fastRender);
+        }
+    }
+
+    private void savePotassium() {
+        if (PotassiumConfig.getConfiguration() != null) {
+            PotassiumConfig.getConfiguration().save();
+        }
     }
 
     private String onOff(boolean value) {
@@ -54,70 +155,25 @@ public final class PotassiumVideoSettingsScreen extends GuiScreen {
     }
 
     @Override
-    protected void actionPerformed(GuiButton button) throws IOException {
-        switch (button.id) {
-            case 1:
-                gameSettings.fancyGraphics = !gameSettings.fancyGraphics;
-                gameSettings.saveOptions();
-                button.displayString = graphicsText();
-                break;
-            case 2:
-                int distance = gameSettings.renderDistanceChunks + 2;
-                if (distance > 16) distance = 2;
-                gameSettings.renderDistanceChunks = distance;
-                gameSettings.saveOptions();
-                button.displayString = renderDistanceText();
-                break;
-            case 3:
-                PotassiumConfig.smoothFps = !PotassiumConfig.smoothFps;
-                break;
-            case 4:
-                PotassiumConfig.smoothWorld = !PotassiumConfig.smoothWorld;
-                break;
-            case 5:
-                PotassiumConfig.fastRender = !PotassiumConfig.fastRender;
-                break;
-            case 6:
-                PotassiumConfig.fastMath = !PotassiumConfig.fastMath;
-                break;
-            case 7:
-                PotassiumConfig.smartAnimations = !PotassiumConfig.smartAnimations;
-                break;
-            case 8:
-                PotassiumConfig.lazyChunkLoading = !PotassiumConfig.lazyChunkLoading;
-                break;
-            case 9:
-                PotassiumConfig.renderRegions = !PotassiumConfig.renderRegions;
-                break;
-            case 10:
-                PotassiumConfig.blockFaceCulling = !PotassiumConfig.blockFaceCulling;
-                break;
-            case 11:
-                PotassiumConfig.entityOcclusionCulling = !PotassiumConfig.entityOcclusionCulling;
-                break;
-            case 99:
-                Minecraft.getMinecraft().displayGuiScreen(parent);
-                return;
-            default:
-                break;
-        }
-        save();
-        initGui();
-    }
-
-    private void save() {
-        if (PotassiumConfig.getConfiguration() != null) {
-            PotassiumConfig.getConfiguration().save();
-        }
-    }
-
-    @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
-        drawCenteredString(fontRendererObj, "Potassium Video Settings", width / 2, 20, 0xFFFFFF);
+
+        if (optionsRowList != null) {
+            optionsRowList.drawScreen(mouseX, mouseY, partialTicks);
+        }
+
         drawCenteredString(fontRendererObj,
-                "OptiFine-style controls backed by Potassium's actual options.",
-                width / 2, 32, 0xAAAAAA);
+                "Potassium Video Settings",
+                width / 2,
+                12,
+                0xFFFFFF);
+
+        drawCenteredString(fontRendererObj,
+                "Minecraft 1.8.9 video controls + Potassium performance",
+                width / 2,
+                24,
+                0xAAAAAA);
+
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 }
