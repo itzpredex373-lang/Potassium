@@ -77,7 +77,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                     "Advanced controls are conservative and fail open.",
                     center, y + 100, 0xAAAAAA);
             drawCenteredString(fontRendererObj,
-                    "Disabling optimization never disables FPS/frame-time monitoring.",
+                    "Disabling optimization never disables frame-time monitoring.",
                     center, y + 116, 0xAAAAAA);
         }
 
@@ -91,7 +91,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
     }
 
     private String masterText() {
-        return "Optimization: " + onOff(PotassiumConfig.enabled) + "  |  FPS monitor: ON";
+        return "Optimization: " + onOff(PotassiumConfig.enabled) + "  |  Frame monitor: ON";
     }
 
     private String profileText() {
