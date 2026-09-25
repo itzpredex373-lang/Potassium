@@ -25,6 +25,9 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             if ("net.minecraft.client.renderer.RenderGlobal".equals(transformedName)) {
                 return transformRenderGlobal(basicClass);
             }
+            if ("net.minecraft.client.renderer.VboRenderList".equals(transformedName)) {
+                return transformVboRenderList(basicClass);
+            }
             if ("net.minecraft.client.renderer.chunk.ChunkRenderDispatcher".equals(transformedName)) {
                 return transformChunkRenderDispatcher(basicClass);
             }
@@ -157,6 +160,35 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         }
 
         if (changed) LOGGER.info("[Potassium ASM] RenderGlobal chunk pipeline transformed");
+        return changed ? write(cn) : bytes;
+    }
+
+    private byte[] transformVboRenderList(byte[] bytes) {
+        ClassNode cn = read(bytes);
+        boolean changed = false;
+
+        for (MethodNode mn : cn.methods) {
+            if (!"(Lnet/minecraft/util/EnumWorldBlockLayer;)V".equals(mn.desc)) continue;
+            if (!"renderChunkLayer".equals(mn.name) && !"func_178001_a".equals(mn.name)) continue;
+
+            LabelNode vanilla = new LabelNode();
+            InsnList hook = new InsnList();
+            hook.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            hook.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            hook.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOK,
+                    "renderCustomChunkLayer",
+                    "(Lnet/minecraft/client/renderer/VboRenderList;Lnet/minecraft/util/EnumWorldBlockLayer;)Z",
+                    false));
+            hook.add(new JumpInsnNode(Opcodes.IFEQ, vanilla));
+            hook.add(new InsnNode(Opcodes.RETURN));
+            hook.add(vanilla);
+
+            mn.instructions.insert(hook);
+            changed = true;
+            break;
+        }
+
+        if (changed) LOGGER.info("[Potassium ASM] VboRenderList custom draw submission transformed");
         return changed ? write(cn) : bytes;
     }
 
