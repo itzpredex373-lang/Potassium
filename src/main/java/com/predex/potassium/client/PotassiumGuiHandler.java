@@ -18,11 +18,11 @@ public final class PotassiumGuiHandler {
 
     @SubscribeEvent
     public void onInitGui(GuiScreenEvent.InitGuiEvent.Post event) {
-        if (!(event.getGui() instanceof GuiOptions)) {
+        if (!(event.gui instanceof GuiOptions)) {
             return;
         }
 
-        GuiScreen gui = event.getGui();
+        GuiScreen gui = event.gui;
         int x = gui.width / 2 - 155;
         int y = gui.height - 52;
 
@@ -38,19 +38,19 @@ public final class PotassiumGuiHandler {
 
     @SubscribeEvent
     public void onAction(GuiScreenEvent.ActionPerformedEvent.Pre event) {
-        if (!(event.getGui() instanceof GuiOptions)) {
+        if (!(event.gui instanceof GuiOptions)) {
             return;
         }
 
-        int id = event.getButton().id;
+        int id = event.button.id;
 
         if (id == POTASSIUM_SETTINGS_ID) {
             Minecraft.getMinecraft().displayGuiScreen(
-                    new PotassiumSettingsScreen(event.getGui()));
+                    new PotassiumSettingsScreen(event.gui));
             event.setCanceled(true);
         } else if (id == VIDEO_SETTINGS_ID) {
             Minecraft.getMinecraft().displayGuiScreen(
-                    new PotassiumVideoSettingsScreen(event.getGui()));
+                    new PotassiumVideoSettingsScreen(event.gui));
             event.setCanceled(true);
         }
     }
