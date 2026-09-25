@@ -146,6 +146,9 @@ public final class PotassiumRealChunkMeshEngine {
                 }
             }
 
+            long revision = PotassiumChunkMeshCache.getRevision(renderChunk);
+            boolean gpuQueueAccepted = true;
+
             for (EnumWorldBlockLayer layer : EnumWorldBlockLayer.values()) {
                 int layerId = layer.ordinal();
                 WorldRenderer renderer =
@@ -162,8 +165,35 @@ public final class PotassiumRealChunkMeshEngine {
                     }
 
                     renderer.finishDrawing();
+
+                    // The worker-side WorldRenderer belongs to Minecraft's
+                    // builder pool, so custom GPU data must be copied before
+                    // the builder can be reused. OpenGL upload happens later
+                    // on the render thread.
+                    if (!PotassiumGpuMeshUpload.queue(
+                            renderChunk, layer, renderer, revision)) {
+                        gpuQueueAccepted = false;
+                    }
+
                     renderer.setTranslation(0.0D, 0.0D, 0.0D);
+                } else {
+                    if (!PotassiumMeshUploadQueue.offer(new Runnable() {
+                        @Override
+                        public void run() {
+                            PotassiumGpuRegionManager.markEmpty(
+                                    renderChunk, layer, revision);
+                        }
+                    })) {
+                        gpuQueueAccepted = false;
+                    }
                 }
+            }
+
+            if (!gpuQueueAccepted) {
+                // Invalidate queued custom uploads so a vanilla fallback can
+                // never be overwritten by an older custom mesh.
+                PotassiumChunkMeshCache.markDirty(renderChunk);
+                return false;
             }
 
             compiledChunk.setVisibility(visibility.computeVisibility());
