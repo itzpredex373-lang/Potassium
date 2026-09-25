@@ -2,9 +2,6 @@ package com.predex.potassium;
 
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.proxy.PotassiumProxy;
-import com.predex.potassium.pet.EntityPotassiumPet;
-import com.predex.potassium.pet.PotassiumPetNetwork;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
 import com.predex.potassium.optimization.profile.PerformanceProfileManager;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
@@ -32,9 +29,6 @@ public final class Potassium {
         instance = this;
         PotassiumConfig.init(event.getSuggestedConfigurationFile());
         PerformanceProfileManager.applyConfiguredProfile();
-        EntityRegistry.registerModEntity(EntityPotassiumPet.class, "potassium_pet",
-                190, this, 64, 2, true);
-        PotassiumPetNetwork.init();
         proxy.registerCommonHooks();
         LOGGER.info("Potassium {} initializing for Minecraft 1.8.9", VERSION);
     }
