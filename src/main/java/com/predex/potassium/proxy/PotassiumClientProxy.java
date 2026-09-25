@@ -23,5 +23,8 @@ public final class PotassiumClientProxy extends PotassiumProxy {
         MinecraftForge.EVENT_BUS.register(new PotassiumGuiHandler());
         MinecraftForge.EVENT_BUS.register(new PotassiumQolHud());
         MinecraftForge.EVENT_BUS.register(new PotassiumMiniPet());
+        PotassiumPetKeyHandler petKeyHandler = new PotassiumPetKeyHandler();
+        petKeyHandler.register();
+        MinecraftForge.EVENT_BUS.register(petKeyHandler);
     }
 }
