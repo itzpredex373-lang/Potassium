@@ -72,7 +72,7 @@ public final class PotassiumRealChunkMeshEngine {
         final boolean[] started = new boolean[EnumWorldBlockLayer.values().length];
         final boolean[] used = new boolean[EnumWorldBlockLayer.values().length];
         final VisGraph visibility = new VisGraph();
-        final Set<TileEntity> forcedTileEntities = new HashSet<TileEntity>();
+        final Set<TileEntity> tileEntities = new HashSet<TileEntity>();
 
         generator.getLock().lock();
         try {
@@ -116,8 +116,9 @@ public final class PotassiumRealChunkMeshEngine {
                         TileEntitySpecialRenderer<TileEntity> specialRenderer =
                                 TileEntityRendererDispatcher.instance.getSpecialRenderer(tileEntity);
 
-                        if (specialRenderer != null && specialRenderer.forceTileEntityRender()) {
-                            forcedTileEntities.add(tileEntity);
+                        if (specialRenderer != null) {
+                            tileEntities.add(tileEntity);
+                            compiledChunk.addTileEntity(tileEntity);
                         }
                     }
                 }
@@ -168,7 +169,7 @@ public final class PotassiumRealChunkMeshEngine {
 
             compiledChunk.setVisibility(visibility.computeVisibility());
 
-            updateForcedTileEntities(forcedTileEntities);
+            updateTileEntities(renderChunk, tileEntities);
 
             ++builds;
             lastBuildNanos = System.nanoTime() - start;
@@ -208,18 +209,18 @@ public final class PotassiumRealChunkMeshEngine {
         }
     }
 
-    private static void updateForcedTileEntities(Set<TileEntity> forced) {
-        // Vanilla keeps forced TESRs in RenderGlobal's active tile-entity set.
-        // The normal compiled-chunk tile entity pass still owns the complete
-        // set; this only preserves the forced-render subset without touching
-        // GL state from the worker thread.
-        if (forced == null || forced.isEmpty()) {
-            return;
-        }
+    private static void updateTileEntities(RenderChunk renderChunk, Set<TileEntity> current) {
         try {
-            Minecraft.getMinecraft().renderGlobal.updateTileEntities(
-                    new HashSet<TileEntity>(),
-                    forced);
+            Set<TileEntity> oldSet = new HashSet<TileEntity>(
+                    renderChunk.getCompiledChunk().getTileEntities());
+            Set<TileEntity> removed = new HashSet<TileEntity>(oldSet);
+            Set<TileEntity> added = new HashSet<TileEntity>(current);
+            removed.removeAll(current);
+            added.removeAll(oldSet);
+
+            if (!removed.isEmpty() || !added.isEmpty()) {
+                Minecraft.getMinecraft().renderGlobal.updateTileEntities(removed, added);
+            }
         } catch (Throwable ignored) {
             // Tile-entity bookkeeping must never invalidate an otherwise valid mesh.
         }
