@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.RegionRenderCache;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.chunk.ChunkCompileTaskGenerator;
-import net.minecraft.client.renderer.chunk.CompiledChunk;
 import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
@@ -68,7 +67,7 @@ public final class PotassiumRealChunkMeshEngine {
         }
 
         final long start = System.nanoTime();
-        final CompiledChunk compiledChunk = new CompiledChunk();
+        final PotassiumCompiledChunk compiledChunk = new PotassiumCompiledChunk();
         final boolean[] started = new boolean[EnumWorldBlockLayer.values().length];
         final boolean[] used = new boolean[EnumWorldBlockLayer.values().length];
         final VisGraph visibility = new VisGraph();
@@ -153,7 +152,7 @@ public final class PotassiumRealChunkMeshEngine {
                         generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(layer);
 
                 if (used[layerId]) {
-                    compiledChunk.setLayerUsed(layer);
+                    compiledChunk.markLayerUsed(layer);
                 }
 
                 if (started[layerId]) {
