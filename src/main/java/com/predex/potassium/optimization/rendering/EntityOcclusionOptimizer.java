@@ -58,12 +58,14 @@ public final class EntityOcclusionOptimizer {
         if (!PerformanceManager.isOptimizationEnabled()
                 || !PotassiumConfig.entityOcclusionCulling || entity == null) return true;
 
+        // Cached results are free. Check them before consuming the ray-trace
+        // budget so repeated entity visits do not exhaust the frame budget.
+        Boolean cached = frameCache.get(entity);
+        if (cached != null) return cached.booleanValue();
+
         if (!beginFrame()) {
             return true;
         }
-
-        Boolean cached = frameCache.get(entity);
-        if (cached != null) return cached.booleanValue();
 
         Minecraft mc = Minecraft.getMinecraft();
         Entity camera = mc.getRenderViewEntity();
