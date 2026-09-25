@@ -26,7 +26,7 @@ public final class PotassiumGuiHandler {
         int x = gui.width / 2 - 155;
         int y = gui.height - 52;
 
-        event.getButtonList().add(
+        event.buttonList.add(
                 new GuiButton(
                         POTASSIUM_SETTINGS_ID,
                         x,
