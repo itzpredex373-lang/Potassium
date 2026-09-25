@@ -18,6 +18,7 @@ public final class PotassiumMeshUploadQueue {
     private static final Queue<Runnable> queue = new ArrayDeque<Runnable>();
     private static int lastDrained;
     private static int dropped;
+    private static int failed;
 
     private PotassiumMeshUploadQueue() {}
 
@@ -52,6 +53,7 @@ public final class PotassiumMeshUploadQueue {
             try {
                 task.run();
             } catch (Throwable ignored) {
+                failed++;
                 // Fail open: a broken optional upload must never stop the
                 // Minecraft client thread.
             }
@@ -64,10 +66,12 @@ public final class PotassiumMeshUploadQueue {
     public static synchronized int size() { return queue.size(); }
     public static int getLastDrained() { return lastDrained; }
     public static synchronized int getDropped() { return dropped; }
+    public static synchronized int getFailed() { return failed; }
 
     public static synchronized void clear() {
         queue.clear();
         lastDrained = 0;
         dropped = 0;
+        failed = 0;
     }
 }
