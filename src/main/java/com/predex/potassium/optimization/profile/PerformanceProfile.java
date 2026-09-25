@@ -75,7 +75,7 @@ public enum PerformanceProfile {
 
     public static PerformanceProfile fromName(String name) {
         if (name == null) {
-            return LOW_END;
+            return ULTRA_LOW;
         }
 
         try {
