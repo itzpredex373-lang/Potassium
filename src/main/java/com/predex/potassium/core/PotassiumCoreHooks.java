@@ -12,6 +12,7 @@ import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
 import com.predex.potassium.optimization.network.MultiplayerPerformanceOptimizer;
 import com.predex.potassium.optimization.particles.ParticleOptimizer;
+import com.predex.potassium.optimization.world.WorldTransitionOptimizer;
 import com.predex.potassium.optimization.rendering.BlockRenderOptimizer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -156,10 +157,14 @@ public final class PotassiumCoreHooks {
 
     public static void onMultiplayerJoin() {
         MultiplayerPerformanceOptimizer.onWorldJoin();
+        WorldTransitionOptimizer.beginTransition();
+        com.predex.potassium.optimization.chunks.PotassiumMeshUploadQueue.beginWorldGeneration();
     }
 
     public static void onMultiplayerDisconnect() {
         MultiplayerPerformanceOptimizer.onDisconnect();
+        WorldTransitionOptimizer.beginTransition();
+        com.predex.potassium.optimization.chunks.PotassiumMeshUploadQueue.beginWorldGeneration();
     }
 
     public static void beginChunkBuildTick() {
