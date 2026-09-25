@@ -4,6 +4,7 @@ import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.adaptive.AdaptivePerformanceController;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
+import com.predex.potassium.optimization.world.WorldTransitionOptimizer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.entity.Entity;
@@ -58,7 +59,7 @@ public final class PotassiumChunkBuildController {
         double dz = pos.getZ() + 8.0D - camera.posZ;
         double distanceSq = dx * dx + dy * dy + dz * dz;
 
-        int radiusBlocks = AdaptivePerformanceController.scaleDistance(
+        int radiusBlocks = WorldTransitionOptimizer.scaleChunkDistance(
                 Math.max(16, PotassiumConfig.chunkUpdateRadius * 16));
 
         if (distanceSq > (double) radiusBlocks * radiusBlocks) {
@@ -66,7 +67,7 @@ public final class PotassiumChunkBuildController {
             return false;
         }
 
-        int budget = AdaptivePerformanceController.scaleBudget(
+        int budget = WorldTransitionOptimizer.scaleChunkBudget(
                 Math.max(1, PotassiumConfig.maxChunkUpdatesPerTick));
 
         if (buildsThisTick >= budget) {
