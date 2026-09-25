@@ -21,21 +21,19 @@ public final class EntityOcclusionOptimizer {
 
     private EntityOcclusionOptimizer() {}
 
-    public static void beginFrame() {
-        if (testsThisFrame >= PotassiumConfig.maxEntityOcclusionTestsPerFrame) {
-            // Budget exhaustion fails open. Rendering one extra entity is much
-            // cheaper than allowing occlusion checks to create a frame spike.
-            return true;
-        }
-
-        testsThisFrame++;
+    /**
+     * Resets per-frame state when the render frame or camera chunk changes.
+     *
+     * Returns true when another occlusion test may be performed.
+     */
+    public static boolean beginFrame() {
         Minecraft mc = Minecraft.getMinecraft();
         Entity camera = mc.getRenderViewEntity();
 
         int chunkX = camera == null ? 0 : ((int) Math.floor(camera.posX)) >> 4;
         int chunkZ = camera == null ? 0 : ((int) Math.floor(camera.posZ)) >> 4;
-
         long currentFrame = RenderFrameCounter.getFrameId();
+
         if (frameId != currentFrame
                 || chunkX != cachedCameraChunkX
                 || chunkZ != cachedCameraChunkZ) {
@@ -45,13 +43,24 @@ public final class EntityOcclusionOptimizer {
             frameCache.clear();
             testsThisFrame = 0;
         }
+
+        if (testsThisFrame >= Math.max(1, PotassiumConfig.maxEntityOcclusionTestsPerFrame)) {
+            // Budget exhaustion fails open. Rendering one extra entity is much
+            // cheaper than allowing occlusion checks to create a frame spike.
+            return false;
+        }
+
+        testsThisFrame++;
+        return true;
     }
 
     public static boolean isVisible(Entity entity) {
         if (!PerformanceManager.isOptimizationEnabled()
                 || !PotassiumConfig.entityOcclusionCulling || entity == null) return true;
 
-        beginFrame();
+        if (!beginFrame()) {
+            return true;
+        }
 
         Boolean cached = frameCache.get(entity);
         if (cached != null) return cached.booleanValue();
@@ -63,7 +72,6 @@ public final class EntityOcclusionOptimizer {
         AxisAlignedBB box = entity.getEntityBoundingBox();
         if (box == null) return true;
 
-        // Very close entities are cheap to render and expensive to ray-test.
         double distanceSq = entity.getDistanceSqToEntity(camera);
         if (distanceSq < 64.0D) {
             return true;
@@ -71,9 +79,6 @@ public final class EntityOcclusionOptimizer {
 
         Vec3 start = camera.getPositionEyes(1.0F);
 
-        // Three samples balance false-occlusion safety against ray-trace cost.
-        // Center, upper-front, and lower-back make it harder to hide a partially
-        // visible entity behind a single opaque block.
         boolean visible =
                 isSampleVisible(mc, start,
                         (box.minX + box.maxX) * 0.5D,
