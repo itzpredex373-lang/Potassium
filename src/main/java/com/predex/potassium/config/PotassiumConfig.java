@@ -137,6 +137,22 @@ public final class PotassiumConfig {
         skipEmptyDrawCalls = configuration.getBoolean("skipEmptyDrawCalls", "rendering", true,
                 "Skip Tessellator submissions that contain zero vertices.");
 
+        renderSections = configuration.getBoolean("renderSections", "rendering", true,
+                "Track chunk sections separately for visibility and rebuild scheduling.");
+
+        meshUploadPipeline = configuration.getBoolean("meshUploadPipeline", "rendering", true,
+                "Use a bounded client-thread mesh upload admission queue.");
+
+        customMeshPreparation = configuration.getBoolean("customMeshPreparation", "rendering", true,
+                "Enable the bounded CPU-side mesh preparation worker pool.");
+
+        maxMeshUploadsPerFrame = configuration.getInt("maxMeshUploadsPerFrame", "rendering",
+                2, 1, 8, "Maximum optional mesh upload tasks admitted per render frame.");
+
+        maxEntityOcclusionTestsPerFrame = configuration.getInt("maxEntityOcclusionTestsPerFrame",
+                "rendering", 64, 8, 256,
+                "Maximum entity occlusion ray-test groups per render frame.");
+
         if (configuration.hasChanged()) configuration.save();
     }
 
