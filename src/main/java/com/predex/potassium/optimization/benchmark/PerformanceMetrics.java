@@ -4,6 +4,8 @@ import com.predex.potassium.optimization.adaptive.AdaptivePerformanceController;
 import com.predex.potassium.optimization.adaptive.HardwareProfileDetector;
 import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.system.MemoryOptimizer;
+import com.predex.potassium.optimization.chunks.PotassiumMeshUploadQueue;
+import com.predex.potassium.optimization.chunks.PotassiumRenderSectionManager;
 
 public final class PerformanceMetrics {
     private PerformanceMetrics() {}
@@ -27,4 +29,10 @@ public final class PerformanceMetrics {
     public static int getProcessorCount() { return HardwareProfileDetector.getProcessorCount(); }
     public static long getMaxHeapMb() { return HardwareProfileDetector.getMaxHeapMb(); }
     public static String getHardwareTier() { return HardwareProfileDetector.getTierName(); }
+    public static int getMeshUploadQueueSize() { return PotassiumMeshUploadQueue.size(); }
+    public static int getMeshUploadDropped() { return PotassiumMeshUploadQueue.getDropped(); }
+    public static int getMeshUploadFailed() { return PotassiumMeshUploadQueue.getFailed(); }
+    public static int getVisibleSections() { return PotassiumRenderSectionManager.getVisibleSections(); }
+    public static int getObservedSections() { return PotassiumRenderSectionManager.getObservedSections(); }
+    public static int getSectionCount() { return PotassiumRenderSectionManager.getSectionCount(); }
 }
