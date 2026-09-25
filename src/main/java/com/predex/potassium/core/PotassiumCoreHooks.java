@@ -4,6 +4,7 @@ import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.chunks.ChunkRenderPipeline;
 import com.predex.potassium.optimization.chunks.PotassiumChunkBuildController;
+import com.predex.potassium.optimization.chunks.PotassiumChunkMeshCache;
 import com.predex.potassium.optimization.chunks.ChunkUpdateOptimizer;
 import com.predex.potassium.optimization.chunks.PotassiumRealChunkMeshEngine;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
