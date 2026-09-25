@@ -28,12 +28,18 @@ public final class FrustumRenderOptimizer {
         frameReady = true;
     }
 
+    public static boolean isVisible(net.minecraft.util.AxisAlignedBB box) {
+        if (!frameReady) beginFrame();
+        if (!frameReady || box == null) return true;
+        return FRUSTUM.isBoundingBoxInFrustum(box);
+    }
+
     public static boolean isVisible(Entity entity) {
         if (entity == null) return true;
         if (!frameReady) beginFrame();
         if (!frameReady) return true;
 
         AxisAlignedBB box = entity.getEntityBoundingBox();
-        return box == null || FRUSTUM.isBoundingBoxInFrustum(box);
+        return box == null || isVisible(box);
     }
 }
