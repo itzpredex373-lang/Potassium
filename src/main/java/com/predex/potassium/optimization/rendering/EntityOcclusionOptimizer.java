@@ -17,10 +17,18 @@ public final class EntityOcclusionOptimizer {
     private static long frameId = -1L;
     private static int cachedCameraChunkX;
     private static int cachedCameraChunkZ;
+    private static int testsThisFrame;
 
     private EntityOcclusionOptimizer() {}
 
     public static void beginFrame() {
+        if (testsThisFrame >= PotassiumConfig.maxEntityOcclusionTestsPerFrame) {
+            // Budget exhaustion fails open. Rendering one extra entity is much
+            // cheaper than allowing occlusion checks to create a frame spike.
+            return true;
+        }
+
+        testsThisFrame++;
         Minecraft mc = Minecraft.getMinecraft();
         Entity camera = mc.getRenderViewEntity();
 
@@ -35,6 +43,7 @@ public final class EntityOcclusionOptimizer {
             cachedCameraChunkX = chunkX;
             cachedCameraChunkZ = chunkZ;
             frameCache.clear();
+            testsThisFrame = 0;
         }
     }
 
