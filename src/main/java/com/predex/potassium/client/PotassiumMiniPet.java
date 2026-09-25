@@ -11,28 +11,32 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityEndermite;
+import net.minecraft.entity.monster.EntityGuardian;
+import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityChicken;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityOcelot;
+import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.passive.EntityRabbit;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
- * Client-only Lunar-style mini pet system.
+ * Pure client-side cosmetic pet system.
  *
- * Pets are never spawned into the world and never sent to a server.
- * One reusable client-side entity is rendered beside the local player.
+ * No pet entity is registered with Forge, no packet is sent, and no server
+ * world state is changed. The selected pet exists only as a local render
+ * object and is visible only to the local player.
  */
 public final class PotassiumMiniPet {
     private static final double FOLLOW_DISTANCE = 1.25D;
     private static final double FOLLOW_SIDE = 0.72D;
-    private static final double FOLLOW_HEIGHT = 0.10D;
+    private static final double FOLLOW_HEIGHT = 0.08D;
     private static final double SNAP_DISTANCE = 8.0D;
 
     private Entity pet;
@@ -42,19 +46,6 @@ public final class PotassiumMiniPet {
     private double petZ;
     private boolean initialized;
     private long lastWorldIdentity;
-
-    @SubscribeEvent
-    public void onWorldLoad(WorldEvent.Load event) {
-        // The pet follows the player across dimensions/worlds.
-        // The old client render entity is replaced automatically when the
-        // world identity changes; the selected pet/config is preserved.
-    }
-
-    @SubscribeEvent
-    public void onWorldUnload(WorldEvent.Unload event) {
-        // Do not clear pet settings. The next world will recreate the local
-        // render entity automatically from the saved selection.
-    }
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
@@ -104,8 +95,7 @@ public final class PotassiumMiniPet {
             petY = targetY;
             petZ = targetZ;
         } else {
-            // Stable smoothing: no per-frame allocation and no tick dependency.
-            double smoothing = 0.16D;
+            double smoothing = 0.18D;
             petX += dx * smoothing;
             petY += dy * smoothing;
             petZ += dz * smoothing;
@@ -119,13 +109,13 @@ public final class PotassiumMiniPet {
         double renderY = petY + idleBob - renderManager.renderPosY;
         double renderZ = petZ - renderManager.renderPosZ;
 
-        float scale = Math.max(0.20F, Math.min(0.70F,
+        float scale = getScale(activeType)
+                * Math.max(0.25F, Math.min(0.65F,
                 PotassiumConfig.miniPetScale / 100.0F));
 
         GlStateManager.pushMatrix();
         try {
             GlStateManager.scale(scale, scale, scale);
-            // 1.8.9's renderEntityWithPosYaw is the correct positioned render path.
             renderManager.renderEntityWithPosYaw(
                     pet,
                     renderX / scale,
@@ -154,97 +144,123 @@ public final class PotassiumMiniPet {
     }
 
     private Entity createPet(Minecraft minecraft, EntityPlayerSP player, String type) {
-        if ("predex".equals(type)) {
+        if ("predex".equals(type) || "mini_me".equals(type)
+                || "astronaut".equals(type)) {
             GameProfile profile = player.getGameProfile();
-            EntityOtherPlayerMP character = new EntityOtherPlayerMP(minecraft.theWorld, profile);
+            EntityOtherPlayerMP character =
+                    new EntityOtherPlayerMP(minecraft.theWorld, profile);
             character.noClip = true;
-            character.setInvisible(false);
             return character;
         }
 
-        if ("dragon".equals(type)) {
+        if ("king_dragon".equals(type) || "black_dragon".equals(type)) {
             EntityDragon dragon = new EntityDragon(minecraft.theWorld);
             dragon.noClip = true;
             return dragon;
         }
 
-        if ("devil".equals(type)) {
-            EntityMagmaCube devil = new EntityMagmaCube(minecraft.theWorld);
-            devil.setSlimeSize(2);
-            devil.noClip = true;
-            return devil;
+        if ("devil".equals(type) || "slime".equals(type)) {
+            EntityMagmaCube cube = new EntityMagmaCube(minecraft.theWorld);
+            cube.setSlimeSize(2);
+            cube.noClip = true;
+            return cube;
         }
 
-        if ("blaze".equals(type)) {
-            EntityBlaze blaze = new EntityBlaze(minecraft.theWorld);
-            blaze.noClip = true;
-            return blaze;
-        }
-
-        if ("slime".equals(type)) {
-            EntitySlime slime = new EntitySlime(minecraft.theWorld);
-            slime.setSlimeSize(2);
-            slime.noClip = true;
-            return slime;
-        }
-
-        if ("endermite".equals(type)) {
+        if ("shadow_dragon".equals(type) || "voidling".equals(type)) {
             EntityEndermite endermite = new EntityEndermite(minecraft.theWorld);
             endermite.noClip = true;
             return endermite;
         }
 
-        if ("bat".equals(type)) {
+        if ("wyvern".equals(type) || "butterfly".equals(type)
+                || "bee".equals(type) || "spirit".equals(type)
+                || "ghost".equals(type)) {
             EntityBat bat = new EntityBat(minecraft.theWorld);
             bat.noClip = true;
             return bat;
         }
 
-        if ("chicken".equals(type)) {
-            EntityChicken chicken = new EntityChicken(minecraft.theWorld);
-            chicken.noClip = true;
-            return chicken;
+        if ("robot".equals(type)) {
+            EntityIronGolem golem = new EntityIronGolem(minecraft.theWorld);
+            golem.noClip = true;
+            return golem;
         }
 
-        if ("rabbit".equals(type)) {
+        if ("fox".equals(type) || "kitsune".equals(type)
+                || "cat".equals(type) || "heart_cat".equals(type)) {
+            EntityOcelot cat = new EntityOcelot(minecraft.theWorld);
+            cat.noClip = true;
+            return cat;
+        }
+
+        if ("wolf".equals(type) || "dog".equals(type)) {
+            EntityWolf wolf = new EntityWolf(minecraft.theWorld);
+            wolf.setTamed(true);
+            wolf.noClip = true;
+            return wolf;
+        }
+
+        if ("bunny".equals(type) || "moon_rabbit".equals(type)) {
             EntityRabbit rabbit = new EntityRabbit(minecraft.theWorld);
             rabbit.noClip = true;
             return rabbit;
         }
 
-        if ("ocelot".equals(type)) {
-            EntityOcelot ocelot = new EntityOcelot(minecraft.theWorld);
-            ocelot.noClip = true;
-            return ocelot;
+        if ("dino".equals(type) || "crow".equals(type)) {
+            EntityChicken chicken = new EntityChicken(minecraft.theWorld);
+            chicken.noClip = true;
+            return chicken;
         }
 
-        EntityWolf wolf = new EntityWolf(minecraft.theWorld);
-        wolf.setTamed(true);
-        wolf.noClip = true;
-        return wolf;
+        if ("capybara".equals(type)) {
+            EntityPig pig = new EntityPig(minecraft.theWorld);
+            pig.noClip = true;
+            return pig;
+        }
+
+        if ("stag".equals(type)) {
+            EntityHorse horse = new EntityHorse(minecraft.theWorld);
+            horse.noClip = true;
+            return horse;
+        }
+
+        if ("inferno".equals(type)) {
+            EntityBlaze blaze = new EntityBlaze(minecraft.theWorld);
+            blaze.noClip = true;
+            return blaze;
+        }
+
+        if ("ender".equals(type)) {
+            EntityEndermite ender = new EntityEndermite(minecraft.theWorld);
+            ender.noClip = true;
+            return ender;
+        }
+
+        if ("guardian".equals(type)) {
+            EntityGuardian guardian = new EntityGuardian(minecraft.theWorld);
+            guardian.noClip = true;
+            return guardian;
+        }
+
+        EntityWolf fallback = new EntityWolf(minecraft.theWorld);
+        fallback.setTamed(true);
+        fallback.noClip = true;
+        return fallback;
+    }
+
+    private float getScale(String type) {
+        if ("king_dragon".equals(type) || "black_dragon".equals(type)) return 0.42F;
+        if ("robot".equals(type) || "guardian".equals(type)) return 0.48F;
+        if ("stag".equals(type)) return 0.45F;
+        if ("inferno".equals(type)) return 0.55F;
+        if ("wyvern".equals(type) || "butterfly".equals(type)
+                || "bee".equals(type) || "spirit".equals(type)
+                || "ghost".equals(type)) return 0.70F;
+        if ("bunny".equals(type) || "moon_rabbit".equals(type)) return 0.85F;
+        return 0.65F;
     }
 
     private String normalizeType(String type) {
-        if ("predex".equals(type)
-                || "dragon".equals(type)
-                || "devil".equals(type)
-                || "blaze".equals(type)
-                || "slime".equals(type)
-                || "endermite".equals(type)
-                || "bat".equals(type)
-                || "chicken".equals(type)
-                || "rabbit".equals(type)
-                || "ocelot".equals(type)
-                || "wolf".equals(type)) {
-            return type;
-        }
-        return "predex";
-    }
-
-    private void reset() {
-        pet = null;
-        activeType = null;
-        initialized = false;
-        lastWorldIdentity = 0L;
+        return PotassiumPetTypes.get(PotassiumPetTypes.indexOf(type));
     }
 }
