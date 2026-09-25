@@ -71,9 +71,20 @@ public final class PotassiumMeshUploadQueue {
     public static synchronized int getFailed() { return failed; }
 
     public static synchronized void clear() {
+        generation++;
         queue.clear();
         lastDrained = 0;
         dropped = 0;
         failed = 0;
+    }
+
+    private static final class UploadTask {
+        private final Runnable runnable;
+        private final long generation;
+
+        private UploadTask(Runnable runnable, long generation) {
+            this.runnable = runnable;
+            this.generation = generation;
+        }
     }
 }
