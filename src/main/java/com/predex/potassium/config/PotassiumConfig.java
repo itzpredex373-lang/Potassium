@@ -222,7 +222,7 @@ public final class PotassiumConfig {
         miniPetScale = configuration.getInt("miniPetScale", "qol", 42, 25, 75,
                 "Mini pet render scale percentage.");
         miniPetType = configuration.getString("miniPetType", "qol", "predex",
-                "Mini pet type: predex, wolf, dragon, devil, blaze, slime, endermite, bat, chicken, rabbit or ocelot.");
+                "Client-only mini pet type. 30 cosmetic pet choices are available.");
 
         if (configuration.hasChanged()) configuration.save();
     }
