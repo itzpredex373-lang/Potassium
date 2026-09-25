@@ -38,8 +38,21 @@ public final class ChunkUpdateOptimizer {
                 isLocalWorld());
         int budget = DynamicQualityController.scaleBudget(configured);
 
+        if (PotassiumConfig.mobileChunkStreaming) {
+            if (!MobileChunkStreaming.shouldPrefer(chunkX, chunkZ)) {
+                return false;
+            }
+            budget = Math.min(budget, Math.max(1, MobileChunkStreaming.getBudget()));
+        }
+
         if (processedThisTick >= budget) return false;
         if (!CpuOptimizer.shouldRunOptionalWork()) return false;
+
+        if (PotassiumConfig.mobileChunkStreaming
+                && !MobileChunkStreaming.tryAcquireBudget()) {
+            return false;
+        }
+
         processedThisTick++;
         return true;
     }
