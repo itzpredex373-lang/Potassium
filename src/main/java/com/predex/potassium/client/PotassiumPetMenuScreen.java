@@ -1,6 +1,8 @@
 package com.predex.potassium.client;
 
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.pet.PotassiumPetNetwork;
+import com.predex.potassium.pet.PotassiumPetTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -39,12 +41,14 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
         switch (button.id) {
             case 1:
                 PotassiumConfig.miniPetEnabled = !PotassiumConfig.miniPetEnabled;
+                syncPet();
                 break;
             case 2:
                 PotassiumConfig.miniPetScale = cycle(PotassiumConfig.miniPetScale, 25, 75, 8);
                 break;
             case 3:
                 cyclePetType();
+                syncPet();
                 break;
             case 4:
                 Minecraft.getMinecraft().displayGuiScreen(new PotassiumSettingsScreen(this));
@@ -60,13 +64,18 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
     }
 
     private void cyclePetType() {
-        String[] types = {"predex","wolf","dragon","devil","blaze","slime",
-                "endermite","bat","chicken","rabbit","ocelot"};
-        int current = 0;
-        for (int i = 0; i < types.length; i++) {
-            if (types[i].equals(PotassiumConfig.miniPetType)) { current = i; break; }
+        PotassiumConfig.miniPetType = PotassiumPetTypes.TYPES[
+                (PotassiumPetTypes.indexOf(PotassiumConfig.miniPetType) + 1)
+                        % PotassiumPetTypes.TYPES.length];
+    }
+
+    private void syncPet() {
+        if (Minecraft.getMinecraft().theWorld != null) {
+            PotassiumPetNetwork.CHANNEL.sendToServer(
+                    new PotassiumPetNetwork.PetSelectionMessage(
+                            PotassiumConfig.miniPetType,
+                            PotassiumConfig.miniPetEnabled));
         }
-        PotassiumConfig.miniPetType = types[(current + 1) % types.length];
     }
 
     private int cycle(int value, int min, int max, int step) {
@@ -75,18 +84,7 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
     }
 
     private String petName(String type) {
-        if ("predex".equals(type)) return "Predex Pet";
-        if ("dragon".equals(type)) return "Mini King Dragon";
-        if ("devil".equals(type)) return "Mini Devil";
-        if ("wolf".equals(type)) return "Wolf";
-        if ("blaze".equals(type)) return "Blaze";
-        if ("slime".equals(type)) return "Slime";
-        if ("endermite".equals(type)) return "Endermite";
-        if ("bat".equals(type)) return "Bat";
-        if ("chicken".equals(type)) return "Chicken";
-        if ("rabbit".equals(type)) return "Rabbit";
-        if ("ocelot".equals(type)) return "Ocelot";
-        return type;
+        return PotassiumPetTypes.displayName(type);
     }
 
     private String onOff(boolean value) { return value ? "ON" : "OFF"; }
@@ -106,7 +104,7 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
                 "Open with /pet or your Potassium Pet Menu keybind.",
                 width / 2, 140, 0xAAAAAA);
         drawCenteredString(fontRendererObj,
-                "Server-visible mode requires Potassium on the server too.",
+                "Server-visible: Potassium must be installed on the server.",
                 width / 2, 154, 0x777777);
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
