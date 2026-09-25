@@ -45,12 +45,15 @@ public final class PotassiumMiniPet {
 
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
-        if (event.world != null && event.world.isRemote) reset();
+        // The pet follows the player across dimensions/worlds.
+        // The old client render entity is replaced automatically when the
+        // world identity changes; the selected pet/config is preserved.
     }
 
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload event) {
-        if (event.world != null && event.world.isRemote) reset();
+        // Do not clear pet settings. The next world will recreate the local
+        // render entity automatically from the saved selection.
     }
 
     @SubscribeEvent
