@@ -18,7 +18,7 @@ import java.util.Queue;
  */
 public final class PotassiumMeshUploadQueue {
     private static final Queue<UploadTask> queue = new ArrayDeque<UploadTask>();
-    private static long generation;
+    private static long generation = 0L;
     private static int lastDrained;
     private static int dropped;
     private static int failed;
@@ -76,7 +76,6 @@ public final class PotassiumMeshUploadQueue {
                 synchronized (PotassiumMeshUploadQueue.class) {
                     failed++;
                 }
-                // Fail open: one optional upload must never stop the client.
             }
             drained++;
         }
