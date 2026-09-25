@@ -1,29 +1,42 @@
 package com.predex.potassium.client;
 
+import com.mojang.authlib.GameProfile;
+import com.predex.potassium.config.PotassiumConfig;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.boss.EntityDragon;
+import net.minecraft.entity.monster.EntityBlaze;
+import net.minecraft.entity.monster.EntityEndermite;
+import net.minecraft.entity.monster.EntityMagmaCube;
+import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.entity.passive.EntityBat;
+import net.minecraft.entity.passive.EntityChicken;
+import net.minecraft.entity.passive.EntityOcelot;
+import net.minecraft.entity.passive.EntityRabbit;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
- * Client-only Lunar-style mini pet.
+ * Client-only Lunar-style mini pet system.
  *
- * The pet is never spawned into the world/server. It is a single reusable
- * client-side render entity that smoothly follows the local player.
+ * Pets are never spawned into the world and never sent to a server.
+ * One reusable client-side entity is rendered beside the local player.
  */
 public final class PotassiumMiniPet {
     private static final double FOLLOW_DISTANCE = 1.25D;
     private static final double FOLLOW_SIDE = 0.72D;
     private static final double FOLLOW_HEIGHT = 0.10D;
     private static final double SNAP_DISTANCE = 8.0D;
-    private static final float PET_SCALE_BASE = 0.01F;
 
-    private EntityWolf pet;
+    private Entity pet;
+    private String activeType;
     private double petX;
     private double petY;
     private double petZ;
@@ -32,50 +45,41 @@ public final class PotassiumMiniPet {
 
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
-        if (event.world != null && event.world.isRemote) {
-            reset();
-        }
+        if (event.world != null && event.world.isRemote) reset();
     }
 
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload event) {
-        if (event.world != null && event.world.isRemote) {
-            reset();
-        }
+        if (event.world != null && event.world.isRemote) reset();
     }
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
-        if (!com.predex.potassium.config.PotassiumConfig.miniPetEnabled) {
-            return;
-        }
+        if (!PotassiumConfig.miniPetEnabled) return;
 
         Minecraft minecraft = Minecraft.getMinecraft();
         EntityPlayerSP player = minecraft.thePlayer;
-        if (player == null || minecraft.theWorld == null) {
-            return;
-        }
+        if (player == null || minecraft.theWorld == null) return;
 
-        ensurePet(minecraft);
+        ensurePet(minecraft, player);
 
         float partialTicks = event.partialTicks;
         double playerX = player.lastTickPosX
-                + (player.posX - player.lastTickPosX) * (double) partialTicks;
+                + (player.posX - player.lastTickPosX) * partialTicks;
         double playerY = player.lastTickPosY
-                + (player.posY - player.lastTickPosY) * (double) partialTicks;
+                + (player.posY - player.lastTickPosY) * partialTicks;
         double playerZ = player.lastTickPosZ
-                + (player.posZ - player.lastTickPosZ) * (double) partialTicks;
+                + (player.posZ - player.lastTickPosZ) * partialTicks;
 
         float yaw = player.prevRotationYaw
                 + (player.rotationYaw - player.prevRotationYaw) * partialTicks;
 
-        double radians = Math.toRadians(yaw);
-        double forwardX = -MathHelper.sin((float) radians);
-        double forwardZ = MathHelper.cos((float) radians);
-        double rightX = MathHelper.cos((float) radians);
-        double rightZ = MathHelper.sin((float) radians);
+        float radians = yaw * 0.017453292F;
+        double forwardX = -MathHelper.sin(radians);
+        double forwardZ = MathHelper.cos(radians);
+        double rightX = MathHelper.cos(radians);
+        double rightZ = MathHelper.sin(radians);
 
-        // Behind + slightly to the player's right, like a small companion.
         double targetX = playerX - forwardX * FOLLOW_DISTANCE + rightX * FOLLOW_SIDE;
         double targetY = playerY + FOLLOW_HEIGHT;
         double targetZ = playerZ - forwardZ * FOLLOW_DISTANCE + rightZ * FOLLOW_SIDE;
@@ -97,59 +101,146 @@ public final class PotassiumMiniPet {
             petY = targetY;
             petZ = targetZ;
         } else {
-            // Exponential-looking smoothing that remains stable at variable FPS.
-            double smoothing = 1.0D - Math.pow(0.001D, Math.max(0.0D, partialTicks + 0.5D));
-            smoothing = Math.min(0.22D, Math.max(0.08D, smoothing));
+            // Stable smoothing: no per-frame allocation and no tick dependency.
+            double smoothing = 0.16D;
             petX += dx * smoothing;
             petY += dy * smoothing;
             petZ += dz * smoothing;
         }
 
-        double idleBob = Math.sin((System.nanoTime() / 100000000.0D)) * 0.025D;
-        pet.setPositionAndRotation(
-                petX,
-                petY + idleBob,
-                petZ,
-                yaw,
-                0.0F
-        );
+        double idleBob = Math.sin(System.nanoTime() / 100000000.0D) * 0.025D;
+        pet.setPositionAndRotation(petX, petY + idleBob, petZ, yaw, 0.0F);
 
         RenderManager renderManager = minecraft.getRenderManager();
         double renderX = petX - renderManager.renderPosX;
         double renderY = petY + idleBob - renderManager.renderPosY;
         double renderZ = petZ - renderManager.renderPosZ;
-        float petScale = Math.max(0.25F, Math.min(0.75F,
-                com.predex.potassium.config.PotassiumConfig.miniPetScale * PET_SCALE_BASE));
+
+        float scale = Math.max(0.20F, Math.min(0.70F,
+                PotassiumConfig.miniPetScale / 100.0F));
 
         GlStateManager.pushMatrix();
         try {
-            GlStateManager.scale(petScale, petScale, petScale);
-            renderManager.renderEntityStatic(
+            GlStateManager.scale(scale, scale, scale);
+            // 1.8.9's renderEntityWithPosYaw is the correct positioned render path.
+            renderManager.renderEntityWithPosYaw(
                     pet,
-                    renderX / PET_SCALE,
-                    renderY / PET_SCALE,
-                    renderZ / PET_SCALE,
+                    renderX / scale,
+                    renderY / scale,
+                    renderZ / scale,
                     yaw,
-                    partialTicks,
-                    false
+                    partialTicks
             );
         } finally {
             GlStateManager.popMatrix();
         }
     }
 
-    private void ensurePet(Minecraft minecraft) {
+    private void ensurePet(Minecraft minecraft, EntityPlayerSP player) {
         long worldIdentity = System.identityHashCode(minecraft.theWorld);
-        if (pet == null || lastWorldIdentity != worldIdentity) {
-            pet = new EntityWolf(minecraft.theWorld);
-            pet.ignoreFrustumCheck = true;
+        String requested = normalizeType(PotassiumConfig.miniPetType);
+
+        if (pet == null
+                || lastWorldIdentity != worldIdentity
+                || !requested.equals(activeType)) {
+            pet = createPet(minecraft, player, requested);
+            activeType = requested;
             initialized = false;
             lastWorldIdentity = worldIdentity;
         }
     }
 
+    private Entity createPet(Minecraft minecraft, EntityPlayerSP player, String type) {
+        if ("predex".equals(type)) {
+            GameProfile profile = player.getGameProfile();
+            EntityOtherPlayerMP character = new EntityOtherPlayerMP(minecraft.theWorld, profile);
+            character.noClip = true;
+            character.setInvisible(false);
+            return character;
+        }
+
+        if ("dragon".equals(type)) {
+            EntityDragon dragon = new EntityDragon(minecraft.theWorld);
+            dragon.noClip = true;
+            return dragon;
+        }
+
+        if ("devil".equals(type)) {
+            EntityMagmaCube devil = new EntityMagmaCube(minecraft.theWorld);
+            devil.setSlimeSize(2);
+            devil.noClip = true;
+            return devil;
+        }
+
+        if ("blaze".equals(type)) {
+            EntityBlaze blaze = new EntityBlaze(minecraft.theWorld);
+            blaze.noClip = true;
+            return blaze;
+        }
+
+        if ("slime".equals(type)) {
+            EntitySlime slime = new EntitySlime(minecraft.theWorld);
+            slime.setSlimeSize(2);
+            slime.noClip = true;
+            return slime;
+        }
+
+        if ("endermite".equals(type)) {
+            EntityEndermite endermite = new EntityEndermite(minecraft.theWorld);
+            endermite.noClip = true;
+            return endermite;
+        }
+
+        if ("bat".equals(type)) {
+            EntityBat bat = new EntityBat(minecraft.theWorld);
+            bat.noClip = true;
+            return bat;
+        }
+
+        if ("chicken".equals(type)) {
+            EntityChicken chicken = new EntityChicken(minecraft.theWorld);
+            chicken.noClip = true;
+            return chicken;
+        }
+
+        if ("rabbit".equals(type)) {
+            EntityRabbit rabbit = new EntityRabbit(minecraft.theWorld);
+            rabbit.noClip = true;
+            return rabbit;
+        }
+
+        if ("ocelot".equals(type)) {
+            EntityOcelot ocelot = new EntityOcelot(minecraft.theWorld);
+            ocelot.noClip = true;
+            return ocelot;
+        }
+
+        EntityWolf wolf = new EntityWolf(minecraft.theWorld);
+        wolf.setTamed(true);
+        wolf.noClip = true;
+        return wolf;
+    }
+
+    private String normalizeType(String type) {
+        if ("predex".equals(type)
+                || "dragon".equals(type)
+                || "devil".equals(type)
+                || "blaze".equals(type)
+                || "slime".equals(type)
+                || "endermite".equals(type)
+                || "bat".equals(type)
+                || "chicken".equals(type)
+                || "rabbit".equals(type)
+                || "ocelot".equals(type)
+                || "wolf".equals(type)) {
+            return type;
+        }
+        return "predex";
+    }
+
     private void reset() {
         pet = null;
+        activeType = null;
         initialized = false;
         lastWorldIdentity = 0L;
     }
