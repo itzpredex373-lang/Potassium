@@ -18,16 +18,35 @@ public final class ChunkWorkQueue {
     }
 
     public void rebuild(int playerChunkX, int playerChunkZ, int radius) {
+        rebuild(playerChunkX, playerChunkZ, radius, 0.0D, 0.0D);
+    }
+
+    /**
+     * Rebuild the candidate heap with movement-aware priority. Nearby chunks
+     * remain important, while chunks in the player's movement direction receive
+     * a small priority bonus. The bonus is deliberately bounded so side/near
+     * chunks are never starved.
+     */
+    public void rebuild(int playerChunkX, int playerChunkZ, int radius,
+                        double motionX, double motionZ) {
         clear();
 
         int safeRadius = Math.max(2, Math.min(radius, 32));
         int maxDistanceSq = safeRadius * safeRadius;
 
+        double length = Math.sqrt(motionX * motionX + motionZ * motionZ);
+        double dirX = length > 0.035D ? motionX / length : 0.0D;
+        double dirZ = length > 0.035D ? motionZ / length : 0.0D;
+
         for (int dz = -safeRadius; dz <= safeRadius; dz++) {
             for (int dx = -safeRadius; dx <= safeRadius; dx++) {
                 int distanceSq = dx * dx + dz * dz;
                 if (distanceSq <= maxDistanceSq) {
-                    insert(playerChunkX + dx, playerChunkZ + dz, distanceSq);
+                    double ahead = dx * dirX + dz * dirZ;
+                    int movementBonus = (int) Math.round(Math.max(-2.0D,
+                            Math.min(2.0D, ahead * 2.0D)));
+                    int score = distanceSq * 4 - movementBonus;
+                    insert(playerChunkX + dx, playerChunkZ + dz, score);
                 }
             }
         }
