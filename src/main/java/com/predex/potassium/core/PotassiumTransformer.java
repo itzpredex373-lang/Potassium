@@ -34,6 +34,9 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
             if ("net.minecraft.client.renderer.chunk.RenderChunk".equals(transformedName)) {
                 return transformRenderChunk(basicClass);
             }
+            if ("net.minecraft.client.network.NetHandlerPlayClient".equals(transformedName)) {
+                return transformNetHandlerPlayClient(basicClass);
+            }
             if ("net.minecraft.client.renderer.entity.RenderManager".equals(transformedName)) {
                 return transformRenderManager(basicClass);
             }
@@ -276,6 +279,50 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         }
 
         if (changed) LOGGER.info("[Potassium ASM] RenderChunk invalidation transformed");
+        return changed ? write(cn) : bytes;
+    }
+
+    private byte[] transformNetHandlerPlayClient(byte[] bytes) {
+        ClassNode cn = read(bytes);
+        boolean changed = false;
+
+        for (MethodNode mn : cn.methods) {
+            String name = mn.name;
+            String desc = mn.desc;
+
+            // Server -> client chunk traffic is one of the largest sources of
+            // multiplayer frame spikes in 1.8.9. We only observe these packets;
+            // vanilla still owns all packet decoding and world mutation.
+            boolean chunkPacket =
+                    ("handleChunkData".equals(name) || "func_147263_a".equals(name))
+                    && "(Lnet/minecraft/network/play/server/S21PacketChunkData;)V".equals(desc);
+            boolean bulkChunkPacket =
+                    ("handleMapChunkBulk".equals(name) || "func_147269_a".equals(name))
+                    && "(Lnet/minecraft/network/play/server/S26PacketMapChunkBulk;)V".equals(desc);
+            boolean multiBlockPacket =
+                    ("handleMultiBlockChange".equals(name) || "func_147286_a".equals(name))
+                    && "(Lnet/minecraft/network/play/server/S22PacketMultiBlockChange;)V".equals(desc);
+            boolean blockPacket =
+                    ("handleBlockChange".equals(name) || "func_147234_a".equals(name))
+                    && "(Lnet/minecraft/network/play/server/S23PacketBlockChange;)V".equals(desc);
+
+            if (chunkPacket || bulkChunkPacket || multiBlockPacket || blockPacket) {
+                mn.instructions.insert(new MethodInsnNode(
+                        Opcodes.INVOKESTATIC, HOOK,
+                        "onServerChunkPacket", "()V", false));
+                changed = true;
+            }
+
+            if (("handleJoinGame".equals(name) || "func_147282_a".equals(name))
+                    && "(Lnet/minecraft/network/play/server/S01PacketJoinGame;)V".equals(desc)) {
+                mn.instructions.insert(new MethodInsnNode(
+                        Opcodes.INVOKESTATIC, HOOK,
+                        "onMultiplayerJoin", "()V", false));
+                changed = true;
+            }
+        }
+
+        if (changed) LOGGER.info("[Potassium ASM] NetHandlerPlayClient multiplayer workload hooks transformed");
         return changed ? write(cn) : bytes;
     }
 
