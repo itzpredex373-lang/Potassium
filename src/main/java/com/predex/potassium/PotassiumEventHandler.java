@@ -16,22 +16,34 @@ import com.predex.potassium.optimization.world.SmoothWorldOptimizer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+/**
+ * Central client lifecycle handler.
+ *
+ * Telemetry/frame monitoring intentionally remains active when the Potassium
+ * optimization master switch is OFF. The master switch controls optimization
+ * work only, not measurement.
+ */
 public final class PotassiumEventHandler {
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !PerformanceManager.isEnabled()) return;
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
 
         try {
             PerformanceManager.onClientTick();
-            AdaptivePerformanceController.update();
 
-            if (PerformanceManager.isOptimizationEnabled()
-                    && PerformanceManager.isMaintenanceTick()
-                    && StabilityGuard.allowOptionalWork()
-                    && SmoothWorldOptimizer.allowOptionalWork()) {
-                runMaintenance();
+            if (PerformanceManager.isOptimizationEnabled()) {
+                AdaptivePerformanceController.update();
+
+                if (PerformanceManager.isMaintenanceTick()
+                        && StabilityGuard.allowOptionalWork()
+                        && SmoothWorldOptimizer.allowOptionalWork()) {
+                    runMaintenance();
+                }
             }
+
             StabilityGuard.reportSuccess();
         } catch (Throwable ignored) {
             StabilityGuard.reportFailure();
@@ -40,8 +52,6 @@ public final class PotassiumEventHandler {
 
     @SubscribeEvent
     public void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (!PerformanceManager.isEnabled()) return;
-
         if (event.phase == TickEvent.Phase.START) {
             RenderFrameCounter.beginFrame();
             PerformanceTelemetry.beginFrame();
