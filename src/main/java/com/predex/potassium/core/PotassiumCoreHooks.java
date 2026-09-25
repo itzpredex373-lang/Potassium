@@ -7,6 +7,7 @@ import com.predex.potassium.optimization.chunks.PotassiumChunkBuildController;
 import com.predex.potassium.optimization.chunks.PotassiumChunkMeshCache;
 import com.predex.potassium.optimization.chunks.ChunkUpdateOptimizer;
 import com.predex.potassium.optimization.chunks.PotassiumRealChunkMeshEngine;
+import com.predex.potassium.optimization.chunks.PotassiumGpuRegionManager;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
 import com.predex.potassium.optimization.particles.ParticleOptimizer;
@@ -17,6 +18,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.chunk.RenderChunk;
+import net.minecraft.client.renderer.VboRenderList;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -74,6 +77,21 @@ public final class PotassiumCoreHooks {
 
     public static void finishChunkRenderPipeline() {
         ChunkRenderPipeline.finishUpdateWindow();
+    }
+
+    public static boolean renderCustomChunkLayer(
+            VboRenderList renderList, EnumWorldBlockLayer layer) {
+        if (!PerformanceManager.isOptimizationEnabled()
+                || !CompatibilityManager.allowRiskyHooks()
+                || !PotassiumConfig.rendererCoreHooks) {
+            return false;
+        }
+        try {
+            return PotassiumGpuRegionManager.renderLayer(renderList, layer);
+        } catch (Throwable ignored) {
+            CompatibilityManager.recordRendererFailure();
+            return false;
+        }
     }
 
     public static boolean allowChunkDispatch(
