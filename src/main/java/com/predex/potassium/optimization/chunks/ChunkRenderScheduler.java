@@ -18,6 +18,7 @@ public final class ChunkRenderScheduler {
         if (event.phase != TickEvent.Phase.END) return;
 
         ChunkUpdateOptimizer.beginTick();
+        MobileChunkStreaming.beginTick();
         com.predex.potassium.core.PotassiumCoreHooks.beginChunkBuildTick();
 
         Minecraft minecraft = Minecraft.getMinecraft();
@@ -39,7 +40,8 @@ public final class ChunkRenderScheduler {
         initialized = true;
 
         if (movedChunk) {
-            workQueue.rebuild(chunkX, chunkZ, PotassiumConfig.chunkUpdateRadius);
+            workQueue.rebuild(chunkX, chunkZ, PotassiumConfig.chunkUpdateRadius,
+                    minecraft.thePlayer.motionX, minecraft.thePlayer.motionZ);
             deduplicator.clear();
         }
     }
