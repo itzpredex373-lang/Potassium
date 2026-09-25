@@ -1,5 +1,6 @@
 package com.predex.potassium.proxy;
 
+import com.predex.potassium.client.PotassiumGuiHandler;
 import com.predex.potassium.optimization.rendering.EntityRenderOptimizer;
 import com.predex.potassium.optimization.entities.EntityUpdateHandler;
 import com.predex.potassium.optimization.particles.ParticleClientScheduler;
@@ -17,5 +18,6 @@ public final class PotassiumClientProxy extends PotassiumProxy {
         MinecraftForge.EVENT_BUS.register(new EntityUpdateHandler());
         MinecraftForge.EVENT_BUS.register(new ParticleClientScheduler());
         MinecraftForge.EVENT_BUS.register(new ChunkRenderScheduler());
+        MinecraftForge.EVENT_BUS.register(new PotassiumGuiHandler());
     }
 }
