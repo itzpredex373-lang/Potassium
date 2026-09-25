@@ -79,6 +79,14 @@ public final class PotassiumCoreHooks {
         ChunkRenderPipeline.finishUpdateWindow();
     }
 
+    public static void clearCustomGpuRegions() {
+        try {
+            PotassiumGpuRegionManager.clear();
+            CompatibilityManager.resetRendererHealth();
+        } catch (Throwable ignored) {
+        }
+    }
+
     public static boolean renderCustomChunkLayer(
             VboRenderList renderList, EnumWorldBlockLayer layer) {
         if (!PerformanceManager.isOptimizationEnabled()
