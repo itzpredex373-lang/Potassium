@@ -236,7 +236,13 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         }
 
         if (changed) LOGGER.info("[Potassium ASM] RenderChunk mesh engine transformed");
-        return changed ? write(cn) : bytes;
+
+        // RenderChunk carries two independent hooks: custom rebuild and
+        // invalidation coalescing. The invalidation transformer must run even
+        // when the rebuild method was not found, and it must also see the
+        // already-transformed class when both methods exist.
+        byte[] transformed = changed ? write(cn) : bytes;
+        return transformRenderChunkInvalidation(transformed);
     }
 
     private byte[] transformRenderChunkInvalidation(byte[] bytes) {
