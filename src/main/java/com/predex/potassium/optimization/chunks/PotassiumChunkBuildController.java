@@ -11,7 +11,7 @@ import net.minecraft.util.BlockPos;
 
 import java.util.Collections;
 import java.util.IdentityHashMap;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Controls the expensive CPU-side RenderChunk rebuild stage.
@@ -21,8 +21,8 @@ import java.util.Set;
  * pipeline rather than touching GL from worker threads.
  */
 public final class PotassiumChunkBuildController {
-    private static final Set<RenderChunk> activeBuilds =
-            Collections.newSetFromMap(new IdentityHashMap<RenderChunk, Boolean>());
+    private static final Map<RenderChunk, Long> activeBuilds =
+            Collections.synchronizedMap(new IdentityHashMap<RenderChunk, Long>());
 
     private static int buildsThisTick;
 
@@ -30,7 +30,7 @@ public final class PotassiumChunkBuildController {
 
     public static synchronized void beginTick() {
         buildsThisTick = 0;
-        activeBuilds.clear();
+        cleanupStaleBuilds(System.nanoTime());
     }
 
     public static synchronized boolean allowBuild(RenderChunk chunk) {
@@ -74,16 +74,33 @@ public final class PotassiumChunkBuildController {
             return false;
         }
 
-        if (!activeBuilds.add(chunk)) {
+        if (activeBuilds.containsKey(chunk)) {
             PerformanceTelemetry.skippedChunk();
             return false;
         }
 
+        activeBuilds.put(chunk, Long.valueOf(System.nanoTime()));
         buildsThisTick++;
         return true;
     }
 
     public static synchronized void finishBuild(RenderChunk chunk) {
         if (chunk != null) activeBuilds.remove(chunk);
+    }
+
+    private static void cleanupStaleBuilds(long nowNanos) {
+        synchronized (activeBuilds) {
+            java.util.Iterator<Map.Entry<RenderChunk, Long>> iterator =
+                    activeBuilds.entrySet().iterator();
+
+            while (iterator.hasNext()) {
+                Map.Entry<RenderChunk, Long> entry = iterator.next();
+                Long started = entry.getValue();
+
+                if (started == null || nowNanos - started.longValue() > 10_000_000_000L) {
+                    iterator.remove();
+                }
+            }
+        }
     }
 }
