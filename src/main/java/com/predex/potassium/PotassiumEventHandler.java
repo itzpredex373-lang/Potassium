@@ -16,6 +16,8 @@ import com.predex.potassium.optimization.chunks.PotassiumMeshUploadQueue;
 import com.predex.potassium.optimization.chunks.PotassiumChunkMeshBuildQueue;
 import com.predex.potassium.optimization.rendering.FrustumRenderOptimizer;
 import com.predex.potassium.optimization.world.SmoothWorldOptimizer;
+import com.predex.potassium.optimization.world.WorldTransitionOptimizer;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -36,6 +38,7 @@ public final class PotassiumEventHandler {
 
         try {
             PerformanceManager.onClientTick();
+            WorldTransitionOptimizer.tick();
 
             if (PerformanceManager.isOptimizationEnabled()) {
                 PotassiumChunkMeshBuildQueue.start();
@@ -76,6 +79,24 @@ public final class PotassiumEventHandler {
             FrameTimeMonitor.frame();
             PerformanceTelemetry.endFrame();
         }
+    }
+
+    @SubscribeEvent
+    public void onWorldLoad(WorldEvent.Load event) {
+        if (event.world != null && !event.world.isRemote) {
+            return;
+        }
+        WorldTransitionOptimizer.beginTransition();
+        PotassiumMeshUploadQueue.beginWorldGeneration();
+    }
+
+    @SubscribeEvent
+    public void onWorldUnload(WorldEvent.Unload event) {
+        if (event.world != null && !event.world.isRemote) {
+            return;
+        }
+        WorldTransitionOptimizer.beginTransition();
+        PotassiumMeshUploadQueue.beginWorldGeneration();
     }
 
     private void runMaintenance() {
