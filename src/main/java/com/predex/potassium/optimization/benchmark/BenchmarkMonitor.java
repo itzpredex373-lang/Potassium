@@ -1,7 +1,5 @@
 package com.predex.potassium.optimization.benchmark;
 
-import com.predex.potassium.optimization.system.CpuOptimizer;
-
 public final class BenchmarkMonitor {
     private static long frames;
     private static long startedNanos;
@@ -16,7 +14,7 @@ public final class BenchmarkMonitor {
     public static void recordFrame() {
         if (startedNanos == 0L) begin();
         frames++;
-        frameTimeMs = CpuOptimizer.getAverageTickMillis();
+        frameTimeMs = FrameTimeMonitor.getAverageMs();
     }
 
     public static long getFrames() { return frames; }
