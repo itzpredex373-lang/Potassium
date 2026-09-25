@@ -93,14 +93,12 @@ public final class ChunkRenderPipeline {
         int playerChunkX = ((int) Math.floor(camera.posX)) >> 4;
         int playerChunkZ = ((int) Math.floor(camera.posZ)) >> 4;
 
-        // The shared chunk scheduler owns the mobile budget and directional
-        // admission policy. Keeping it here makes the policy effective at the
-        // actual RenderGlobal -> ChunkRenderDispatcher dispatch boundary.
-        if (!ChunkUpdateOptimizer.shouldProcessChunk(
-                chunkX, chunkZ, playerChunkX, playerChunkZ)) {
-            rejectedThisWindow++;
-            PerformanceTelemetry.skippedChunk();
-            return false;
+        // RenderGlobal/ChunkRenderDispatcher is a retry-sensitive boundary.
+        // Never hard-reject a chunk here: doing so can leave an unloaded/empty
+        // section with no guaranteed future retry. Mobile directional admission
+        // is handled by the scheduler; this boundary remains fail-open.
+        if (PotassiumConfig.mobileChunkStreaming) {
+            MobileChunkStreaming.shouldPrefer(chunkX, chunkZ);
         }
 
         dispatched.add(renderChunk);
