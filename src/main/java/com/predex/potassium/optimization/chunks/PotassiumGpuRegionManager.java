@@ -133,14 +133,16 @@ public final class PotassiumGpuRegionManager {
                 return false;
             }
 
-            List<RenderChunk> snapshot = new ArrayList<RenderChunk>(renderList);
-            for (RenderChunk chunk : snapshot) {
+            // VboRenderList owns this list for the duration of
+            // renderChunkLayer(). Avoid copying it every layer/frame; the
+            // extra allocation is unnecessary on low-end clients.
+            for (RenderChunk chunk : renderList) {
                 if (chunk == null || !isReady(chunk, layer)) {
                     return false;
                 }
             }
 
-            for (RenderChunk chunk : snapshot) {
+            for (RenderChunk chunk : renderList) {
                 draw(container, chunk, layer);
             }
 
