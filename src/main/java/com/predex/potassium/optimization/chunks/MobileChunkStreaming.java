@@ -129,18 +129,17 @@ public final class MobileChunkStreaming {
      * admitted when they are in front of the player.
      */
     public static boolean shouldPrefer(RenderChunk renderChunk) {
-        if (!initialized || renderChunk == null) return true;
-
-        BlockPos pos;
+        if (renderChunk == null) return true;
         try {
-            pos = renderChunk.getPosition();
+            BlockPos pos = renderChunk.getPosition();
+            return pos == null || shouldPrefer(pos.getX() >> 4, pos.getZ() >> 4);
         } catch (Throwable ignored) {
             return true;
         }
-        if (pos == null) return true;
+    }
 
-        int x = pos.getX() >> 4;
-        int z = pos.getZ() >> 4;
+    public static boolean shouldPrefer(int x, int z) {
+        if (!initialized) return true;
 
         int dx = x - playerChunkX;
         int dz = z - playerChunkZ;
