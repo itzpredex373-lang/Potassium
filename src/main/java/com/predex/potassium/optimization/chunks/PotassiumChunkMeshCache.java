@@ -42,6 +42,8 @@ public final class PotassiumChunkMeshCache {
             Entry next = entry == null ? new Entry() : entry;
             next.state = State.QUEUED;
             next.position = safePosition(chunk);
+            next.revision++;
+            next.lastTransitionNanos = System.nanoTime();
             entries.put(chunk, next);
             return true;
         }
@@ -51,7 +53,10 @@ public final class PotassiumChunkMeshCache {
         if (chunk == null) return;
         synchronized (entries) {
             Entry entry = entries.get(chunk);
-            if (entry != null) entry.state = State.BUILDING;
+            if (entry != null) {
+                entry.state = State.BUILDING;
+                entry.lastTransitionNanos = System.nanoTime();
+            }
         }
     }
 
@@ -59,7 +64,10 @@ public final class PotassiumChunkMeshCache {
         if (chunk == null) return;
         synchronized (entries) {
             Entry entry = entries.get(chunk);
-            if (entry != null) entry.state = State.UPLOAD_PENDING;
+            if (entry != null) {
+                entry.state = State.UPLOAD_PENDING;
+                entry.lastTransitionNanos = System.nanoTime();
+            }
         }
     }
 
@@ -67,7 +75,10 @@ public final class PotassiumChunkMeshCache {
         if (chunk == null) return;
         synchronized (entries) {
             Entry entry = entries.get(chunk);
-            if (entry != null) entry.state = State.CLEAN;
+            if (entry != null) {
+                entry.state = State.CLEAN;
+                entry.lastTransitionNanos = System.nanoTime();
+            }
         }
     }
 
@@ -89,6 +100,38 @@ public final class PotassiumChunkMeshCache {
         }
     }
 
+    public static void markDirty(RenderChunk chunk) {
+        if (chunk == null) return;
+        synchronized (entries) {
+            Entry entry = entries.get(chunk);
+            if (entry == null) {
+                entry = new Entry();
+                entry.position = safePosition(chunk);
+                entries.put(chunk, entry);
+            }
+            entry.state = State.QUEUED;
+            entry.revision++;
+            entry.lastTransitionNanos = System.nanoTime();
+        }
+    }
+
+    public static long getRevision(RenderChunk chunk) {
+        synchronized (entries) {
+            Entry entry = entries.get(chunk);
+            return entry == null ? 0L : entry.revision;
+        }
+    }
+
+    public static boolean isStale(RenderChunk chunk, long maxAgeMillis) {
+        if (chunk == null || maxAgeMillis <= 0L) return false;
+        synchronized (entries) {
+            Entry entry = entries.get(chunk);
+            if (entry == null || entry.state == State.CLEAN) return false;
+            return System.nanoTime() - entry.lastTransitionNanos
+                    > maxAgeMillis * 1000000L;
+        }
+    }
+
     private static BlockPos safePosition(RenderChunk chunk) {
         try {
             return chunk.getPosition();
@@ -100,5 +143,7 @@ public final class PotassiumChunkMeshCache {
     private static final class Entry {
         private State state = State.CLEAN;
         private BlockPos position;
+        private long revision;
+        private long lastTransitionNanos;
     }
 }
