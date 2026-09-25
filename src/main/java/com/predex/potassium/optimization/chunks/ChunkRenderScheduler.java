@@ -53,7 +53,7 @@ public final class ChunkRenderScheduler {
     public boolean shouldSchedule(int chunkX, int chunkZ) {
         if (!ChunkOptimizer.isEnabled() || !initialized) return true;
 
-        if (!ChunkUpdateOptimizer.shouldProcessChunk(
+        if (!ChunkUpdateOptimizer.isChunkEligible(
                 chunkX, chunkZ, lastPlayerChunkX, lastPlayerChunkZ)) {
             return false;
         }
@@ -69,7 +69,7 @@ public final class ChunkRenderScheduler {
             int z = workQueue.nextChunkZ();
             workQueue.advance();
 
-            if (!ChunkUpdateOptimizer.shouldProcessChunk(
+            if (!ChunkUpdateOptimizer.isChunkEligible(
                     x, z, lastPlayerChunkX, lastPlayerChunkZ)) {
                 continue;
             }
