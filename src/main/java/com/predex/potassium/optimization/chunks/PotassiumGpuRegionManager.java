@@ -146,13 +146,13 @@ public final class PotassiumGpuRegionManager {
 
             // Match VboRenderList's post-layer cleanup so the transformed
             // method can safely return before its vanilla body executes.
-            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
-            GlStateManager.resetColor();
-            renderList.clear();
-
+            cleanupRenderState(renderList);
             return true;
         } catch (Throwable failure) {
             failures++;
+            // Never leave an array buffer/client texture/matrix state dirty
+            // when the optional renderer falls back to vanilla.
+            cleanupRenderState(renderList);
             CompatibilityManager.recordRendererFailure();
             return false;
         }
@@ -175,19 +175,46 @@ public final class PotassiumGpuRegionManager {
             return;
         }
 
-        GlStateManager.pushMatrix();
-        container.preRenderChunk(chunk);
-        chunk.multModelviewMatrix();
+        boolean pushed = false;
+        try {
+            GlStateManager.pushMatrix();
+            pushed = true;
+            container.preRenderChunk(chunk);
+            chunk.multModelviewMatrix();
 
-        OpenGlHelper.glBindBuffer(GL15.GL_ARRAY_BUFFER, mesh.vbo);
-        setupBlockPointers();
-        GL11.glDrawArrays(GL11.GL_QUADS, 0, mesh.vertexCount);
-        OpenGlHelper.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+            OpenGlHelper.glBindBuffer(GL15.GL_ARRAY_BUFFER, mesh.vbo);
+            setupBlockPointers();
+            GL11.glDrawArrays(GL11.GL_QUADS, 0, mesh.vertexCount);
 
-        GlStateManager.popMatrix();
+            drawCalls++;
+            drawnVertices += mesh.vertexCount;
+        } finally {
+            OpenGlHelper.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+            if (pushed) {
+                GlStateManager.popMatrix();
+            }
+        }
+    }
 
-        drawCalls++;
-        drawnVertices += mesh.vertexCount;
+    private static void cleanupRenderState(List<RenderChunk> renderList) {
+        try {
+            OpenGlHelper.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        } catch (Throwable ignored) {
+        }
+        try {
+            OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit);
+        } catch (Throwable ignored) {
+        }
+        try {
+            GlStateManager.resetColor();
+        } catch (Throwable ignored) {
+        }
+        if (renderList != null) {
+            try {
+                renderList.clear();
+            } catch (Throwable ignored) {
+            }
+        }
     }
 
     /**
