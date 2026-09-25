@@ -5,6 +5,7 @@ import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.chunks.ChunkRenderPipeline;
 import com.predex.potassium.optimization.chunks.PotassiumChunkBuildController;
 import com.predex.potassium.optimization.chunks.ChunkUpdateOptimizer;
+import com.predex.potassium.optimization.chunks.PotassiumRealChunkMeshEngine;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
 import com.predex.potassium.optimization.particles.ParticleOptimizer;
@@ -79,6 +80,31 @@ public final class PotassiumCoreHooks {
         if (!PerformanceManager.isOptimizationEnabled()) return true;
         if (!CompatibilityManager.allowRiskyHooks()) return true;
         return ChunkRenderPipeline.allowChunkDispatch(dispatcher, renderChunk);
+    }
+
+    public static boolean rebuildChunkWithPotassium(
+            RenderChunk renderChunk,
+            float cameraX,
+            float cameraY,
+            float cameraZ,
+            net.minecraft.client.renderer.chunk.ChunkCompileTaskGenerator generator) {
+        if (!PerformanceManager.isOptimizationEnabled()
+                || !CompatibilityManager.allowRiskyHooks()
+                || !PotassiumConfig.rendererCoreHooks
+                || !PotassiumConfig.customMeshPreparation
+                || !PotassiumConfig.meshUploadPipeline
+                || !PotassiumConfig.optimizeChunkUpdates) {
+            return false;
+        }
+
+        try {
+            PotassiumChunkMeshCache.markBuilding(renderChunk);
+            return PotassiumRealChunkMeshEngine.rebuild(
+                    renderChunk, cameraX, cameraY, cameraZ, generator);
+        } catch (Throwable ignored) {
+            // The transformer must never make vanilla chunk rebuilding unavailable.
+            return false;
+        }
     }
 
     public static void beginChunkBuildTick() {
