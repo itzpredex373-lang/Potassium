@@ -4,6 +4,7 @@ import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.system.MemoryOptimizer;
+import com.predex.potassium.optimization.benchmark.FrameTimeMonitor;
 
 public final class AdaptivePerformanceController {
     private static int qualityPercent = 100;
@@ -23,14 +24,20 @@ public final class AdaptivePerformanceController {
 
         boolean memoryPressure = MemoryOptimizer.isUnderPressure();
         boolean cpuPressure = !CpuOptimizer.shouldRunOptionalWork();
+        double averageFrameMs = FrameTimeMonitor.getAverageMs();
+        double variance = FrameTimeMonitor.getVarianceMs();
+        double onePercentLow = FrameTimeMonitor.getOnePercentLowFps();
+        boolean framePressure = averageFrameMs > 22.0D
+                || variance > 90.0D
+                || (onePercentLow > 0.0D && onePercentLow < 35.0D);
 
-        if (memoryPressure || cpuPressure) {
+        if (memoryPressure || cpuPressure || framePressure) {
             pressureTicks++;
             recoveryTicks = 0;
             if (pressureTicks >= 2) {
                 if (MemoryOptimizer.getPressurePercent() >= 95) {
                     qualityPercent = Math.min(qualityPercent, 50);
-                } else if (cpuPressure) {
+                } else if (cpuPressure || framePressure) {
                     qualityPercent = Math.min(qualityPercent, 65);
                 } else {
                     qualityPercent = Math.min(qualityPercent, 75);
