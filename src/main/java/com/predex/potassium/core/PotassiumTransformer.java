@@ -177,6 +177,44 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         return changed ? write(cn) : bytes;
     }
 
+    private byte[] transformChunkRenderDispatcher(byte[] bytes) {
+        ClassNode cn = read(bytes);
+        boolean changed = false;
+
+        for (MethodNode mn : cn.methods) {
+            if (!"(Lnet/minecraft/client/renderer/chunk/RenderChunk;)Z".equals(mn.desc)) {
+                continue;
+            }
+            if (!"updateChunkLater".equals(mn.name)
+                    && !"func_178503_a".equals(mn.name)
+                    && !"updateChunkNow".equals(mn.name)
+                    && !"func_178516_a".equals(mn.name)) {
+                continue;
+            }
+
+            InsnList hook = new InsnList();
+            hook.add(new MethodInsnNode(
+                    Opcodes.INVOKESTATIC,
+                    HOOK,
+                    "allowChunkRendererUpdate",
+                    "()Z",
+                    false));
+            LabelNode allowed = new LabelNode();
+            hook.add(new JumpInsnNode(Opcodes.IFNE, allowed));
+            hook.add(new InsnNode(Opcodes.ICONST_0));
+            hook.add(new InsnNode(Opcodes.IRETURN));
+            hook.add(allowed);
+
+            mn.instructions.insert(hook);
+            changed = true;
+        }
+
+        if (changed) {
+            LOGGER.info("[Potassium ASM] ChunkRenderDispatcher workload gate transformed");
+        }
+        return changed ? write(cn) : bytes;
+    }
+
     private byte[] transformVboRenderList(byte[] bytes) {
         ClassNode cn = read(bytes);
         boolean changed = false;
