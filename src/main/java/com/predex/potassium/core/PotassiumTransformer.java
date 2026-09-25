@@ -29,7 +29,8 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
                 return basicClass;
             }
             if ("net.minecraft.client.renderer.chunk.RenderChunk".equals(transformedName)) {
-                return transformRenderChunk(basicClass);
+                byte[] transformed = transformRenderChunkInvalidation(basicClass);
+                return transformRenderChunkBuild(transformed);
             }
             if ("net.minecraft.client.renderer.entity.RenderManager".equals(transformedName)) {
                 return transformRenderManager(basicClass);
@@ -160,7 +161,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         return changed ? write(cn) : bytes;
     }
 
-    private byte[] transformRenderChunk(byte[] bytes) {
+    private byte[] transformRenderChunkInvalidation(byte[] bytes) {
         ClassNode cn = read(bytes);
         boolean changed = false;
 
@@ -194,7 +195,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         return changed ? write(cn) : bytes;
     }
 
-    private byte[] transformRenderChunk(byte[] bytes) {
+    private byte[] transformRenderChunkBuild(byte[] bytes) {
         ClassNode cn = read(bytes);
         boolean changed = false;
 
