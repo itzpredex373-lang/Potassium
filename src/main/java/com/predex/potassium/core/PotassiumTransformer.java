@@ -300,7 +300,7 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
                     ("handleMapChunkBulk".equals(name) || "func_147269_a".equals(name))
                     && "(Lnet/minecraft/network/play/server/S26PacketMapChunkBulk;)V".equals(desc);
             boolean multiBlockPacket =
-                    ("handleMultiBlockChange".equals(name) || "func_147286_a".equals(name))
+                    ("handleMultiBlockChange".equals(name) || "func_147287_a".equals(name))
                     && "(Lnet/minecraft/network/play/server/S22PacketMultiBlockChange;)V".equals(desc);
             boolean blockPacket =
                     ("handleBlockChange".equals(name) || "func_147234_a".equals(name))
