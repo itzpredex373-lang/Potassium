@@ -6,6 +6,7 @@ import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.system.MemoryOptimizer;
 import com.predex.potassium.optimization.chunks.PotassiumMeshUploadQueue;
 import com.predex.potassium.optimization.chunks.PotassiumRenderSectionManager;
+import com.predex.potassium.optimization.chunks.PotassiumGpuRegionManager;
 
 public final class PerformanceMetrics {
     private PerformanceMetrics() {}
