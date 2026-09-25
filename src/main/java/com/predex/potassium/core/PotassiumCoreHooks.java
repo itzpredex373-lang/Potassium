@@ -81,6 +81,10 @@ public final class PotassiumCoreHooks {
 
     public static void clearCustomGpuRegions() {
         try {
+            // Drop queued CPU-side uploads before deleting their GPU targets.
+            // This prevents an old world/render pass from repopulating VBOs
+            // immediately after RenderGlobal.loadRenderers() resets them.
+            com.predex.potassium.optimization.chunks.PotassiumMeshUploadQueue.clear();
             PotassiumGpuRegionManager.clear();
             CompatibilityManager.resetRendererHealth();
         } catch (Throwable ignored) {
