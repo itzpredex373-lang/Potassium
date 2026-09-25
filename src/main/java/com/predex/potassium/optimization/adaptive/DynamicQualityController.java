@@ -9,6 +9,8 @@ import com.predex.potassium.config.PotassiumConfig;
 public final class DynamicQualityController {
     private static double frameMillis = 16.67D;
     private static int optionalWorkPercent = 100;
+    private static int pressureFrames;
+    private static int recoveryFrames;
 
     private DynamicQualityController() {}
 
@@ -19,14 +21,33 @@ public final class DynamicQualityController {
 
         if (!PotassiumConfig.adaptivePerformance || !PotassiumConfig.smoothFps) {
             optionalWorkPercent = 100;
+            pressureFrames = 0;
+            recoveryFrames = 0;
             return;
         }
 
-        if (frameMillis > 50.0D) optionalWorkPercent = 35;
-        else if (frameMillis > 33.0D) optionalWorkPercent = 55;
-        else if (frameMillis > 25.0D) optionalWorkPercent = 70;
-        else if (frameMillis > 18.0D) optionalWorkPercent = 88;
-        else optionalWorkPercent = 100;
+        if (frameMillis > 22.0D) {
+            pressureFrames++;
+            recoveryFrames = 0;
+        } else if (frameMillis < 16.5D) {
+            recoveryFrames++;
+            pressureFrames = 0;
+        } else {
+            pressureFrames = Math.max(0, pressureFrames - 1);
+            recoveryFrames = Math.max(0, recoveryFrames - 1);
+        }
+
+        // Hysteresis prevents rapid quality flapping around a frame-time boundary.
+        if (pressureFrames >= 3) {
+            if (frameMillis > 50.0D) optionalWorkPercent = Math.max(35, optionalWorkPercent - 20);
+            else if (frameMillis > 33.0D) optionalWorkPercent = Math.max(50, optionalWorkPercent - 15);
+            else if (frameMillis > 25.0D) optionalWorkPercent = Math.max(65, optionalWorkPercent - 10);
+            else optionalWorkPercent = Math.max(80, optionalWorkPercent - 5);
+            pressureFrames = 0;
+        } else if (recoveryFrames >= 20) {
+            optionalWorkPercent = Math.min(100, optionalWorkPercent + 5);
+            recoveryFrames = 0;
+        }
     }
 
     public static boolean allow(int requiredPercent) {
