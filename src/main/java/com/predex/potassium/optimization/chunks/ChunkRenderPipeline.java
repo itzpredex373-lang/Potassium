@@ -88,10 +88,16 @@ public final class ChunkRenderPipeline {
             return false;
         }
 
-        int configuredBudget = Math.max(1, PotassiumConfig.maxChunkUpdatesPerTick);
-        int budget = AdaptivePerformanceController.scaleBudget(configuredBudget);
+        int chunkX = position.getX() >> 4;
+        int chunkZ = position.getZ() >> 4;
+        int playerChunkX = ((int) Math.floor(camera.posX)) >> 4;
+        int playerChunkZ = ((int) Math.floor(camera.posZ)) >> 4;
 
-        if (dispatchedThisWindow >= budget) {
+        // The shared chunk scheduler owns the mobile budget and directional
+        // admission policy. Keeping it here makes the policy effective at the
+        // actual RenderGlobal -> ChunkRenderDispatcher dispatch boundary.
+        if (!ChunkUpdateOptimizer.shouldProcessChunk(
+                chunkX, chunkZ, playerChunkX, playerChunkZ)) {
             rejectedThisWindow++;
             PerformanceTelemetry.skippedChunk();
             return false;
