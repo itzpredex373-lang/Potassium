@@ -271,12 +271,10 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         boolean changed = false;
 
         for (MethodNode mn : cn.methods) {
-            if (!"()Z".equals(mn.desc)) continue;
-            if (mn.instructions == null || mn.instructions.size() == 0) continue;
-
             if (!"(Lnet/minecraft/world/IBlockAccess;Lnet/minecraft/client/renderer/block/model/IBakedModel;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/BlockPos;Lnet/minecraft/client/renderer/WorldRenderer;Z)Z".equals(mn.desc)) {
                 continue;
             }
+            if (mn.instructions == null || mn.instructions.size() == 0) continue;
 
             InsnList hook = new InsnList();
             hook.add(new VarInsnNode(Opcodes.ALOAD, 1));
