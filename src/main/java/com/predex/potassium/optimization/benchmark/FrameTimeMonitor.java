@@ -17,6 +17,9 @@ public final class FrameTimeMonitor {
     private static double varianceMs;
     private static int sampleCount;
     private static int cursor;
+    private static int percentileSampleCount;
+    private static double cachedOnePercentLow;
+    private static double cachedZeroPointOnePercentLow;
 
     private FrameTimeMonitor() {}
 
@@ -53,14 +56,24 @@ public final class FrameTimeMonitor {
      * 1% low FPS: the FPS corresponding to the 99th percentile frame time.
      */
     public static synchronized double getOnePercentLowFps() {
-        return percentileFps(0.99D);
+        refreshPercentilesIfNeeded();
+        return cachedOnePercentLow;
     }
 
     /**
      * 0.1% low FPS: the FPS corresponding to the 99.9th percentile frame time.
      */
     public static synchronized double getZeroPointOnePercentLowFps() {
-        return percentileFps(0.999D);
+        refreshPercentilesIfNeeded();
+        return cachedZeroPointOnePercentLow;
+    }
+
+    private static void refreshPercentilesIfNeeded() {
+        if (sampleCount < 2) return;
+        if (sampleCount - percentileSampleCount < 8 && percentileSampleCount != 0) return;
+        cachedOnePercentLow = percentileFps(0.99D);
+        cachedZeroPointOnePercentLow = percentileFps(0.999D);
+        percentileSampleCount = sampleCount;
     }
 
     private static double percentileFps(double percentile) {
@@ -84,6 +97,9 @@ public final class FrameTimeMonitor {
         varianceMs = 0.0D;
         sampleCount = 0;
         cursor = 0;
+        percentileSampleCount = 0;
+        cachedOnePercentLow = 0.0D;
+        cachedZeroPointOnePercentLow = 0.0D;
         Arrays.fill(samples, 0.0D);
     }
 }
