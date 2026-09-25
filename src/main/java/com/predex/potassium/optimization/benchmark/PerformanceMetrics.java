@@ -11,6 +11,11 @@ public final class PerformanceMetrics {
     public static double getLastTickMillis() { return CpuOptimizer.getLastTickMillis(); }
     public static double getAverageTickMillis() { return CpuOptimizer.getAverageTickMillis(); }
     public static double getFrameTimeMillis() { return FrameTimeMonitor.getAverageMs(); }
+    public static double getOnePercentLowFps() { return FrameTimeMonitor.getOnePercentLowFps(); }
+    public static double getZeroPointOnePercentLowFps() {
+        return FrameTimeMonitor.getZeroPointOnePercentLowFps();
+    }
+    public static double getFrameTimeVariance() { return FrameTimeMonitor.getVarianceMs(); }
     public static double getChunkTimeMillis() { return ChunkTimeTracker.getAverageMs(); }
     public static double getMeasuredFps() { return BenchmarkMonitor.getMeasuredFps(); }
     public static int getMemoryPressurePercent() { return MemoryOptimizer.getPressurePercent(); }
