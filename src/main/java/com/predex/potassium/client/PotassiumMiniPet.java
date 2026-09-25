@@ -21,7 +21,7 @@ public final class PotassiumMiniPet {
     private static final double FOLLOW_SIDE = 0.72D;
     private static final double FOLLOW_HEIGHT = 0.10D;
     private static final double SNAP_DISTANCE = 8.0D;
-    private static final float PET_SCALE = 0.42F;
+    private static final float PET_SCALE_BASE = 0.01F;
 
     private EntityWolf pet;
     private double petX;
@@ -118,10 +118,12 @@ public final class PotassiumMiniPet {
         double renderX = petX - renderManager.renderPosX;
         double renderY = petY + idleBob - renderManager.renderPosY;
         double renderZ = petZ - renderManager.renderPosZ;
+        float petScale = Math.max(0.25F, Math.min(0.75F,
+                com.predex.potassium.config.PotassiumConfig.miniPetScale * PET_SCALE_BASE));
 
         GlStateManager.pushMatrix();
         try {
-            GlStateManager.scale(PET_SCALE, PET_SCALE, PET_SCALE);
+            GlStateManager.scale(petScale, petScale, petScale);
             renderManager.renderEntityStatic(
                     pet,
                     renderX / PET_SCALE,
