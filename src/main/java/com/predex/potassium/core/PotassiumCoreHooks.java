@@ -120,7 +120,8 @@ public final class PotassiumCoreHooks {
                 || !PotassiumConfig.rendererCoreHooks
                 || !PotassiumConfig.customMeshPreparation
                 || !PotassiumConfig.meshUploadPipeline
-                || !PotassiumConfig.optimizeChunkUpdates) {
+                || !PotassiumConfig.optimizeChunkUpdates
+                || !CompatibilityManager.allowCustomRenderer()) {
             return false;
         }
 
