@@ -21,6 +21,9 @@ import java.util.Set;
  * Potassium controls which rebuild jobs are allowed to enter that pipeline.
  * This keeps the client-thread/worker-thread contract intact while reducing
  * redundant and low-value rebuild dispatches.
+ *
+ * RenderGlobal#updateChunks runs on the client thread, so this state is kept
+ * unsynchronized to avoid putting a monitor lock on the chunk-dispatch hot path.
  */
 public final class ChunkRenderPipeline {
     private static final Set<RenderChunk> dispatched =
@@ -32,14 +35,14 @@ public final class ChunkRenderPipeline {
 
     private ChunkRenderPipeline() {}
 
-    public static synchronized void beginUpdateWindow(long finishTimeNano) {
+    public static void beginUpdateWindow(long finishTimeNano) {
         deadlineNanos = finishTimeNano;
         dispatchedThisWindow = 0;
         rejectedThisWindow = 0;
         dispatched.clear();
     }
 
-    public static synchronized boolean allowChunkDispatch(
+    public static boolean allowChunkDispatch(
             ChunkRenderDispatcher dispatcher, RenderChunk renderChunk) {
         if (!PerformanceManager.isOptimizationEnabled()
                 || !PotassiumConfig.rendererCoreHooks
@@ -97,15 +100,15 @@ public final class ChunkRenderPipeline {
         return true;
     }
 
-    public static synchronized void finishUpdateWindow() {
+    public static void finishUpdateWindow() {
         dispatched.clear();
     }
 
-    public static synchronized int getDispatchedThisWindow() {
+    public static int getDispatchedThisWindow() {
         return dispatchedThisWindow;
     }
 
-    public static synchronized int getRejectedThisWindow() {
+    public static int getRejectedThisWindow() {
         return rejectedThisWindow;
     }
 }
