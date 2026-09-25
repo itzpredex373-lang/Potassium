@@ -10,6 +10,7 @@ import com.predex.potassium.optimization.chunks.PotassiumRealChunkMeshEngine;
 import com.predex.potassium.optimization.chunks.PotassiumGpuRegionManager;
 import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
+import com.predex.potassium.optimization.network.MultiplayerPerformanceOptimizer;
 import com.predex.potassium.optimization.particles.ParticleOptimizer;
 import com.predex.potassium.optimization.rendering.BlockRenderOptimizer;
 import net.minecraft.block.state.IBlockState;
@@ -145,6 +146,20 @@ public final class PotassiumCoreHooks {
             PotassiumChunkMeshCache.markClean(renderChunk);
         } catch (Throwable ignored) {
         }
+    }
+
+    public static void onServerChunkPacket() {
+        if (PerformanceManager.isOptimizationEnabled()) {
+            MultiplayerPerformanceOptimizer.onChunkPacket();
+        }
+    }
+
+    public static void onMultiplayerJoin() {
+        MultiplayerPerformanceOptimizer.onWorldJoin();
+    }
+
+    public static void onMultiplayerDisconnect() {
+        MultiplayerPerformanceOptimizer.onDisconnect();
     }
 
     public static void beginChunkBuildTick() {
