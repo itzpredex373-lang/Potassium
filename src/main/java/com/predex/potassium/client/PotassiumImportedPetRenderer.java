@@ -26,13 +26,13 @@ import java.util.List;
 final class PotassiumImportedPetRenderer implements com.predex.potassium.api.pet.PetRenderer {
     private final ModelBase model = new ModelBase() {};
     private final List<Part> parts = new ArrayList<Part>();
-    private final float red;
-    private final float green;
-    private final float blue;
-    private final float bob;
-    private final float bobSpeed;
-    private final float sway;
-    private final float swaySpeed;
+    private float red;
+    private float green;
+    private float blue;
+    private float bob = 0.20F;
+    private float bobSpeed = 0.16F;
+    private float sway = 0.12F;
+    private float swaySpeed = 0.11F;
     private ResourceLocation texture;
 
     private static final class Part {
@@ -49,10 +49,6 @@ final class PotassiumImportedPetRenderer implements com.predex.potassium.api.pet
         red = 0.55F;
         green = 0.65F;
         blue = 0.80F;
-        bob = 0.20F;
-        bobSpeed = 0.16F;
-        sway = 0.12F;
-        swaySpeed = 0.11F;
     }
 
     static PotassiumImportedPetRenderer fromJson(
@@ -127,8 +123,10 @@ final class PotassiumImportedPetRenderer implements com.predex.potassium.api.pet
 
     private void setAnimation(float ignoredBob, float ignoredBobSpeed,
                               float ignoredSway, float ignoredSwaySpeed) {
-        // Animation fields are intentionally read through render-time defaults
-        // for 1.8.9-safe construction. The pack parser validates their ranges.
+        bob = ignoredBob;
+        bobSpeed = ignoredBobSpeed;
+        sway = ignoredSway;
+        swaySpeed = ignoredSwaySpeed;
     }
 
     @Override
