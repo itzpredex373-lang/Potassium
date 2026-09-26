@@ -295,6 +295,11 @@ Current implementation provides **45 selectable cosmetic pet types**, including:
 
 The pet system includes:
 
+- Three original procedural 3D models:
+  - Mini Phoenix — wing flap, float/bob, moving tail and crest
+  - Tiny Reaper — robe sway, arm movement and animated scythe
+  - Cyber Cat — walking cycle, tail wave, ear movement and cyan visor
+- These three models are generated from Potassium's own Java geometry code without copied third-party model assets.
 - Pet selector
 - Pet scale control
 - Pet menu
