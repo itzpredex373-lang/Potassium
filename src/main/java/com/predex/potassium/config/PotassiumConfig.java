@@ -92,7 +92,7 @@ public final class PotassiumConfig {
                 && !"MEDIUM".equals(performanceProfile)
                 && !"LOW".equals(performanceProfile)
                 && !"PERFORMANCE".equals(performanceProfile)) {
-            performanceProfile = "PERFORMANCE";
+            performanceProfile = "MEDIUM";
         }
 
         memoryPressureThreshold = configuration.getInt("memoryPressureThreshold", "performance",
