@@ -63,7 +63,7 @@ public final class PotassiumOwnNameTag {
 
             GlStateManager.disableTexture2D();
             GL11.glBegin(GL11.GL_QUADS);
-            GL11.glColor4ub((byte) 0, (byte) 0, (byte) 0, (byte) 64);
+            GL11.glColor4f(0.0F, 0.0F, 0.0F, 0.25F);
             GL11.glVertex2f(-width - 2, -1.0F);
             GL11.glVertex2f(-width - 2, 8.0F);
             GL11.glVertex2f(width + 2, 8.0F);
