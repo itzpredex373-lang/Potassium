@@ -50,12 +50,12 @@ public final class PotassiumQolHud {
 
     private String[] buildLines(Minecraft mc) {
         /*
-         * Always keep the network line available without F3.
-         * FPS and 1%/0.1% low FPS are intentionally not shown here.
+         * Always keep FPS and network ping available without F3.
+         * 1%/0.1% low FPS are intentionally not shown here.
          */
         boolean extraQol = PerformanceProfileManager.isQoLAllowed();
 
-        int count = 1;
+        int count = 2;
         if (extraQol && PotassiumConfig.qolShowFrameTime) count++;
         if (extraQol && PotassiumConfig.qolShowCoordinates && mc.thePlayer != null) count++;
         if (extraQol && PotassiumConfig.qolShowDirection && mc.thePlayer != null) count++;
@@ -66,6 +66,9 @@ public final class PotassiumQolHud {
         String[] lines = new String[count];
         int index = 0;
 
+        lines[index++] = String.format(Locale.ROOT,
+                "FPS: %d",
+                mc.getDebugFPS());
         lines[index++] = String.format(Locale.ROOT,
                 "Ping: %dms",
                 getPing(mc));
