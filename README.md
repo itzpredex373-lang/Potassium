@@ -1,133 +1,369 @@
 # Potassium
 
-Potassium is a Minecraft Java Edition **1.8.9 Forge** performance mod focused on
-low-end hardware and Java launchers.
+Potassium is a Minecraft Java Edition **1.8.9 Forge** performance mod focused on improving frame-time stability, rendering, chunk work, entity/particle processing, CPU/memory usage, and low-end client performance.
 
-## Roadmap / implementation status
+The current repository contains both the optimization engine and the in-game Potassium settings UI.
 
-Potassium is being developed as an optimization-first project. **Part 6 (Settings
-UI) is intentionally skipped for now.** The engine work in Parts 1-5 and the
-advanced Parts 7-11 is prioritized first.
+## Current implementation
 
-### Part 1 — Rendering Engine
-- Living-entity distance culling
-- Frustum culling
-- Conservative occlusion/visibility gate
-- Block/chunk distance helpers
-- Render-pass/state helper and state cache
-- Vertex-buffer and texture-binding helper layers
-- Adaptive render distance scaling
+### Target platform
 
-Deep RenderGlobal/RenderChunk replacement and true GPU occlusion queries are
-not enabled yet because those require careful 1.8.9 renderer/coremod integration.
+- Minecraft Java Edition **1.8.9**
+- Minecraft Forge **11.15.1.2318**
+- Java **8**
+- ForgeGradle **2.1**
+- Gradle wrapper **2.14.1**
 
-### Part 2 — Chunk Engine
-- Chunk build scheduling foundation
-- Nearest-first priority queue
-- Player-proximity priority
-- Bounded per-tick chunk budget
-- Rebuild deduplication
-- World-update gating
-- Optional async preparation API for pure data work
+Potassium is designed as a client-side performance mod. It uses Forge event hooks and a core transformer for supported renderer hooks.
 
-The async API deliberately does not move Minecraft world/render objects off the
-client thread. Vanilla RenderGlobal/RenderChunk rebuilding is not rewritten yet.
+---
 
-### Part 3 — Entity & Particle
-- Entity render distance/culling
-- Experimental distant living-entity update throttling
-- Particle budget and adaptive trimming
-- Particle culling helper
-- Bounded particle object-pool helper
+## Part 1 — Rendering Engine
 
-Gameplay-affecting entity update throttling remains disabled by default.
+Implemented rendering/performance systems include:
 
-### Part 4 — CPU & Memory
-- Client tick CPU budget
-- JVM heap pressure monitoring
-- Allocation/object-reuse helpers
-- Mesh-data reuse pool
-- Bounded cache management
-- Adaptive scheduler
-- Stability guard / fail-safe degradation
+- Entity render-distance optimization
+- Entity occlusion culling
+- Frustum visibility optimization
+- Conservative occlusion/visibility gates
+- Block/face culling helpers
+- Render visibility helpers
+- Render-pass/state caching
+- Render-region scheduling helpers
+- Texture-binding optimization
+- Vertex-buffer optimization
+- Display-list/render-pass compatibility helpers
+- Animation visibility optimization
+- Fast-render paths
+- Fast math helpers
+- Empty draw-call skipping
+- Render section tracking
+- Custom GPU mesh storage
+- Custom draw submission with fallback behavior
+- Bounded mesh upload pipeline
+- CPU-side mesh preparation
+- Per-frame mesh upload budgeting
+- Per-frame entity occlusion-test budgeting
 
-Potassium does not force garbage collection.
+Potassium also contains Forge 1.8.9 renderer/core hooks through its core plugin and transformer.
 
-### Part 5 — Low-End Engine
-Profiles:
-- BALANCED
-- LOW_END
-- ULTRA_LOW
+The renderer uses conservative fallback behavior where a Potassium path is not safe or complete.
 
-Also included:
-- Dynamic quality scaling
-- CPU/memory-aware workload scaling
-- JVM processor/heap based hardware tier detection
-- Hardware work scaling
+---
 
-### Part 6 — Settings UI
-**Skipped for now.** No settings UI work is being prioritized until the engine
-parts are substantially complete.
+## Part 2 — Chunk Engine
 
-### Part 7 — Advanced Rendering
-Engine foundations added for:
-- Vertex buffer optimization
-- Render-state caching
-- Texture-binding reduction
-- Display-list/render-pass helper compatibility
-- Draw-call/state tracking foundations
+Implemented chunk systems include:
 
-Actual vanilla renderer bytecode replacement is intentionally deferred until
-1.8.9 runtime mappings are tested.
+- Chunk build scheduling
+- Chunk rebuild queue
+- Nearest/player-proximity prioritization
+- Directional movement-aware prioritization
+- Bounded per-tick chunk budgets
+- Chunk rebuild deduplication
+- Chunk work queues
+- Chunk render pipeline
+- Chunk async preparation API
+- Mobile-oriented chunk streaming
+- Movement prediction
+- Chunk mesh build queue
+- Chunk mesh cache
+- Compiled chunk representation
+- GPU mesh upload queue
+- GPU region management
+- Render-section management
+- Mesh upload admission control
+- Optional lazy chunk preparation
+- Optional dynamic chunk updates
 
-### Part 8 — Memory Engine
-Added:
-- Chunk memory estimation helpers
-- Mesh/data reuse pools
-- LRU cache management
+Async preparation is designed for safe data preparation. Minecraft world/render objects are not blindly moved to background threads.
+
+---
+
+## Part 3 — Entity & Particle Engine
+
+### Entities
+
+- Entity render optimization
+- Entity render-distance control
+- Entity occlusion culling
+- Optional living-entity update throttling
+- Entity update-distance control
+- Bounded occlusion-test workload
+
+Gameplay-affecting entity update throttling is **disabled by default**.
+
+### Particles
+
+- Particle processing budget
+- Adaptive particle trimming
+- Particle culling
+- Client-side particle scheduling
+- Particle object pooling/reuse
+
+---
+
+## Part 4 — CPU & Memory
+
+Implemented CPU/memory systems include:
+
+- Client CPU workload budgeting
+- Adaptive performance controller
+- CPU-aware scheduling
+- JVM heap-pressure monitoring
+- Memory-aware workload scaling
+- Allocation optimization helpers
 - Allocation tracking
+- Object reuse pools
+- Mesh-data reuse
+- Chunk memory estimation
+- Cache management
+- Stability/fail-safe degradation
+- System performance scheduling
 
-### Part 9 — World Optimization
-Added foundations for:
+Potassium does **not** force garbage collection.
+
+---
+
+## Part 5 — Low-End / Adaptive Engine
+
+Potassium includes hardware-aware and adaptive systems:
+
+- Hardware profile detection
+- CPU/processor-based workload scaling
+- JVM heap-based workload scaling
+- Dynamic quality control
+- Adaptive performance control
+- Memory-pressure response
+- CPU-budget response
+- Low-memory mode
+- Mobile-first chunk streaming
+- Bounded workload admission
+
+### Performance Profiles
+
+The current implementation has **four selectable profiles**:
+
+| Profile | Purpose |
+|---|---|
+| **HIGH** | Strong optimization while keeping a more general-purpose balance |
+| **MEDIUM / Mid** | Balanced optimization for general use |
+| **LOW** | Lighter optimization with more QoL features |
+| **PERFORMANCE** | Most aggressive performance-oriented profile, prioritizing raw FPS and frame-time stability |
+
+Profile values automatically configure several performance budgets such as entity distance, particle budget, chunk radius, chunk updates, memory threshold, CPU budget, mesh uploads, and occlusion-test limits.
+
+Profile-specific behavior is also applied to rendering/chunk settings.
+
+---
+
+## Part 6 — Settings UI
+
+**Implemented.**
+
+Potassium currently has a **4-page in-game Settings UI**.
+
+### Main settings
+
+- Master Optimization ON/OFF
+- High profile
+- Mid profile
+- Low profile
+- Performance profile
+- Fast Render
+- Fast Math
+- Smart Animations
+- Block Face Culling
+- Entity Culling
+- Render Regions
+- Chunk Optimization
+- Lazy Chunk Loading
+- Dynamic Chunk Updates
+- Adaptive Performance
+
+### Advanced performance settings
+
+- Entity Rendering
+- Entity Update Optimization
+- Particle Optimization
+- Low Memory Mode
+- Entity Render Distance
+- Entity Update Distance
+- Particle Budget
+- Chunk Radius
+- Chunk Budget
+- CPU Budget
+- Memory Pressure Threshold
+- Renderer Hooks
+- Empty Draw Skipping
+- Smooth World
+- Chunk Streaming
+- Movement Prediction
+- FPS Smoothing
+- Render Sections
+- Mesh Upload Budget
+- Mesh Preparation
+- Occlusion-Test Budget
+- Mesh Upload Pipeline
+
+### Video settings
+
+Potassium also provides a dedicated video-settings screen with Minecraft-style video options, including graphics/render-distance related controls and other client visual settings.
+
+### Mouse-hover descriptions
+
+Settings buttons provide mouse-hover descriptions explaining what each option changes.
+
+---
+
+## Quality-of-Life HUD
+
+Potassium includes a lightweight in-game QoL HUD.
+
+Available information includes:
+
+- FPS
+- 1% low FPS
+- 0.1% low FPS
+- Frame time
+- Coordinates
+- Facing direction
+- Biome
+- Java memory usage
+- Session time
+- Adjustable HUD scale
+
+FPS and low-FPS monitoring remain available independently of the master optimization switch.
+
+This means the user can turn Potassium optimization OFF while keeping performance monitoring available for comparison.
+
+---
+
+## Client-only Mini Pet
+
+Potassium includes a **client-only cosmetic mini-pet system**.
+
+The pet does not create a server-side gameplay entity and does not modify server/world state.
+
+Current implementation provides **30 selectable cosmetic pet types**, including:
+
+- Predex Pet
+- Mini King Dragon
+- Mini Devil
+- Black Dragon
+- Wyvern
+- Shadow Dragon
+- Robot
+- Fox
+- Kitsune
+- Cat
+- Heart Cat
+- Wolf
+- Dog
+- Bunny
+- Dino
+- Bee
+- Butterfly
+- Crow
+- Capybara
+- Stag
+- Spirit
+- Inferno
+- Ender
+- Slime
+- Mini-Me
+- Guardian
+- Ghost
+- Astronaut
+- Voidling
+- Moon Rabbit
+
+The pet system includes:
+
+- Pet selector
+- Pet scale control
+- Pet menu
+- Pet key handler
+- Local name-tag support
+- Client-side rendering/animation support
+
+The current profile rules allow the mini pet in the **LOW** profile only.
+
+---
+
+## World Optimization
+
+Implemented world-related systems include:
+
 - Tile-entity validity checks
 - Light-update scheduling
+- Redundant update tracking
 - Optional world-update budgeting
-- Redundant update deduplication
+- World-update scheduling
+- Smooth world workload distribution
+- World transition optimization
 
-Vanilla world ticks are not globally cancelled.
+Potassium does not globally cancel vanilla world ticks.
 
-### Part 10 — Compatibility
-Added:
-- Forge presence/fallback checks
-- OptiFine detection
+---
+
+## Compatibility
+
+Potassium includes compatibility/fallback systems for:
+
+- Forge presence
 - Mod-loaded checks
+- OptiFine detection
 - Safe hook gating
+- Renderer fallback paths
 
-When OptiFine is detected, Potassium's event-based living-entity render hook
-fails open until a dedicated compatibility layer is implemented.
+OptiFine compatibility is handled conservatively where Potassium's event-based rendering hooks could conflict.
 
-### Part 11 — Benchmark & Stability
-Added:
+Potassium is intended to be tested first by itself, followed by controlled compatibility testing with other mods.
+
+---
+
+## Benchmark & Telemetry
+
+Potassium includes performance measurement systems for:
+
+- FPS/frame counting
 - Frame-time measurement
+- 1% low FPS
+- 0.1% low FPS
 - Client tick-time measurement
-- Chunk-work timing instrumentation
+- Chunk-work timing
 - JVM memory measurement
-- Measured FPS counter
 - Allocation counters
-- Stability degradation guard
+- Performance telemetry
+- Benchmark monitoring
+- Stability monitoring
 
-These metrics are instrumentation only; Potassium does not promise a fixed FPS
-gain without real hardware and scene benchmarks.
+These systems measure actual runtime behavior rather than promising a fixed FPS increase.
+
+---
+
+## Master Optimization Switch
+
+The master Potassium optimization switch controls optimization processing.
+
+When optimization is **ON**:
+
+- Potassium optimization workloads are active according to the selected profile/settings.
+
+When optimization is **OFF**:
+
+- Potassium optimization workloads are disabled.
+- FPS/frame-time/telemetry monitoring can remain active.
+- QoL monitoring can therefore be used to compare the client with and without optimization.
+
+---
 
 ## Build
 
-This is a legacy **ForgeGradle 2.1** project for Minecraft 1.8.9 and is intended
-to be built with **JDK 8**. Do not use a current Gradle 8.x release with this
-toolchain.
+This is a legacy **ForgeGradle 2.1** project for Minecraft 1.8.9 and targets **JDK 8**.
 
-The repository now includes a lightweight Gradle bootstrapper. It pins Gradle
-**2.14.1**, downloads it on first use, and then runs the build. This avoids
-requiring a separate Gradle installation.
+The repository uses a Gradle wrapper/bootstrap setup with **Gradle 2.14.1**.
 
 ### Windows
 
@@ -136,7 +372,7 @@ Open Command Prompt in the Potassium folder:
     gradlew.bat setupDecompWorkspace
     gradlew.bat build
 
-Or, after the workspace has been prepared:
+After the workspace has been prepared:
 
     gradlew.bat build
 
@@ -148,33 +384,87 @@ Open a terminal in the Potassium folder:
     ./gradlew setupDecompWorkspace
     ./gradlew build
 
-The first run downloads Gradle 2.14.1. The Gradle distribution is cached locally
-under .gradle-bootstrap/ and that directory is ignored by Git.
-
-If dependency resolution fails because of stale legacy caches, try:
-
-    gradlew.bat clean
-    gradlew.bat setupDecompWorkspace --refresh-dependencies
-    gradlew.bat build
-
 The compiled mod JAR is produced under:
 
     build/libs/
-## Runtime test
 
-Use a clean Minecraft **1.8.9 Forge 11.15.1.2318** profile for the first test.
-Forge lists 11.15.1.2318 as the recommended 1.8.9 build.
+### CI build
 
-For compatibility testing, first test Potassium alone. Then test it with other
-mods one group at a time. Gameplay-affecting entity-update throttling is off by
-default.
+The repository also contains a GitHub Actions build workflow using:
 
-## Important
+- Ubuntu 22.04
+- JDK 8
+- Gradle wrapper
+- setupDecompWorkspace
+- Gradle build
+- JAR artifact upload
 
-Potassium does not claim a fixed FPS increase. Actual gains depend on the
-Minecraft scene, entity count, render distance, GPU/CPU, drivers, launcher,
-resource pack, and other installed mods.
+---
 
-The current advanced modules are intentionally conservative foundations. Actual
-1.8.9 renderer/chunk internals must be runtime-tested before enabling invasive
-bytecode/coremod hooks.
+## Runtime testing
+
+For the first test, use a clean Minecraft **1.8.9 Forge 11.15.1.2318** profile.
+
+Recommended test order:
+
+1. Potassium alone
+2. Verify the Settings UI
+3. Test each performance profile
+4. Compare optimization ON/OFF using the QoL HUD
+5. Test chunk-heavy scenes
+6. Test entity/particle-heavy scenes
+7. Test OptiFine compatibility separately
+8. Test other mods one group at a time
+
+Performance results depend on the actual scene and hardware.
+
+---
+
+## Important limitations
+
+Potassium does **not** promise a fixed FPS increase.
+
+Actual performance depends on:
+
+- CPU
+- GPU
+- RAM/JVM heap
+- Drivers
+- Minecraft settings
+- Render distance
+- Entity count
+- Particle count
+- World/chunk complexity
+- Resource packs
+- Other installed mods
+- OptiFine or other renderer modifications
+- Launcher/runtime environment
+
+Some advanced renderer and chunk systems use conservative fallbacks because Minecraft 1.8.9's renderer is sensitive to invasive changes.
+
+Runtime benchmarking on real hardware is required before claiming a specific FPS improvement.
+
+---
+
+## Project status
+
+The repository currently contains:
+
+- Rendering optimization
+- Chunk optimization
+- Entity optimization
+- Particle optimization
+- CPU/memory optimization
+- Adaptive performance systems
+- Low-end hardware scaling
+- Performance profiles
+- Settings UI
+- Video settings UI
+- QoL HUD
+- Client-only mini pets
+- World optimization foundations
+- Compatibility/fallback systems
+- Benchmark and telemetry systems
+- Forge core hooks/transformer
+
+The README describes the **current repository implementation**, not the original roadmap state.
