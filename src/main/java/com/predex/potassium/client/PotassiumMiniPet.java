@@ -106,9 +106,9 @@ public final class PotassiumMiniPet {
         pet.setPositionAndRotation(petX, petY + idleBob, petZ, yaw, 0.0F);
 
         RenderManager renderManager = minecraft.getRenderManager();
-        double renderX = petX - renderManager.renderPosX;
-        double renderY = petY + idleBob - renderManager.renderPosY;
-        double renderZ = petZ - renderManager.renderPosZ;
+        double renderX = petX - renderManager.viewerPosX;
+        double renderY = petY + idleBob - renderManager.viewerPosY;
+        double renderZ = petZ - renderManager.viewerPosZ;
 
         float scale = getScale(activeType)
                 * Math.max(0.25F, Math.min(0.65F,
@@ -178,7 +178,6 @@ public final class PotassiumMiniPet {
 
         if ("devil".equals(type) || "slime".equals(type) || "slime_king".equals(type) || "dragon_egg".equals(type)) {
             EntityMagmaCube cube = new EntityMagmaCube(minecraft.theWorld);
-            cube.setSlimeSize(2);
             cube.noClip = true;
             return cube;
         }
