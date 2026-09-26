@@ -45,6 +45,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(4, left + 79, y + 22, 74, "Mid");
             addButton(5, left + 158, y + 22, 74, "Low");
             addButton(6, left + 237, y + 22, 73, "Performance");
+            setProfileButtonEnabled(3, false);
+            setProfileButtonEnabled(6, false);
 
             addButton(10, left, y + 44, 150, "Fast Render: " + onOff(PotassiumConfig.fastRender));
             addButton(11, right, y + 44, 150, "Fast Math: " + onOff(PotassiumConfig.fastMath));
@@ -129,6 +131,17 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         buttonList.add(new GuiButton(id, x, y, width, 20, text));
     }
 
+    private void setProfileButtonEnabled(int id, boolean enabled) {
+        for (Object obj : buttonList) {
+            if (!(obj instanceof GuiButton)) continue;
+            GuiButton button = (GuiButton) obj;
+            if (button.id == id) {
+                button.enabled = enabled;
+                return;
+            }
+        }
+    }
+
     private String masterText() {
         return "Optimization: " + onOff(PotassiumConfig.enabled) + "  |  Frame monitor: ON";
     }
@@ -157,8 +170,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                 cycleProfile();
                 break;
             case 3:
-                selectProfile("HIGH");
-                break;
+                return;
             case 4:
                 selectProfile("MEDIUM");
                 break;
@@ -166,8 +178,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                 selectProfile("LOW");
                 break;
             case 6:
-                selectProfile("PERFORMANCE");
-                break;
+                return;
             case 10:
                 PotassiumConfig.fastRender = !PotassiumConfig.fastRender;
                 break;
@@ -343,10 +354,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
 
     private void cycleProfile() {
         String current = PerformanceProfileManager.getActiveProfileName();
-        if ("HIGH".equals(current)) selectProfile("MEDIUM");
-        else if ("MEDIUM".equals(current)) selectProfile("LOW");
-        else if ("LOW".equals(current)) selectProfile("PERFORMANCE");
-        else selectProfile("HIGH");
+        if ("MEDIUM".equals(current)) selectProfile("LOW");
+        else selectProfile("MEDIUM");
     }
 
     private void selectProfile(String profile) {
@@ -364,7 +373,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.enabled = true;
         PotassiumConfig.lowMemoryMode = true;
         PotassiumConfig.adaptivePerformance = true;
-        PotassiumConfig.performanceProfile = "PERFORMANCE";
+        PotassiumConfig.performanceProfile = "MEDIUM";
         PerformanceProfileManager.applyConfiguredProfile();
 
         PotassiumConfig.reduceParticles = true;
