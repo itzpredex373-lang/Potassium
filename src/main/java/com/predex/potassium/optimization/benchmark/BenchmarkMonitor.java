@@ -3,7 +3,7 @@ package com.predex.potassium.optimization.benchmark;
 public final class BenchmarkMonitor {
     private static long frames;
     private static long startedNanos;
-    private static double frameTimeMs;
+    private static double frameTimeMs;\n    private static double minimumFrameTimeMs;\n    private static double maximumFrameTimeMs;
 
     private BenchmarkMonitor() {}
 
@@ -14,11 +14,14 @@ public final class BenchmarkMonitor {
     public static void recordFrame() {
         if (startedNanos == 0L) begin();
         frames++;
-        frameTimeMs = FrameTimeMonitor.getAverageMs();
+        frameTimeMs = FrameTimeMonitor.getAverageMs();\n        double current = FrameTimeMonitor.getAverageMs();\n        if (minimumFrameTimeMs == 0.0D || current < minimumFrameTimeMs) minimumFrameTimeMs = current;\n        if (current > maximumFrameTimeMs) maximumFrameTimeMs = current;
     }
 
     public static long getFrames() { return frames; }
     public static double getAverageFrameTimeMs() { return frameTimeMs; }
+
+    public static double getMinimumFrameTimeMs() { return minimumFrameTimeMs; }
+    public static double getMaximumFrameTimeMs() { return maximumFrameTimeMs; }
 
     public static double getMeasuredFps() {
         if (startedNanos == 0L) return 0.0D;
@@ -29,6 +32,6 @@ public final class BenchmarkMonitor {
     public static void reset() {
         frames = 0L;
         startedNanos = 0L;
-        frameTimeMs = 0.0D;
+        frameTimeMs = 0.0D;\n        minimumFrameTimeMs = 0.0D;\n        maximumFrameTimeMs = 0.0D;
     }
 }
