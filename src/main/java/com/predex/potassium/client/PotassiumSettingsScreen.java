@@ -124,8 +124,13 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(50, left, y + 110, 150, "Mesh Pipeline: " + onOff(PotassiumConfig.meshUploadPipeline));
             addButton(51, right, y + 110, 150, "Reset Metrics");
             drawCenteredString(fontRendererObj,
-                    "Hover any button to see what it changes.",
+                    "FPS: " + String.format(Locale.ROOT, "%.0f", BenchmarkMonitor.getMeasuredFps())
+                            + " | Avg: " + String.format(Locale.ROOT, "%.2f", FrameTimeMonitor.getAverageMs()) + "ms"
+                            + " | 1% Low: " + String.format(Locale.ROOT, "%.0f", FrameTimeMonitor.getOnePercentLowFps()),
                     center, y + 136, 0xAAAAAA);
+            drawCenteredString(fontRendererObj,
+                    "Hover any button to see what it changes.",
+                    center, y + 148, 0x777777);
         }
 
         addButton(90, center - 155, height - 26, 95, "< Previous");
