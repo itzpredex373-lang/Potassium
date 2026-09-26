@@ -17,7 +17,7 @@ public final class BenchmarkMonitor {
         if (startedNanos == 0L) begin();
         frames++;
         frameTimeMs = FrameTimeMonitor.getAverageMs();
-        double current = frameTimeMs;\n        if (minimumFrameTimeMs == 0.0D || current < minimumFrameTimeMs) minimumFrameTimeMs = current;\n        if (current > maximumFrameTimeMs) maximumFrameTimeMs = current;
+        double current = FrameTimeMonitor.getLastFrameMs();\n        if (minimumFrameTimeMs == 0.0D || current < minimumFrameTimeMs) minimumFrameTimeMs = current;\n        if (current > maximumFrameTimeMs) maximumFrameTimeMs = current;
     }
 
     public static long getFrames() { return frames; }
