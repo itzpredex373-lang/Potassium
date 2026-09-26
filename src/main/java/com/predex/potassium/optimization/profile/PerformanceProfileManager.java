@@ -14,6 +14,14 @@ public final class PerformanceProfileManager {
         activeProfile = PerformanceProfile.fromName(
                 PotassiumConfig.performanceProfile);
 
+        // High and Performance remain defined presets, but only Mid and Low
+        // are selectable in the current UI. Normalize legacy config values.
+        if (activeProfile == PerformanceProfile.HIGH
+                || activeProfile == PerformanceProfile.PERFORMANCE) {
+            activeProfile = PerformanceProfile.MEDIUM;
+            PotassiumConfig.performanceProfile = "MEDIUM";
+        }
+
         PotassiumConfig.entityRenderDistance =
                 activeProfile.getEntityRenderDistance();
 
