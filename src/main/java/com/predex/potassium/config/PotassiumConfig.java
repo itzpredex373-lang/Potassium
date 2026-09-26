@@ -9,7 +9,7 @@ public final class PotassiumConfig {
     public static boolean enabled = true;
     public static boolean lowMemoryMode = true;
     public static boolean adaptivePerformance = true;
-    public static String performanceProfile = "PERFORMANCE";
+    public static String performanceProfile = "MEDIUM";
     public static int memoryPressureThreshold = 85;
     public static int cpuBudgetMillis = 45;
 
@@ -87,7 +87,7 @@ public final class PotassiumConfig {
                 "Adapt optional optimization work to current memory pressure and client tick time.");
 
         performanceProfile = configuration.getString("performanceProfile", "performance",
-                "PERFORMANCE", "Potassium performance profile. HIGH=light, MEDIUM=balanced, LOW=lower optimization, PERFORMANCE=maximum optimization.");
+                "MEDIUM", "Potassium profile: HIGH=strong optimization, MEDIUM=balanced, LOW=light optimization + more QoL, PERFORMANCE=ultra optimization.");
         if (!"HIGH".equals(performanceProfile)
                 && !"MEDIUM".equals(performanceProfile)
                 && !"LOW".equals(performanceProfile)
