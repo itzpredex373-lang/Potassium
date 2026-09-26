@@ -3,6 +3,7 @@ package com.predex.potassium.optimization.chunks;
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.PerformanceManager;
 import com.predex.potassium.optimization.adaptive.AdaptivePerformanceController;
+import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.benchmark.PerformanceTelemetry;
 import com.predex.potassium.optimization.world.WorldTransitionOptimizer;
 import net.minecraft.client.Minecraft;
@@ -69,6 +70,12 @@ public final class PotassiumChunkBuildController {
 
         int budget = WorldTransitionOptimizer.scaleChunkBudget(
                 Math.max(1, PotassiumConfig.maxChunkUpdatesPerTick));
+        budget = AdaptivePerformanceController.scaleBudget(budget);
+
+        if (!CpuOptimizer.shouldRunOptionalWork()) {
+            PerformanceTelemetry.skippedChunk();
+            return false;
+        }
 
         if (buildsThisTick >= budget) {
             PerformanceTelemetry.skippedChunk();
