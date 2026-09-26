@@ -9,7 +9,7 @@ public final class PotassiumConfig {
     public static boolean enabled = true;
     public static boolean lowMemoryMode = true;
     public static boolean adaptivePerformance = true;
-    public static String performanceProfile = "ULTRA_LOW";
+    public static String performanceProfile = "PERFORMANCE";
     public static int memoryPressureThreshold = 85;
     public static int cpuBudgetMillis = 45;
 
@@ -88,10 +88,11 @@ public final class PotassiumConfig {
 
         performanceProfile = configuration.getString("performanceProfile", "performance",
                 "ULTRA_LOW", "Potassium performance profile. Applied at startup.");
-        if (!"BALANCED".equals(performanceProfile)
-                && !"LOW_END".equals(performanceProfile)
-                && !"ULTRA_LOW".equals(performanceProfile)) {
-            performanceProfile = "ULTRA_LOW";
+        if (!"HIGH".equals(performanceProfile)
+                && !"MEDIUM".equals(performanceProfile)
+                && !"LOW".equals(performanceProfile)
+                && !"PERFORMANCE".equals(performanceProfile)) {
+            performanceProfile = "PERFORMANCE";
         }
 
         memoryPressureThreshold = configuration.getInt("memoryPressureThreshold", "performance",
