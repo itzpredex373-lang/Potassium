@@ -73,6 +73,10 @@ public final class FrameTimeMonitor {
         return averageMs;
     }
 
+    public static double getLastFrameMs() {
+        return sampleCount == 0 ? 0.0D : samples[(cursor - 1 + SAMPLE_SIZE) % SAMPLE_SIZE];
+    }
+
     public static double getVarianceMs() {
         return Math.max(0.0D, varianceMs);
     }
