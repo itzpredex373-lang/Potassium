@@ -102,7 +102,7 @@ public final class PotassiumMiniPet {
             petZ += dz * smoothing;
         }
 
-        double idleBob = Math.sin(System.nanoTime() / 100000000.0D) * 0.025D;
+        // Tick-based phase is deterministic and avoids querying nanoTime for every pet render.\n        double animationTime = (player.ticksExisted + partialTicks) * 0.12D;\n        double idleBob = Math.sin(animationTime) * 0.025D;
         pet.setPositionAndRotation(petX, petY + idleBob, petZ, yaw, 0.0F);
 
         RenderManager renderManager = minecraft.getRenderManager();
@@ -110,7 +110,7 @@ public final class PotassiumMiniPet {
         double renderY = petY + idleBob - renderManager.viewerPosY;
         double renderZ = petZ - renderManager.viewerPosZ;
 
-        float scale = getScale(activeType)
+        // Keep the companion cosmetic and lightweight: it never participates in world AI/ticking.\n        float scale = getScale(activeType)
                 * Math.max(0.25F, Math.min(0.65F,
                 PotassiumConfig.miniPetScale / 100.0F));
 
