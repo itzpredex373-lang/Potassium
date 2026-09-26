@@ -2,6 +2,7 @@ package com.predex.potassium.client;
 
 import com.mojang.authlib.GameProfile;
 import com.predex.potassium.config.PotassiumConfig;
+import com.predex.potassium.optimization.profile.PerformanceProfileManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -49,7 +50,7 @@ public final class PotassiumMiniPet {
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
-        if (!PotassiumConfig.miniPetEnabled) return;
+        if (!PerformanceProfileManager.isQoLAllowed() || !PotassiumConfig.miniPetEnabled) return;
 
         Minecraft minecraft = Minecraft.getMinecraft();
         EntityPlayerSP player = minecraft.thePlayer;
