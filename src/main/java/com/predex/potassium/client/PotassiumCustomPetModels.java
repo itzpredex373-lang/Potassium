@@ -12,6 +12,8 @@ import net.minecraft.entity.Entity;
  * palette and lightweight idle animation so the base mod stays self-contained.
  */
 public final class PotassiumCustomPetModels {
+    private static final PetModel[] MODELS = createModels();
+
     private PotassiumCustomPetModels() {}
 
     public static boolean isCustom(String type) {
@@ -45,7 +47,7 @@ public final class PotassiumCustomPetModels {
     public static boolean render(String type, float age, float scale) {
         if (!isBuiltIn(type)) return false;
 
-        PetModel model = new PetModel(type);
+        PetModel model = MODELS[PotassiumPetTypes.indexOf(type)];
         GlStateManager.pushMatrix();
         try {
             GlStateManager.scale(scale, scale, scale);
@@ -56,6 +58,14 @@ public final class PotassiumCustomPetModels {
             GlStateManager.popMatrix();
         }
         return true;
+    }
+
+    private static PetModel[] createModels() {
+        PetModel[] models = new PetModel[PotassiumPetTypes.TYPES.length];
+        for (int i = 0; i < models.length; i++) {
+            models[i] = new PetModel(PotassiumPetTypes.TYPES[i]);
+        }
+        return models;
     }
 
     /**
