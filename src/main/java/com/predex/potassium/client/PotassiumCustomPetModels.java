@@ -16,6 +16,12 @@ public final class PotassiumCustomPetModels {
 
     private PotassiumCustomPetModels() {}
 
+    public static boolean isCustom(String type) {
+        return "mini_phoenix".equals(type)
+                || "tiny_reaper".equals(type)
+                || "cyber_cat".equals(type);
+    }
+
     public static boolean render(String type, float age, float scale) {
         ModelBase model;
         if ("mini_phoenix".equals(type)) model = PHOENIX;
