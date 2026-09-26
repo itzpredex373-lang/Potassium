@@ -3,15 +3,17 @@ package com.predex.potassium.optimization.system;
 import com.predex.potassium.config.PotassiumConfig;
 
 /**
- * Part 4 CPU/frame-time optimizer. Optional work uses the measured average tick time.
+ * Part 4 CPU/frame-time optimizer.
  *
- * Measures client tick duration and lets optional maintenance back off when
- * the client is already spending too much time in a tick.
+ * Uses a small hysteresis window so one slow client tick does not disable
+ * optional work, while sustained CPU pressure quickly backs it off.
  */
 public final class CpuOptimizer {
     private static long tickStartNanos;
     private static long lastTickNanos;
     private static long averageTickNanos;
+    private static int pressureTicks;
+    private static int recoveryTicks;
 
     private CpuOptimizer() {}
 
@@ -20,9 +22,7 @@ public final class CpuOptimizer {
     }
 
     public static void endTick() {
-        if (tickStartNanos == 0L) {
-            return;
-        }
+        if (tickStartNanos == 0L) return;
 
         long duration = Math.max(0L, System.nanoTime() - tickStartNanos);
         lastTickNanos = duration;
@@ -32,6 +32,26 @@ public final class CpuOptimizer {
         } else {
             averageTickNanos = (averageTickNanos * 7L + duration) / 8L;
         }
+
+        long budgetNanos = getBudgetNanos();
+        if (duration > budgetNanos) {
+            pressureTicks++;
+            recoveryTicks = 0;
+        } else if (duration < (budgetNanos * 85L) / 100L) {
+            recoveryTicks++;
+            pressureTicks = 0;
+        } else {
+            pressureTicks = Math.max(0, pressureTicks - 1);
+            recoveryTicks = Math.max(0, recoveryTicks - 1);
+        }
+
+        if (pressureTicks > 60) pressureTicks = 60;
+        if (recoveryTicks > 60) recoveryTicks = 60;
+    }
+
+    private static long getBudgetNanos() {
+        long millis = Math.max(1L, Math.min(200L, (long) PotassiumConfig.cpuBudgetMillis));
+        return millis * 1_000_000L;
     }
 
     public static double getLastTickMillis() {
@@ -43,11 +63,11 @@ public final class CpuOptimizer {
     }
 
     public static boolean shouldRunOptionalWork() {
-        if (!PotassiumConfig.adaptivePerformance) {
-            return true;
-        }
+        if (!PotassiumConfig.adaptivePerformance) return true;
 
-        long budgetNanos = PotassiumConfig.cpuBudgetMillis * 1_000_000L;
-        return averageTickNanos == 0L || averageTickNanos <= budgetNanos;
+        if (pressureTicks >= 3) return false;
+        if (recoveryTicks >= 2) return true;
+
+        return averageTickNanos == 0L || averageTickNanos <= getBudgetNanos();
     }
 }
