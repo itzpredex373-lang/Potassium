@@ -241,7 +241,7 @@ public final class PotassiumMiniPet {
             return horse;
         }
 
-        if ("inferno".equals(type) || "mini_phoenix".equals(type)) {
+        if ("inferno".equals(type)) {
             EntityBlaze blaze = new EntityBlaze(minecraft.theWorld);
             blaze.noClip = true;
             return blaze;
