@@ -21,11 +21,6 @@ public final class EntityOcclusionOptimizer {
 
     private EntityOcclusionOptimizer() {}
 
-    /**
-     * Resets per-frame state when the render frame or camera chunk changes.
-     *
-     * Returns true when another occlusion test may be performed.
-     */
     public static void beginFrame() {
         Minecraft mc = Minecraft.getMinecraft();
         Entity camera = mc.getRenderViewEntity();
@@ -47,11 +42,8 @@ public final class EntityOcclusionOptimizer {
 
     private static boolean tryAcquireTest() {
         if (testsThisFrame >= Math.max(1, PotassiumConfig.maxEntityOcclusionTestsPerFrame)) {
-            // Budget exhaustion fails open. Rendering one extra entity is much
-            // cheaper than allowing occlusion checks to create a frame spike.
             return false;
         }
-
         testsThisFrame++;
         return true;
     }
@@ -60,14 +52,8 @@ public final class EntityOcclusionOptimizer {
         if (!PerformanceManager.isOptimizationEnabled()
                 || !PotassiumConfig.entityOcclusionCulling || entity == null) return true;
 
-        // Cached results are free. Check them before consuming the ray-trace
-        // budget so repeated entity visits do not exhaust the frame budget.
         Boolean cached = frameCache.get(entity);
         if (cached != null) return cached.booleanValue();
-
-        if (!tryAcquireTest()) {
-            return true;
-        }
 
         Minecraft mc = Minecraft.getMinecraft();
         Entity camera = mc.getRenderViewEntity();
@@ -77,25 +63,31 @@ public final class EntityOcclusionOptimizer {
         if (box == null) return true;
 
         double distanceSq = entity.getDistanceSqToEntity(camera);
-        if (distanceSq < 64.0D) {
-            return true;
-        }
+        if (distanceSq < 64.0D) return true;
 
         Vec3 start = camera.getPositionEyes(1.0F);
 
-        boolean visible =
-                isSampleVisible(mc, start,
-                        (box.minX + box.maxX) * 0.5D,
-                        (box.minY + box.maxY) * 0.5D,
-                        (box.minZ + box.maxZ) * 0.5D)
-                || isSampleVisible(mc, start,
-                        box.minX + (box.maxX - box.minX) * 0.35D,
-                        box.maxY - (box.maxY - box.minY) * 0.15D,
-                        box.minZ + (box.maxZ - box.minZ) * 0.35D)
-                || isSampleVisible(mc, start,
-                        box.maxX - (box.maxX - box.minX) * 0.35D,
-                        box.minY + (box.maxY - box.minY) * 0.15D,
-                        box.maxZ - (box.maxZ - box.minZ) * 0.35D);
+        // Center sample is the cheap/common path. Extra samples are only used
+        // when the center is blocked and each consumes its own frame budget.
+        if (!tryAcquireTest()) return true;
+        boolean visible = isSampleVisible(mc, start,
+                (box.minX + box.maxX) * 0.5D,
+                (box.minY + box.maxY) * 0.5D,
+                (box.minZ + box.maxZ) * 0.5D);
+
+        if (!visible && tryAcquireTest()) {
+            visible = isSampleVisible(mc, start,
+                    box.minX + (box.maxX - box.minX) * 0.35D,
+                    box.maxY - (box.maxY - box.minY) * 0.15D,
+                    box.minZ + (box.maxZ - box.minZ) * 0.35D);
+        }
+
+        if (!visible && tryAcquireTest()) {
+            visible = isSampleVisible(mc, start,
+                    box.maxX - (box.maxX - box.minX) * 0.35D,
+                    box.minY + (box.maxY - box.minY) * 0.15D,
+                    box.maxZ - (box.maxZ - box.minZ) * 0.35D);
+        }
 
         frameCache.put(entity, Boolean.valueOf(visible));
         return visible;
