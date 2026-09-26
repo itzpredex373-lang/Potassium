@@ -11,6 +11,8 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Potassium's main performance control panel.
@@ -38,7 +40,11 @@ public final class PotassiumSettingsScreen extends GuiScreen {
 
         if (page == 0) {
             addButton(1, left, y, 310, masterText());
-            addButton(2, left, y + 22, 310, profileText());
+
+            addButton(3, left, y + 22, 74, "High");
+            addButton(4, left + 79, y + 22, 74, "Mid");
+            addButton(5, left + 158, y + 22, 74, "Low");
+            addButton(6, left + 237, y + 22, 73, "Performance");
 
             addButton(10, left, y + 44, 150, "Fast Render: " + onOff(PotassiumConfig.fastRender));
             addButton(11, right, y + 44, 150, "Fast Math: " + onOff(PotassiumConfig.fastMath));
@@ -140,6 +146,18 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                 break;
             case 2:
                 cycleProfile();
+                break;
+            case 3:
+                selectProfile("HIGH");
+                break;
+            case 4:
+                selectProfile("MEDIUM");
+                break;
+            case 5:
+                selectProfile("LOW");
+                break;
+            case 6:
+                selectProfile("PERFORMANCE");
                 break;
             case 10:
                 PotassiumConfig.fastRender = !PotassiumConfig.fastRender;
@@ -315,14 +333,15 @@ public final class PotassiumSettingsScreen extends GuiScreen {
     }
 
     private void cycleProfile() {
-        if ("ULTRA_LOW".equals(PerformanceProfileManager.getActiveProfileName())) {
-            PotassiumConfig.performanceProfile = "LOW_END";
-        } else if ("LOW_END".equals(PerformanceProfileManager.getActiveProfileName())) {
-            PotassiumConfig.performanceProfile = "BALANCED";
-        } else {
-            PotassiumConfig.performanceProfile = "ULTRA_LOW";
-        }
+        String current = PerformanceProfileManager.getActiveProfileName();
+        if ("HIGH".equals(current)) selectProfile("MEDIUM");
+        else if ("MEDIUM".equals(current)) selectProfile("LOW");
+        else if ("LOW".equals(current)) selectProfile("PERFORMANCE");
+        else selectProfile("HIGH");
+    }
 
+    private void selectProfile(String profile) {
+        PotassiumConfig.performanceProfile = profile;
         PerformanceProfileManager.applyConfiguredProfile();
         save();
     }
@@ -336,7 +355,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.enabled = true;
         PotassiumConfig.lowMemoryMode = true;
         PotassiumConfig.adaptivePerformance = true;
-        PotassiumConfig.performanceProfile = "ULTRA_LOW";
+        PotassiumConfig.performanceProfile = "PERFORMANCE";
         PerformanceProfileManager.applyConfiguredProfile();
 
         PotassiumConfig.reduceParticles = true;
@@ -425,6 +444,13 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                 30,
                 0xAAAAAA);
 
+        if (page == 0) {
+            drawCenteredString(fontRendererObj,
+                    "Active: " + PerformanceProfileManager.getActiveProfileName()
+                            + "  |  QoL: " + (PerformanceProfileManager.isQoLAllowed() ? "ON" : "OFF"),
+                    width / 2, 42, 0xFFFFFF);
+        }
+
         if (page == 3) {
             drawCenteredString(fontRendererObj,
                     String.format(java.util.Locale.ROOT,
@@ -444,5 +470,81 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         }
 
         super.drawScreen(mouseX, mouseY, partialTicks);
+        drawSettingTooltip(mouseX, mouseY);
+    }
+
+    private void drawSettingTooltip(int mouseX, int mouseY) {
+        for (Object obj : buttonList) {
+            if (!(obj instanceof GuiButton)) continue;
+            GuiButton button = (GuiButton) obj;
+            if (mouseX < button.xPosition || mouseX > button.xPosition + button.width
+                    || mouseY < button.yPosition || mouseY > button.yPosition + button.height) continue;
+
+            String description = getSettingDescription(button.id);
+            if (description == null) continue;
+            List<String> lines = new ArrayList<String>();
+            for (String line : description.split("\\n")) lines.add(line);
+            drawHoveringText(lines, mouseX, mouseY);
+            break;
+        }
+    }
+
+    private String getSettingDescription(int id) {
+        switch (id) {
+            case 1: return "Master Optimization: enables Potassium performance optimizations. Monitoring stays active when OFF.";
+            case 3: return "High: light optimization and higher budgets. QoL disabled.";
+            case 4: return "Mid: balanced optimization. QoL available.";
+            case 5: return "Low: stronger optimization for weaker hardware. QoL available.";
+            case 6: return "Performance: strongest workload reduction. QoL disabled to minimize overhead.";
+            case 10: return "Fast Render reduces safe rendering-path overhead.";
+            case 11: return "Fast Math uses cached math helpers in Potassium hot paths.";
+            case 12: return "Smart Animations avoids unnecessary optional animation work.";
+            case 13: return "Block Face Culling skips fully hidden block faces.";
+            case 14: return "Entity Culling skips entities fully hidden by opaque geometry.";
+            case 15: return "Render Regions improves chunk render grouping and scheduling.";
+            case 16: return "Chunk Optimization limits and prioritizes chunk rebuild work.";
+            case 17: return "Lazy Chunk Loading spreads optional chunk preparation over ticks.";
+            case 18: return "Dynamic Chunk Updates allows extra scheduling while standing still.";
+            case 19: return "Adaptive Performance reacts to frame time, CPU, and memory pressure.";
+            case 20: return "Entity Rendering reduces unnecessary distant-entity render work.";
+            case 21: return "Entity Updates throttles distant living-entity updates. Experimental.";
+            case 22: return "Particles limits optional particle processing.";
+            case 23: return "Low Memory Mode uses more conservative memory-aware budgets.";
+            case 24: return "Entity Distance controls Potassium's entity render optimization range.";
+            case 25: return "Entity Update Distance controls the experimental entity-update range.";
+            case 26: return "Particle Budget is the optional particle-processing budget per tick.";
+            case 27: return "Chunk Radius controls the area considered for optional chunk work.";
+            case 28: return "Chunk Budget limits optional chunk-work slots per tick.";
+            case 29: return "CPU Budget is the time budget for optional maintenance work.";
+            case 30: return "Memory Threshold controls when optional work is reduced.";
+            case 31: return "Core Renderer Hooks enables Potassium Forge 1.8.9 bytecode hooks.";
+            case 32: return "Empty Draw Skip avoids zero-vertex Tessellator submissions.";
+            case 33: return "Smooth World spreads optional single-player world work.";
+            case 60: return "QoL HUD: information HUD. Only Mid and Low profiles allow QoL.";
+            case 61: return "HUD Scale changes QoL HUD size.";
+            case 62: return "FPS shows current measured FPS.";
+            case 63: return "1% / 0.1% Low shows low-FPS metrics.";
+            case 64: return "Frame Time shows average frame time.";
+            case 65: return "Coordinates shows player XYZ.";
+            case 66: return "Direction shows facing direction.";
+            case 67: return "Biome shows the current biome.";
+            case 68: return "Memory shows Java heap usage.";
+            case 69: return "Session Timer shows elapsed client session time.";
+            case 70: return "Mini Pet toggles the client-only cosmetic pet.";
+            case 71: return "Pet Scale changes mini pet render size.";
+            case 72: return "Pet cycles through client-only pet choices.";
+            case 40: return "Open Minecraft video options and Potassium video controls.";
+            case 41: return "Reset Potassium settings to safe defaults.";
+            case 42: return "FPS Smoothing adapts optional workloads to reduce frame-time spikes.";
+            case 43: return "Renderer Hooks toggles Potassium bytecode renderer hooks.";
+            case 44: return "Master Optimization toggles optimization only; monitoring stays active.";
+            case 45: return "Shows the currently active performance profile.";
+            case 46: return "Render Sections tracks chunk sections for visibility and rebuild scheduling.";
+            case 47: return "Mesh Uploads limits optional mesh uploads per render frame.";
+            case 48: return "Mesh Prep Workers enables bounded CPU-side mesh preparation.";
+            case 49: return "Occlusion Budget limits entity occlusion tests per render frame.";
+            case 50: return "Mesh Upload Pipeline enables the bounded mesh upload queue.";
+            default: return null;
+        }
     }
 }
