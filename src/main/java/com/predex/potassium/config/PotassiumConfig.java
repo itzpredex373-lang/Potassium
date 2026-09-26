@@ -223,7 +223,7 @@ public final class PotassiumConfig {
         miniPetScale = configuration.getInt("miniPetScale", "qol", 42, 25, 75,
                 "Mini pet render scale percentage.");
         miniPetType = configuration.getString("miniPetType", "qol", "predex",
-                "Client-only mini pet type. 30 cosmetic pet choices are available.");
+                "Client-only mini pet type. 45 cosmetic pet choices are available.");
 
         if (configuration.hasChanged()) configuration.save();
     }
