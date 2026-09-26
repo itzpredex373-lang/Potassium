@@ -3,6 +3,7 @@ package com.predex.potassium.proxy;
 import com.predex.potassium.client.PotassiumGuiHandler;
 import com.predex.potassium.client.PotassiumQolHud;
 import com.predex.potassium.client.PotassiumMiniPet;
+import com.predex.potassium.client.PotassiumPetKeyHandler;
 import com.predex.potassium.client.PotassiumOwnNameTag;
 import com.predex.potassium.optimization.rendering.EntityRenderOptimizer;
 import com.predex.potassium.optimization.entities.EntityUpdateHandler;
