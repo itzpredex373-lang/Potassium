@@ -10,7 +10,9 @@ public final class PotassiumPetCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        PotassiumPetMenuScreen.open();
+        if (PerformanceProfileManager.isQoLAllowed()) {
+            PotassiumPetMenuScreen.open();
+        }
     }
 
     @Override public int getRequiredPermissionLevel() { return 0; }
