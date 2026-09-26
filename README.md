@@ -245,7 +245,7 @@ Potassium includes a **client-only cosmetic mini-pet system**.
 
 The pet does not create a server-side gameplay entity and does not modify server/world state.
 
-Current implementation provides **30 selectable cosmetic pet types**, including:
+Current implementation provides **45 selectable cosmetic pet types**, including:
 
 - Predex Pet
 - Mini King Dragon
@@ -277,6 +277,21 @@ Current implementation provides **30 selectable cosmetic pet types**, including:
 - Astronaut
 - Voidling
 - Moon Rabbit
+- Mini Phoenix
+- Dragon Egg
+- Shadow Fox
+- Cyber Cat
+- Mini Golem
+- Ghost Bunny
+- Tiny Knight
+- Slime King
+- Void Orb
+- Mini Astral Wolf
+- Pixel Robot
+- Mini Ender Dragon
+- Crystal Fairy
+- Tiny Reaper
+- Moon Cat
 
 The pet system includes:
 
@@ -287,7 +302,7 @@ The pet system includes:
 - Local name-tag support
 - Client-side rendering/animation support
 
-The current profile rules allow the mini pet in the **LOW** profile only.
+The current profile rules allow the mini pet in the **LOW** profile only. QoL features are available in **MEDIUM/Mid and LOW**; HIGH and PERFORMANCE keep the extra QoL/pet layer restricted so they can prioritize performance.
 
 ---
 
