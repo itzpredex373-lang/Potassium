@@ -50,16 +50,12 @@ public final class PotassiumQolHud {
 
     private String[] buildLines(Minecraft mc) {
         /*
-         * Always keep the first line available without F3:
-         * FPS: 144  Avr: 132  Mini: 85  Ping: 32ms
-         *
-         * "Mini" is Potassium's 0.1% low metric, i.e. the worst sampled
-         * frame-time-derived FPS value in the current measurement window.
+         * Always keep the network line available without F3.
+         * FPS and 1%/0.1% low FPS are intentionally not shown here.
          */
         boolean extraQol = PerformanceProfileManager.isQoLAllowed();
 
         int count = 1;
-        if (extraQol && PotassiumConfig.qolShowLowFps) count++;
         if (extraQol && PotassiumConfig.qolShowFrameTime) count++;
         if (extraQol && PotassiumConfig.qolShowCoordinates && mc.thePlayer != null) count++;
         if (extraQol && PotassiumConfig.qolShowDirection && mc.thePlayer != null) count++;
@@ -70,22 +66,9 @@ public final class PotassiumQolHud {
         String[] lines = new String[count];
         int index = 0;
 
-        double averageFps = FrameTimeMonitor.getAverageMs() <= 0.0D
-                ? 0.0D : 1000.0D / FrameTimeMonitor.getAverageMs();
-
         lines[index++] = String.format(Locale.ROOT,
-                "FPS: %.0f  Avr: %.0f  Mini: %.0f  Ping: %dms",
-                BenchmarkMonitor.getMeasuredFps(),
-                averageFps,
-                FrameTimeMonitor.getZeroPointOnePercentLowFps(),
+                "Ping: %dms",
                 getPing(mc));
-
-        if (extraQol && PotassiumConfig.qolShowLowFps) {
-            lines[index++] = String.format(Locale.ROOT,
-                    "1%%: %.0f  |  0.1%%: %.0f",
-                    FrameTimeMonitor.getOnePercentLowFps(),
-                    FrameTimeMonitor.getZeroPointOnePercentLowFps());
-        }
 
         if (extraQol && PotassiumConfig.qolShowFrameTime) {
             lines[index++] = String.format(Locale.ROOT,
