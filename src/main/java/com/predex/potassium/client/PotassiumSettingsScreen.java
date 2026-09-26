@@ -80,8 +80,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         } else if (page == 2) {
             addButton(60, left, y, 150, "QoL HUD: " + onOff(PotassiumConfig.qolHud));
             addButton(61, right, y, 150, "HUD Scale: " + PotassiumConfig.qolHudScale + "%");
-            addButton(62, left, y + 22, 150, "FPS Counter: " + onOff(PotassiumConfig.qolShowFps));
-            addButton(63, right, y + 22, 150, "1% / 0.1% Low: " + onOff(PotassiumConfig.qolShowLowFps));
+            addButton(62, left, y + 22, 150, "Server Ping: ON");
+            addButton(63, right, y + 22, 150, "FPS / Low FPS: OFF");
             addButton(64, left, y + 44, 150, "Frame Time: " + onOff(PotassiumConfig.qolShowFrameTime));
             addButton(65, right, y + 44, 150, "Coordinates: " + onOff(PotassiumConfig.qolShowCoordinates));
             addButton(66, left, y + 66, 150, "Direction: " + onOff(PotassiumConfig.qolShowDirection));
@@ -220,8 +220,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                 break;
             case 60: PotassiumConfig.qolHud = !PotassiumConfig.qolHud; break;
             case 61: PotassiumConfig.qolHudScale = cycle(PotassiumConfig.qolHudScale, 75, 150, 25); break;
-            case 62: PotassiumConfig.qolShowFps = !PotassiumConfig.qolShowFps; break;
-            case 63: PotassiumConfig.qolShowLowFps = !PotassiumConfig.qolShowLowFps; break;
+            case 62: break;
+            case 63: break;
             case 64: PotassiumConfig.qolShowFrameTime = !PotassiumConfig.qolShowFrameTime; break;
             case 65: PotassiumConfig.qolShowCoordinates = !PotassiumConfig.qolShowCoordinates; break;
             case 66: PotassiumConfig.qolShowDirection = !PotassiumConfig.qolShowDirection; break;
@@ -284,8 +284,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.dynamicChunkUpdates = false;
         PotassiumConfig.reduceEntityUpdates = false;
         PotassiumConfig.qolHud = true;
-        PotassiumConfig.qolShowFps = true;
-        PotassiumConfig.qolShowLowFps = true;
+        PotassiumConfig.qolShowFps = false;
+        PotassiumConfig.qolShowLowFps = false;
         PotassiumConfig.qolShowFrameTime = false;
         PotassiumConfig.qolShowCoordinates = false;
         PotassiumConfig.qolShowDirection = false;
@@ -385,8 +385,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 51: text = "Reset Metrics: clears FPS, frame-time and telemetry samples."; break;
             case 60: text = "QoL HUD: controls the lightweight information overlay."; break;
             case 61: text = "HUD Scale: changes the size of the Potassium overlay."; break;
-            case 62: text = "FPS Counter: shows FPS without opening F3."; break;
-            case 63: text = "Low FPS Metrics: shows 1% and 0.1% low values."; break;
+            case 62: text = "Server Ping: shows your current multiplayer connection ping."; break;
+            case 63: text = "FPS / Low FPS: intentionally disabled in the Potassium HUD."; break;
             case 64: text = "Frame Time: shows average frame time in milliseconds."; break;
             case 65: text = "Coordinates: shows XYZ without F3."; break;
             case 66: text = "Direction: shows the direction the player is facing."; break;
