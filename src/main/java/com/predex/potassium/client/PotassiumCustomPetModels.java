@@ -62,7 +62,7 @@ public final class PotassiumCustomPetModels {
         private final ModelRenderer tailR = box(42, 18, 2, 2, 5, -2.5F, -1.0F, 2.5F);
         private final ModelRenderer crest = box(51, 18, 1, 3, 2, -0.5F, -8.0F, -0.5F);
 
-        public MiniPhoenix() { textureWidth = 32; textureHeight = 32; }
+        public MiniPhoenix() { textureWidth = 64; textureHeight = 64; }
 
         @Override
         public void render(Entity entity, float limbSwing, float limbSwingAmount,
