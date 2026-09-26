@@ -26,7 +26,7 @@ public final class EntityOcclusionOptimizer {
      *
      * Returns true when another occlusion test may be performed.
      */
-    public static boolean beginFrame() {
+    public static void beginFrame() {
         Minecraft mc = Minecraft.getMinecraft();
         Entity camera = mc.getRenderViewEntity();
 
@@ -43,7 +43,9 @@ public final class EntityOcclusionOptimizer {
             frameCache.clear();
             testsThisFrame = 0;
         }
+    }
 
+    private static boolean tryAcquireTest() {
         if (testsThisFrame >= Math.max(1, PotassiumConfig.maxEntityOcclusionTestsPerFrame)) {
             // Budget exhaustion fails open. Rendering one extra entity is much
             // cheaper than allowing occlusion checks to create a frame spike.
@@ -63,7 +65,7 @@ public final class EntityOcclusionOptimizer {
         Boolean cached = frameCache.get(entity);
         if (cached != null) return cached.booleanValue();
 
-        if (!beginFrame()) {
+        if (!tryAcquireTest()) {
             return true;
         }
 
