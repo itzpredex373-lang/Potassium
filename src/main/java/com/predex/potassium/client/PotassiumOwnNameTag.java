@@ -28,14 +28,14 @@ public final class PotassiumOwnNameTag {
         RenderManager renderManager = mc.getRenderManager();
         double x = player.lastTickPosX
                 + (player.posX - player.lastTickPosX) * event.partialTicks
-                - renderManager.renderPosX;
+                - renderManager.viewerPosX;
         double y = player.lastTickPosY
                 + (player.posY - player.lastTickPosY) * event.partialTicks
-                - renderManager.renderPosY
+                - renderManager.viewerPosY
                 + player.height + 0.55D;
         double z = player.lastTickPosZ
                 + (player.posZ - player.lastTickPosZ) * event.partialTicks
-                - renderManager.renderPosZ;
+                - renderManager.viewerPosZ;
 
         String name = ScorePlayerTeam.formatPlayerName(
                 mc.theWorld.getScoreboard().getPlayersTeam(player.getName()),
