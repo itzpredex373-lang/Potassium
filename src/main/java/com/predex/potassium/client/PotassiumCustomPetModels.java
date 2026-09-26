@@ -10,6 +10,7 @@ import net.minecraft.entity.Entity;
  * Geometry is built from ModelRenderer boxes and animated at render time.
  */
 public final class PotassiumCustomPetModels {
+    private static final ModelBase BASE = new ModelBase() {};
     public static final MiniPhoenix PHOENIX = new MiniPhoenix();
     public static final TinyReaper REAPER = new TinyReaper();
     public static final CyberCat CYBER_CAT = new CyberCat();
@@ -35,6 +36,7 @@ public final class PotassiumCustomPetModels {
             GlStateManager.disableTexture2D();
             model.render(null, 0.0F, 0.0F, age, 0.0F, 0.0F, 0.0625F);
         } finally {
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.enableTexture2D();
             GlStateManager.popMatrix();
         }
@@ -146,7 +148,7 @@ public final class PotassiumCustomPetModels {
     }
 
     private static ModelRenderer box(int x, int y, int z, float px, float py, float pz) {
-        ModelRenderer renderer = new ModelRenderer(32, 32, 0, 0);
+        ModelRenderer renderer = new ModelRenderer(BASE, 0, 0);
         renderer.addBox(px, py, pz, x, y, z);
         return renderer;
     }
