@@ -23,7 +23,7 @@ public final class PotassiumPetKeyHandler {
 
     @SubscribeEvent
     public void onKeyInput(InputEvent.KeyInputEvent event) {
-        if (registered && PerformanceProfileManager.isQoLAllowed()
+        if (registered && PerformanceProfileManager.isPetAllowed()
                 && PET_MENU_KEY.isPressed()
                 && Minecraft.getMinecraft().theWorld != null) {
             PotassiumPetMenuScreen.open();
