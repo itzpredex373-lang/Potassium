@@ -50,7 +50,7 @@ public final class PotassiumMiniPet {
 
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
-        if (!PerformanceProfileManager.isQoLAllowed() || !PotassiumConfig.miniPetEnabled) return;
+        if (!PerformanceProfileManager.isPetAllowed() || !PotassiumConfig.miniPetEnabled) return;
 
         Minecraft minecraft = Minecraft.getMinecraft();
         EntityPlayerSP player = minecraft.thePlayer;
