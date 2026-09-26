@@ -3,6 +3,7 @@ package com.predex.potassium.client;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
+import com.predex.potassium.optimization.profile.PerformanceProfileManager;
 
 public final class PotassiumPetCommand extends CommandBase {
     @Override public String getCommandName() { return "pet"; }
@@ -10,7 +11,7 @@ public final class PotassiumPetCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        if (PerformanceProfileManager.isQoLAllowed()) {
+        if (PerformanceProfileManager.isPetAllowed()) {
             PotassiumPetMenuScreen.open();
         }
     }
