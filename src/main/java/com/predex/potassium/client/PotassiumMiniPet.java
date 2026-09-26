@@ -114,19 +114,35 @@ public final class PotassiumMiniPet {
                 * Math.max(0.25F, Math.min(0.65F,
                 PotassiumConfig.miniPetScale / 100.0F));
 
-        GlStateManager.pushMatrix();
-        try {
-            GlStateManager.scale(scale, scale, scale);
-            renderManager.renderEntityWithPosYaw(
-                    pet,
-                    renderX / scale,
-                    renderY / scale,
-                    renderZ / scale,
-                    yaw,
-                    partialTicks
-            );
-        } finally {
-            GlStateManager.popMatrix();
+        if (PotassiumCustomPetModels.isCustom(activeType)) {
+            GlStateManager.pushMatrix();
+            try {
+                GlStateManager.translate(renderX, renderY + 0.10D, renderZ);
+                GlStateManager.rotate(-yaw, 0.0F, 1.0F, 0.0F);
+                PotassiumCustomPetModels.render(
+                        activeType,
+                        player.ticksExisted + partialTicks,
+                        0.90F * Math.max(0.70F, Math.min(1.25F,
+                                PotassiumConfig.miniPetScale / 100.0F))
+                );
+            } finally {
+                GlStateManager.popMatrix();
+            }
+        } else {
+            GlStateManager.pushMatrix();
+            try {
+                GlStateManager.scale(scale, scale, scale);
+                renderManager.renderEntityWithPosYaw(
+                        pet,
+                        renderX / scale,
+                        renderY / scale,
+                        renderZ / scale,
+                        yaw,
+                        partialTicks
+                );
+            } finally {
+                GlStateManager.popMatrix();
+            }
         }
     }
 
