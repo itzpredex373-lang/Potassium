@@ -5,6 +5,7 @@ import com.predex.potassium.client.PotassiumPetTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import com.predex.potassium.optimization.profile.PerformanceProfileManager;
 import java.io.IOException;
 
 public final class PotassiumPetMenuScreen extends GuiScreen {
@@ -19,6 +20,10 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
 
     @Override
     public void initGui() {
+        if (!PerformanceProfileManager.isPetAllowed()) {
+            Minecraft.getMinecraft().displayGuiScreen(parent);
+            return;
+        }
         buttonList.clear();
         int center = width / 2;
         int left = center - 155;
@@ -39,13 +44,19 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
     protected void actionPerformed(GuiButton button) throws IOException {
         switch (button.id) {
             case 1:
-                PotassiumConfig.miniPetEnabled = !PotassiumConfig.miniPetEnabled;
+                if (PerformanceProfileManager.isPetAllowed()) {
+                    PotassiumConfig.miniPetEnabled = !PotassiumConfig.miniPetEnabled;
+                }
                 break;
             case 2:
-                PotassiumConfig.miniPetScale = cycle(PotassiumConfig.miniPetScale, 25, 75, 8);
+                if (PerformanceProfileManager.isPetAllowed()) {
+                    PotassiumConfig.miniPetScale = cycle(PotassiumConfig.miniPetScale, 25, 75, 8);
+                }
                 break;
             case 3:
-                cyclePetType();
+                if (PerformanceProfileManager.isPetAllowed()) {
+                    cyclePetType();
+                }
                 syncPet();
                 break;
             case 4:
