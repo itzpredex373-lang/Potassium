@@ -3,6 +3,7 @@ package com.predex.potassium.client;
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.benchmark.BenchmarkMonitor;
 import com.predex.potassium.optimization.benchmark.FrameTimeMonitor;
+import com.predex.potassium.optimization.profile.PerformanceProfileManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.gui.ScaledResolution;
@@ -21,6 +22,7 @@ public final class PotassiumQolHud {
     @SubscribeEvent
     public void onOverlay(RenderGameOverlayEvent.Post event) {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL
+                || !PerformanceProfileManager.isQoLAllowed()
                 || !PotassiumConfig.qolHud) {
             return;
         }
