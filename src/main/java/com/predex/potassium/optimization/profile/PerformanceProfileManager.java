@@ -43,7 +43,7 @@ public final class PerformanceProfileManager {
             PotassiumConfig.fastMath = true;
             PotassiumConfig.lazyChunkLoading = true;
             PotassiumConfig.renderRegions = true;
-            PotassiumConfig.smartAnimations = activeProfile != PerformanceProfile.PERFORMANCE || true;
+            PotassiumConfig.smartAnimations = true;
             PotassiumConfig.blockFaceCulling = true;
             PotassiumConfig.entityOcclusionCulling = true;
             PotassiumConfig.rendererCoreHooks = true;
