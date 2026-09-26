@@ -154,20 +154,20 @@ public final class PotassiumMiniPet {
             return character;
         }
 
-        if ("king_dragon".equals(type) || "black_dragon".equals(type)) {
+        if ("king_dragon".equals(type) || "black_dragon".equals(type) || "mini_ender_dragon".equals(type)) {
             EntityDragon dragon = new EntityDragon(minecraft.theWorld);
             dragon.noClip = true;
             return dragon;
         }
 
-        if ("devil".equals(type) || "slime".equals(type)) {
+        if ("devil".equals(type) || "slime".equals(type) || "slime_king".equals(type) || "dragon_egg".equals(type)) {
             EntityMagmaCube cube = new EntityMagmaCube(minecraft.theWorld);
             cube.setSlimeSize(2);
             cube.noClip = true;
             return cube;
         }
 
-        if ("shadow_dragon".equals(type) || "voidling".equals(type)) {
+        if ("shadow_dragon".equals(type) || "voidling".equals(type) || "void_orb".equals(type) || "tiny_reaper".equals(type)) {
             EntityEndermite endermite = new EntityEndermite(minecraft.theWorld);
             endermite.noClip = true;
             return endermite;
@@ -175,33 +175,33 @@ public final class PotassiumMiniPet {
 
         if ("wyvern".equals(type) || "butterfly".equals(type)
                 || "bee".equals(type) || "spirit".equals(type)
-                || "ghost".equals(type)) {
+                || "ghost".equals(type) || "mini_phoenix".equals(type) || "crystal_fairy".equals(type)) {
             EntityBat bat = new EntityBat(minecraft.theWorld);
             bat.noClip = true;
             return bat;
         }
 
-        if ("robot".equals(type)) {
+        if ("robot".equals(type) || "pixel_robot".equals(type) || "tiny_knight".equals(type) || "mini_golem".equals(type)) {
             EntityIronGolem golem = new EntityIronGolem(minecraft.theWorld);
             golem.noClip = true;
             return golem;
         }
 
         if ("fox".equals(type) || "kitsune".equals(type)
-                || "cat".equals(type) || "heart_cat".equals(type)) {
+                || "cat".equals(type) || "heart_cat".equals(type) || "shadow_fox".equals(type) || "cyber_cat".equals(type) || "moon_cat".equals(type)) {
             EntityOcelot cat = new EntityOcelot(minecraft.theWorld);
             cat.noClip = true;
             return cat;
         }
 
-        if ("wolf".equals(type) || "dog".equals(type)) {
+        if ("wolf".equals(type) || "dog".equals(type) || "mini_astral_wolf".equals(type)) {
             EntityWolf wolf = new EntityWolf(minecraft.theWorld);
             wolf.setTamed(true);
             wolf.noClip = true;
             return wolf;
         }
 
-        if ("bunny".equals(type) || "moon_rabbit".equals(type)) {
+        if ("bunny".equals(type) || "moon_rabbit".equals(type) || "ghost_bunny".equals(type)) {
             EntityRabbit rabbit = new EntityRabbit(minecraft.theWorld);
             rabbit.noClip = true;
             return rabbit;
@@ -225,7 +225,7 @@ public final class PotassiumMiniPet {
             return horse;
         }
 
-        if ("inferno".equals(type)) {
+        if ("inferno".equals(type) || "mini_phoenix".equals(type)) {
             EntityBlaze blaze = new EntityBlaze(minecraft.theWorld);
             blaze.noClip = true;
             return blaze;
@@ -250,14 +250,14 @@ public final class PotassiumMiniPet {
     }
 
     private float getScale(String type) {
-        if ("king_dragon".equals(type) || "black_dragon".equals(type)) return 0.42F;
-        if ("robot".equals(type) || "guardian".equals(type)) return 0.48F;
+        if ("king_dragon".equals(type) || "black_dragon".equals(type) || "mini_ender_dragon".equals(type)) return 0.42F;
+        if ("robot".equals(type) || "guardian".equals(type) || "pixel_robot".equals(type) || "mini_golem".equals(type) || "tiny_knight".equals(type)) return 0.48F;
         if ("stag".equals(type)) return 0.45F;
         if ("inferno".equals(type)) return 0.55F;
         if ("wyvern".equals(type) || "butterfly".equals(type)
                 || "bee".equals(type) || "spirit".equals(type)
-                || "ghost".equals(type)) return 0.70F;
-        if ("bunny".equals(type) || "moon_rabbit".equals(type)) return 0.85F;
+                || "ghost".equals(type) || "mini_phoenix".equals(type) || "crystal_fairy".equals(type)) return 0.70F;
+        if ("bunny".equals(type) || "moon_rabbit".equals(type) || "ghost_bunny".equals(type)) return 0.85F;
         return 0.65F;
     }
 
