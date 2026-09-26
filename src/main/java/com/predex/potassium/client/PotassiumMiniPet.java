@@ -110,17 +110,24 @@ public final class PotassiumMiniPet {
         try {
             GlStateManager.translate(renderX, renderY + 0.10D, renderZ);
             GlStateManager.rotate(-yaw, 0.0F, 1.0F, 0.0F);
-            PotassiumCustomPetModels.render(
+            if (!PotassiumCustomPetModels.render(
                     activeType,
                     player.ticksExisted + partialTicks,
-                    modelScale
-            );
+                    modelScale)) {
+                com.predex.potassium.api.pet.PetDefinition definition =
+                        com.predex.potassium.api.pet.PotassiumPetAPI.get(activeType);
+                if (definition != null && definition.getRenderer() != null) {
+                    definition.getRenderer().render(
+                            player.ticksExisted + partialTicks, modelScale);
+                }
+            }
         } finally {
             GlStateManager.popMatrix();
         }
     }
 
     private String normalizeType(String type) {
+        if (type != null && PotassiumPetPackManager.isAvailable(type)) return type;
         return PotassiumPetTypes.get(PotassiumPetTypes.indexOf(type));
     }
 }
