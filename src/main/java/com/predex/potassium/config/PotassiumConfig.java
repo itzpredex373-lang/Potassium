@@ -199,7 +199,7 @@ public final class PotassiumConfig {
 
         qolHud = configuration.getBoolean("qolHud", "qol", true,
                 "Show Potassium's lightweight in-game information HUD.");
-        qolShowFps = configuration.getBoolean("qolShowFps", "qol", false,
+        qolShowFps = configuration.getBoolean("qolShowFps", "qol", true,
                 "Show current FPS in the Potassium HUD.");
         qolShowLowFps = configuration.getBoolean("qolShowLowFps", "qol", false,
                 "Show 1% low and 0.1% low FPS in the Potassium HUD.");
