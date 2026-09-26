@@ -80,8 +80,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         } else if (page == 2) {
             addButton(60, left, y, 150, "QoL HUD: " + onOff(PotassiumConfig.qolHud));
             addButton(61, right, y, 150, "HUD Scale: " + PotassiumConfig.qolHudScale + "%");
-            addButton(62, left, y + 22, 150, "FPS: ON");
-            addButton(63, right, y + 22, 150, "1% / 0.1% Low: OFF");
+            addButton(62, left, y + 22, 150, "FPS: ALWAYS ON");
+            addButton(63, right, y + 22, 150, "1% / 0.1% Low: HIDDEN");
             addButton(64, left, y + 44, 150, "Frame Time: " + onOff(PotassiumConfig.qolShowFrameTime));
             addButton(65, right, y + 44, 150, "Coordinates: " + onOff(PotassiumConfig.qolShowCoordinates));
             addButton(66, left, y + 66, 150, "Direction: " + onOff(PotassiumConfig.qolShowDirection));
@@ -220,7 +220,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                 break;
             case 60: PotassiumConfig.qolHud = !PotassiumConfig.qolHud; break;
             case 61: PotassiumConfig.qolHudScale = cycle(PotassiumConfig.qolHudScale, 75, 150, 25); break;
-            case 62: break;
+            case 62: PotassiumConfig.qolShowFps = true; break;
             case 63: break;
             case 64: PotassiumConfig.qolShowFrameTime = !PotassiumConfig.qolShowFrameTime; break;
             case 65: PotassiumConfig.qolShowCoordinates = !PotassiumConfig.qolShowCoordinates; break;
