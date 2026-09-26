@@ -284,7 +284,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.dynamicChunkUpdates = false;
         PotassiumConfig.reduceEntityUpdates = false;
         PotassiumConfig.qolHud = true;
-        PotassiumConfig.qolShowFps = false;
+        PotassiumConfig.qolShowFps = true;
         PotassiumConfig.qolShowLowFps = false;
         PotassiumConfig.qolShowFrameTime = false;
         PotassiumConfig.qolShowCoordinates = false;
