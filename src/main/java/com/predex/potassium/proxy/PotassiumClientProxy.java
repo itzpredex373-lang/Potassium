@@ -2,7 +2,8 @@ package com.predex.potassium.proxy;
 
 import com.predex.potassium.client.PotassiumGuiHandler;
 import com.predex.potassium.client.PotassiumQolHud;
-import com.predex.potassium.client.PotassiumMiniPet;\nimport com.predex.potassium.client.PotassiumOwnNameTag;
+import com.predex.potassium.client.PotassiumMiniPet;
+import com.predex.potassium.client.PotassiumOwnNameTag;
 import com.predex.potassium.optimization.rendering.EntityRenderOptimizer;
 import com.predex.potassium.optimization.entities.EntityUpdateHandler;
 import com.predex.potassium.optimization.particles.ParticleClientScheduler;
@@ -22,7 +23,8 @@ public final class PotassiumClientProxy extends PotassiumProxy {
         MinecraftForge.EVENT_BUS.register(new ChunkRenderScheduler());
         MinecraftForge.EVENT_BUS.register(new PotassiumGuiHandler());
         MinecraftForge.EVENT_BUS.register(new PotassiumQolHud());
-        MinecraftForge.EVENT_BUS.register(new PotassiumMiniPet());\n        MinecraftForge.EVENT_BUS.register(new PotassiumOwnNameTag());
+        MinecraftForge.EVENT_BUS.register(new PotassiumMiniPet());
+        MinecraftForge.EVENT_BUS.register(new PotassiumOwnNameTag());
         PotassiumPetKeyHandler petKeyHandler = new PotassiumPetKeyHandler();
         petKeyHandler.register();
         MinecraftForge.EVENT_BUS.register(petKeyHandler);
