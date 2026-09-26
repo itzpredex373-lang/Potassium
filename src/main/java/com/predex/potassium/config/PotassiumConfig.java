@@ -87,7 +87,7 @@ public final class PotassiumConfig {
                 "Adapt optional optimization work to current memory pressure and client tick time.");
 
         performanceProfile = configuration.getString("performanceProfile", "performance",
-                "ULTRA_LOW", "Potassium performance profile. Applied at startup.");
+                "PERFORMANCE", "Potassium performance profile. HIGH=light, MEDIUM=balanced, LOW=lower optimization, PERFORMANCE=maximum optimization.");
         if (!"HIGH".equals(performanceProfile)
                 && !"MEDIUM".equals(performanceProfile)
                 && !"LOW".equals(performanceProfile)
