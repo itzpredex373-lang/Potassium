@@ -57,7 +57,6 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
                 if (PerformanceProfileManager.isPetAllowed()) {
                     cyclePetType();
                 }
-                syncPet();
                 break;
             case 4:
                 Minecraft.getMinecraft().displayGuiScreen(new PotassiumSettingsScreen(this));
