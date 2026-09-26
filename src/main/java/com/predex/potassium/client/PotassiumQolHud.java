@@ -59,12 +59,16 @@ public final class PotassiumQolHud {
         if (PotassiumConfig.qolShowBiome && mc.thePlayer != null && mc.theWorld != null) count++;
         if (PotassiumConfig.qolShowMemory) count++;
         if (PotassiumConfig.qolShowSessionTime) count++;
+        count += 1;
 
         String[] lines = new String[count];
         int index = 0;
 
-        if (PotassiumConfig.qolShowFps)
-            lines[index++] = String.format(Locale.ROOT, "FPS: %.0f", BenchmarkMonitor.getMeasuredFps());
+        lines[index++] = String.format(Locale.ROOT, "FPS: %.0f  Avr: %.0f  Min: %.0f  Ping: %dms",
+                BenchmarkMonitor.getMeasuredFps(),
+                FrameTimeMonitor.getAverageMs() <= 0.0D ? 0.0D : 1000.0D / FrameTimeMonitor.getAverageMs(),
+                FrameTimeMonitor.getOnePercentLowFps(),
+                getPing(mc));
 
         if (PotassiumConfig.qolShowLowFps)
             lines[index++] = String.format(Locale.ROOT, "1%%: %.0f  |  0.1%%: %.0f",
@@ -101,6 +105,13 @@ public final class PotassiumQolHud {
         }
 
         return lines;
+    }
+
+    private int getPing(Minecraft mc) {
+        if (mc.thePlayer == null || mc.getNetHandler() == null) return 0;
+        net.minecraft.client.network.NetworkPlayerInfo info =
+                mc.getNetHandler().getPlayerInfo(mc.thePlayer.getUniqueID());
+        return info == null ? 0 : Math.max(0, info.getResponseTime());
     }
 
     private String getDirection(float yaw) {
