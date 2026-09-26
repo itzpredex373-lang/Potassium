@@ -38,7 +38,7 @@ public final class PerformanceProfileManager {
             PotassiumConfig.optimizeChunkUpdates = true;
             PotassiumConfig.mobileChunkStreaming = false;
         } else {
-            // Medium/High/Performance progressively favor performance.
+            // Medium keeps balanced optimization; High/Performance keep QoL disabled and favor performance.
             PotassiumConfig.fastRender = true;
             PotassiumConfig.fastMath = true;
             PotassiumConfig.lazyChunkLoading = true;
@@ -66,6 +66,9 @@ public final class PerformanceProfileManager {
         } else if (activeProfile == PerformanceProfile.MEDIUM) {
             PotassiumConfig.maxMeshUploadsPerFrame = 3;
             PotassiumConfig.maxEntityOcclusionTestsPerFrame = 64;
+        } else if (activeProfile == PerformanceProfile.LOW) {
+            PotassiumConfig.maxMeshUploadsPerFrame = 2;
+            PotassiumConfig.maxEntityOcclusionTestsPerFrame = 48;
         }
     }
 
