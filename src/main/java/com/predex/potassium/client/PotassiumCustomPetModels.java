@@ -4,6 +4,7 @@ import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * Original procedural client-only pet models.
@@ -11,6 +12,8 @@ import net.minecraft.entity.Entity;
  */
 public final class PotassiumCustomPetModels {
     private static final ModelBase BASE = new ModelBase() {};
+    private static final ResourceLocation MINI_PHOENIX_TEXTURE =
+            new ResourceLocation("potassium", "textures/pets/mini_phoenix.png");
     public static final MiniPhoenix PHOENIX = new MiniPhoenix();
     public static final TinyReaper REAPER = new TinyReaper();
     public static final CyberCat CYBER_CAT = new CyberCat();
@@ -33,7 +36,13 @@ public final class PotassiumCustomPetModels {
         GlStateManager.pushMatrix();
         try {
             GlStateManager.scale(scale, scale, scale);
-            GlStateManager.disableTexture2D();
+            if ("mini_phoenix".equals(type)) {
+                GlStateManager.enableTexture2D();
+                net.minecraft.client.Minecraft.getMinecraft().getTextureManager().bindTexture(MINI_PHOENIX_TEXTURE);
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            } else {
+                GlStateManager.disableTexture2D();
+            }
             model.render(null, 0.0F, 0.0F, age, 0.0F, 0.0F, 0.0625F);
         } finally {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -44,14 +53,14 @@ public final class PotassiumCustomPetModels {
     }
 
     public static final class MiniPhoenix extends ModelBase {
-        private final ModelRenderer body = box(5, 4, 7, -2.5F, -2.0F, -3.5F);
-        private final ModelRenderer head = box(4, 4, 4, -2.0F, -5.0F, -2.0F);
-        private final ModelRenderer beak = box(2, 1, 2, -1.0F, -4.5F, -5.0F);
-        private final ModelRenderer wingL = box(1, 2, 7, 2.5F, -1.5F, -3.0F);
-        private final ModelRenderer wingR = box(1, 2, 7, -3.5F, -1.5F, -3.0F);
-        private final ModelRenderer tailL = box(2, 2, 5, 0.5F, -1.0F, 2.5F);
-        private final ModelRenderer tailR = box(2, 2, 5, -2.5F, -1.0F, 2.5F);
-        private final ModelRenderer crest = box(1, 3, 2, -0.5F, -8.0F, -0.5F);
+        private final ModelRenderer body = box(0, 0, 5, 4, 7, -2.5F, -2.0F, -3.5F);
+        private final ModelRenderer head = box(32, 0, 4, 4, 4, -2.0F, -5.0F, -2.0F);
+        private final ModelRenderer beak = box(0, 34, 2, 1, 2, -1.0F, -4.5F, -5.0F);
+        private final ModelRenderer wingL = box(17, 18, 1, 2, 7, 2.5F, -1.5F, -3.0F);
+        private final ModelRenderer wingR = box(0, 18, 1, 2, 7, -3.5F, -1.5F, -3.0F);
+        private final ModelRenderer tailL = box(34, 18, 2, 2, 5, 0.5F, -1.0F, 2.5F);
+        private final ModelRenderer tailR = box(42, 18, 2, 2, 5, -2.5F, -1.0F, 2.5F);
+        private final ModelRenderer crest = box(51, 18, 1, 3, 2, -0.5F, -8.0F, -0.5F);
 
         public MiniPhoenix() { textureWidth = 32; textureHeight = 32; }
 
@@ -67,12 +76,10 @@ public final class PotassiumCustomPetModels {
             wingL.rotateAngleZ = -flap; wingR.rotateAngleZ = flap;
             tailL.rotateAngleY = tail; tailR.rotateAngleY = -tail;
             crest.rotateAngleZ = (float) Math.sin(ageInTicks * 0.30F) * 0.10F;
-            color(1.0F, 0.30F, 0.04F, 1.0F); body.render(scale);
-            color(1.0F, 0.62F, 0.04F, 1.0F); head.render(scale);
-            color(1.0F, 0.85F, 0.12F, 1.0F); beak.render(scale);
-            color(0.95F, 0.18F, 0.02F, 1.0F); wingL.render(scale); wingR.render(scale);
-            color(1.0F, 0.38F, 0.02F, 1.0F); tailL.render(scale); tailR.render(scale);
-            color(1.0F, 0.92F, 0.18F, 1.0F); crest.render(scale);
+            color(1.0F, 1.0F, 1.0F, 1.0F);
+            body.render(scale); head.render(scale); beak.render(scale);
+            wingL.render(scale); wingR.render(scale);
+            tailL.render(scale); tailR.render(scale); crest.render(scale);
         }
     }
 
@@ -149,6 +156,13 @@ public final class PotassiumCustomPetModels {
 
     private static ModelRenderer box(int x, int y, int z, float px, float py, float pz) {
         ModelRenderer renderer = new ModelRenderer(BASE, 0, 0);
+        renderer.addBox(px, py, pz, x, y, z);
+        return renderer;
+    }
+
+    private static ModelRenderer box(int texX, int texY, int x, int y, int z,
+                                     float px, float py, float pz) {
+        ModelRenderer renderer = new ModelRenderer(BASE, texX, texY);
         renderer.addBox(px, py, pz, x, y, z);
         return renderer;
     }
