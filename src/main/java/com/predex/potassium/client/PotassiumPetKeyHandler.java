@@ -1,6 +1,7 @@
 package com.predex.potassium.client;
 
 import net.minecraft.client.Minecraft;
+import com.predex.potassium.optimization.profile.PerformanceProfileManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -22,7 +23,8 @@ public final class PotassiumPetKeyHandler {
 
     @SubscribeEvent
     public void onKeyInput(InputEvent.KeyInputEvent event) {
-        if (registered && PET_MENU_KEY.isPressed()
+        if (registered && PerformanceProfileManager.isQoLAllowed()
+                && PET_MENU_KEY.isPressed()
                 && Minecraft.getMinecraft().theWorld != null) {
             PotassiumPetMenuScreen.open();
         }
