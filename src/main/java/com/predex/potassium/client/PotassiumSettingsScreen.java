@@ -114,6 +114,15 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         addButton(90, center - 155, height - 26, 95, "< Previous");
         addButton(91, center + 60, height - 26, 95, "Next >");
         addButton(99, center - 50, height - 26, 100, "Done");
+        if (page == 2 && !PerformanceProfileManager.isQoLAllowed()) {
+            for (Object obj : buttonList) {
+                if (!(obj instanceof GuiButton)) continue;
+                GuiButton b = (GuiButton) obj;
+                if (b.id >= 60 && b.id <= 72) b.enabled = false;
+            }
+        }
+
+
     }
 
     private void addButton(int id, int x, int y, int width, String text) {
