@@ -222,9 +222,7 @@ Potassium includes a lightweight in-game QoL HUD.
 
 Available information includes:
 
-- FPS
-- 1% low FPS
-- 0.1% low FPS
+- Server ping
 - Frame time
 - Coordinates
 - Facing direction
@@ -233,9 +231,9 @@ Available information includes:
 - Session time
 - Adjustable HUD scale
 
-FPS and low-FPS monitoring remain available independently of the master optimization switch.
+Server ping remains available independently of the master optimization switch.
 
-This means the user can turn Potassium optimization OFF while keeping performance monitoring available for comparison.
+FPS/1%/0.1% low values are still collected internally for benchmarking and telemetry, but they are intentionally not displayed in the in-game QoL HUD.
 
 ---
 
