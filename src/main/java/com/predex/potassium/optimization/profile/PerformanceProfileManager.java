@@ -6,7 +6,7 @@ import com.predex.potassium.config.PotassiumConfig;
  * Part 5 runtime profile controller.
  */
 public final class PerformanceProfileManager {
-    private static PerformanceProfile activeProfile = PerformanceProfile.LOW_END;
+    private static PerformanceProfile activeProfile = PerformanceProfile.PERFORMANCE;
 
     private PerformanceProfileManager() {}
 
@@ -40,5 +40,9 @@ public final class PerformanceProfileManager {
 
     public static String getActiveProfileName() {
         return activeProfile.name();
+    }
+
+    public static boolean isQoLAllowed() {
+        return activeProfile.isQoLAllowed();
     }
 }
