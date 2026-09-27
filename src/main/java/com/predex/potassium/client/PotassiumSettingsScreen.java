@@ -91,6 +91,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(70, left, y + 110, 150, "Mini Pet: " + onOff(PotassiumConfig.miniPetEnabled));
             addButton(71, right, y + 110, 150, "Pet Scale: " + PotassiumConfig.miniPetScale + "%");
             addButton(72, left, y + 132, 310, "Pet: " + petName(PotassiumConfig.miniPetType));
+            addButton(73, left, y + 154, 150, "C Zoom: " + onOff(PotassiumConfig.zoomEnabled));
+            addButton(74, right, y + 154, 150, "Zoom FOV: " + PotassiumConfig.zoomFovPercent + "%");
 
             if (!PerformanceProfileManager.isQoLAllowed()) {
                 for (Object obj : buttonList) {
@@ -108,8 +110,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             }
 
             drawCenteredString(fontRendererObj,
-                    "FPS/Ping HUD stays available without F3. Extra QoL and the pet are profile-gated.",
-                    center, y + 156, 0xAAAAAA);
+                    "FPS/Ping HUD stays available without F3. C Zoom works in every profile.",
+                    center, y + 180, 0xAAAAAA);
         } else {
             addButton(40, left, y, 150, "Video Settings");
             addButton(41, right, y, 150, "Reset Potassium Defaults");
@@ -242,6 +244,12 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 72:
                 if (PerformanceProfileManager.isPetAllowed()) cyclePetType();
                 break;
+            case 73:
+                PotassiumConfig.zoomEnabled = !PotassiumConfig.zoomEnabled;
+                break;
+            case 74:
+                PotassiumConfig.zoomFovPercent = cycle(PotassiumConfig.zoomFovPercent, 10, 60, 5);
+                break;
             case 90: page = Math.max(0, page - 1); break;
             case 91: page = Math.min(3, page + 1); break;
             case 99:
@@ -301,6 +309,9 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.miniPetEnabled = false;
         PotassiumConfig.miniPetScale = 42;
         PotassiumConfig.miniPetType = "predex";
+        PotassiumConfig.zoomEnabled = true;
+        PotassiumConfig.zoomFovPercent = 35;
+        PotassiumConfig.zoomSmoothness = 8;
     }
 
     private void save() {
@@ -401,6 +412,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 70: text = "Mini Pet: client-only cosmetic companion. Available only in Low profile."; break;
             case 71: text = "Pet Scale: changes the local pet's render size."; break;
             case 72: text = "Pet Selector: cycles through Potassium's original cosmetic pet choices."; break;
+            case 73: text = "C Zoom: hold C for a smooth client-only zoom. It works independently of the optimization master switch."; break;
+            case 74: text = "Zoom FOV: lower values create a stronger zoom effect."; break;
             case 90: text = "Go to the previous Potassium settings page."; break;
             case 91: text = "Go to the next Potassium settings page."; break;
             case 99: text = "Close Potassium settings."; break;
