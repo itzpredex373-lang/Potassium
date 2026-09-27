@@ -18,9 +18,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  * never participate in world AI/ticking.
  */
 public final class PotassiumMiniPet {
-    private static final double FOLLOW_DISTANCE = 1.25D;
-    private static final double FOLLOW_SIDE = 0.72D;
-    private static final double FOLLOW_HEIGHT = 0.08D;
+    private static final double FOLLOW_DISTANCE = 0.92D;
+    private static final double FOLLOW_SIDE = 0.88D;
+    private static final double FOLLOW_HEIGHT = 1.12D;
     private static final double SNAP_DISTANCE = 8.0D;
 
     private double petX;
@@ -103,12 +103,12 @@ public final class PotassiumMiniPet {
         double renderY = petY + idleBob - renderManager.viewerPosY;
         double renderZ = petZ - renderManager.viewerPosZ;
 
-        float modelScale = 0.90F * Math.max(0.70F, Math.min(1.25F,
+        float modelScale = 1.28F * Math.max(0.75F, Math.min(1.65F,
                 PotassiumConfig.miniPetScale / 100.0F));
 
         GlStateManager.pushMatrix();
         try {
-            GlStateManager.translate(renderX, renderY + 0.10D, renderZ);
+            GlStateManager.translate(renderX, renderY + 0.02D, renderZ);
             GlStateManager.rotate(-yaw, 0.0F, 1.0F, 0.0F);
             if (!PotassiumCustomPetModels.render(
                     activeType,
