@@ -35,13 +35,13 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
         int top = Math.max(42, height / 2 - 95);
         List<String> ids = PotassiumPetPackManager.getPetIds();
 
-        // 5 x 3 inventory-like pet grid.
+        // 5 x 4 inventory-like pet grid.
         int slotW = 82;
         int slotH = 28;
         int startX = center - (slotW * 5) / 2;
         int gridTop = top + 30;
 
-        int max = Math.min(15, ids.size());
+        int max = Math.min(20, ids.size());
         for (int i = 0; i < max; i++) {
             int row = i / 5;
             int col = i % 5;
@@ -59,7 +59,7 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
                     marker + name));
         }
 
-        int controlsY = gridTop + 3 * slotH + 8;
+        int controlsY = gridTop + 4 * slotH + 8;
         addButton(1, center - 155, controlsY, 150,
                 "Mini Pet: " + onOff(PotassiumConfig.miniPetEnabled));
         addButton(2, center + 5, controlsY, 150,
@@ -164,7 +164,7 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
         int gridTop = top + 30;
 
         // Inventory-style panel.
-        drawRect(center - 210, top, center + 210, gridTop + 3 * 28 + 88, 0xB0101010);
+        drawRect(center - 210, top, center + 210, gridTop + 4 * 28 + 88, 0xB0101010);
         drawRect(center - 202, top + 8, center + 202, top + 28, 0xC01B1B1B);
 
         drawCenteredString(fontRendererObj, "Potassium Pets", center, top + 13, 0xFFFFFF);
@@ -174,15 +174,15 @@ public final class PotassiumPetMenuScreen extends GuiScreen {
 
         drawCenteredString(fontRendererObj,
                 "20 built-in + imported pets • client-only",
-                center, gridTop + 3 * 28 + 56, 0x777777);
+                center, gridTop + 4 * 28 + 56, 0x777777);
 
         if (!PerformanceProfileManager.isPetAllowed()) {
             drawCenteredString(fontRendererObj,
                     "Mini Pet is disabled in this performance profile.",
-                    center, gridTop + 3 * 28 + 68, 0xAAAAAA);
+                    center, gridTop + 4 * 28 + 68, 0xAAAAAA);
         } else if (!status.isEmpty()) {
             drawCenteredString(fontRendererObj, status,
-                    center, gridTop + 3 * 28 + 68, 0xAAAAAA);
+                    center, gridTop + 4 * 28 + 68, 0xAAAAAA);
         }
 
         super.drawScreen(mouseX, mouseY, partialTicks);
