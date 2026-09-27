@@ -60,7 +60,7 @@ public final class AdaptivePerformanceController {
 
             // Require sustained pressure. One isolated bad frame should not
             // immediately reduce rendering work.
-            if (pressureTicks >= 4 && cooldownTicks == 0) {
+            if (pressureTicks >= 8 && cooldownTicks == 0) {
                 int target;
                 if (MemoryOptimizer.getPressurePercent() >= 95) {
                     target = 65;
@@ -71,11 +71,11 @@ public final class AdaptivePerformanceController {
                 }
 
                 if (qualityPercent > target) {
-                    qualityPercent = Math.max(target, qualityPercent - 5);
+                    qualityPercent = Math.max(target, qualityPercent - 3);
                 }
 
                 pressureTicks = 0;
-                cooldownTicks = 8;
+                cooldownTicks = 16;
             }
         } else {
             pressureTicks = 0;
@@ -88,8 +88,8 @@ public final class AdaptivePerformanceController {
 
             // Recover much more slowly than we reduce work. This prevents
             // pressure/recovery oscillation while the scene is borderline.
-            if (recoveryTicks >= 60 && cooldownTicks == 0) {
-                qualityPercent = Math.min(100, qualityPercent + 2);
+            if (recoveryTicks >= 120 && cooldownTicks == 0) {
+                qualityPercent = Math.min(100, qualityPercent + 1);
                 recoveryTicks = 0;
                 cooldownTicks = 8;
             }
