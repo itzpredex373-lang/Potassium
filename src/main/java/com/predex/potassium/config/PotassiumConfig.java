@@ -66,6 +66,11 @@ public final class PotassiumConfig {
     public static int miniPetScale = 42;
     public static String miniPetType = "predex";
 
+    // Client-only zoom, inspired by the familiar C-key zoom workflow.
+    public static boolean zoomEnabled = true;
+    public static int zoomFovPercent = 35;
+    public static int zoomSmoothness = 8;
+
     private PotassiumConfig() {}
 
     public static void init(File file) {
@@ -224,6 +229,13 @@ public final class PotassiumConfig {
                 "Mini pet render scale percentage.");
         miniPetType = configuration.getString("miniPetType", "qol", "predex",
                 "Client-only mini pet type. 45 cosmetic pet choices are available.");
+
+        zoomEnabled = configuration.getBoolean("zoomEnabled", "qol", true,
+                "Enable the client-only C-key zoom.");
+        zoomFovPercent = configuration.getInt("zoomFovPercent", "qol", 35, 10, 60,
+                "Zoom field-of-view percentage while the zoom key is held.");
+        zoomSmoothness = configuration.getInt("zoomSmoothness", "qol", 8, 1, 20,
+                "Smoothness of the client-only zoom transition.");
 
         if (configuration.hasChanged()) configuration.save();
     }
