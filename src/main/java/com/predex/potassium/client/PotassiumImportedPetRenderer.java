@@ -106,6 +106,15 @@ final class PotassiumImportedPetRenderer implements com.predex.potassium.api.pet
         if (textureBytes != null) {
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(textureBytes));
             if (image == null) throw new IllegalArgumentException("invalid PNG texture");
+            if (image.getWidth() < 1 || image.getHeight() < 1
+                    || image.getWidth() > 256 || image.getHeight() > 256) {
+                throw new IllegalArgumentException("PNG texture must be 1-256 pixels");
+            }
+            // Use the decoded image dimensions for ModelRenderer UV mapping.
+            // This prevents stretched/misaligned textures when a pack's JSON
+            // dimensions do not match the actual PNG.
+            renderer.model.textureWidth = image.getWidth();
+            renderer.model.textureHeight = image.getHeight();
             DynamicTexture dynamicTexture = new DynamicTexture(image);
             renderer.texture = Minecraft.getMinecraft().getTextureManager()
                     .getDynamicTextureLocation("potassium_pet_" + textureId, dynamicTexture);
@@ -135,9 +144,16 @@ final class PotassiumImportedPetRenderer implements com.predex.potassium.api.pet
         try {
             GlStateManager.scale(scale, scale, scale);
             if (texture != null) {
+                GlStateManager.enableTexture2D();
+                GlStateManager.enableAlpha();
+                GlStateManager.disableBlend();
                 Minecraft.getMinecraft().getTextureManager().bindTexture(texture);
+                // Never tint an imported PNG; the texture itself owns the color.
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            } else {
+                GlStateManager.disableTexture2D();
+                GlStateManager.color(red, green, blue, 1.0F);
             }
-            GlStateManager.color(red, green, blue, 1.0F);
 
             float bobAmount = (float)Math.sin(ageInTicks * bobSpeed) * bob;
             float tailSway = (float)Math.sin(ageInTicks * swaySpeed) * sway;
@@ -162,6 +178,8 @@ final class PotassiumImportedPetRenderer implements com.predex.potassium.api.pet
         } finally {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.enableTexture2D();
+            GlStateManager.enableBlend();
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.popMatrix();
         }
     }
