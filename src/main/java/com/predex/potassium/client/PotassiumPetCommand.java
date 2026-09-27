@@ -3,7 +3,6 @@ package com.predex.potassium.client;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
-import com.predex.potassium.optimization.profile.PerformanceProfileManager;
 
 public final class PotassiumPetCommand extends CommandBase {
     @Override public String getCommandName() { return "pet"; }
@@ -11,9 +10,9 @@ public final class PotassiumPetCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        if (PerformanceProfileManager.isPetAllowed()) {
-            PotassiumPetMenuScreen.open();
-        }
+        // The menu itself is always accessible. The pet render/toggle remains
+        // profile-aware, so /pet never becomes a dead command on High/Medium.
+        PotassiumPetMenuScreen.open();
     }
 
     @Override public int getRequiredPermissionLevel() { return 0; }
