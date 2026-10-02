@@ -82,6 +82,15 @@ public final class PotassiumChunkBuildController {
             return false;
         }
 
+        // Mobile streaming has its own directional/adaptive admission budget.
+        // Consume it only after distance/CPU checks so skipped work does not
+        // waste the per-tick streaming allowance.
+        if (PotassiumConfig.mobileChunkStreaming
+                && !MobileChunkStreaming.tryAcquireBudget()) {
+            PerformanceTelemetry.skippedChunk();
+            return false;
+        }
+
         if (activeBuilds.containsKey(chunk)) {
             PerformanceTelemetry.skippedChunk();
             return false;
