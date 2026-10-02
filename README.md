@@ -486,3 +486,11 @@ The repository currently contains:
 - Forge core hooks/transformer
 
 The README describes the **current repository implementation**, not the original roadmap state.
+
+
+## Current architecture notes
+
+- FPS and server ping telemetry are fixed client HUD signals; 1%/0.1% low FPS metrics remain benchmark-only.
+- Minecraft 1.8.9's native Video Settings screen is used; the obsolete custom video screen was removed.
+- Mobile chunk streaming now enforces its adaptive per-tick admission budget at the actual chunk-build boundary.
+- Optional Potassium renderer/chunk paths remain fail-open to vanilla when compatibility or runtime health checks reject them.
