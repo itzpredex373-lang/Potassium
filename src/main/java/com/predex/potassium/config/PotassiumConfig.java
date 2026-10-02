@@ -51,8 +51,6 @@ public final class PotassiumConfig {
     // Lightweight quality-of-life features. These remain independent from
     // the master optimization switch and are intentionally low-cost.
     public static boolean qolHud = true;
-    public static boolean qolShowFps = true;
-    public static boolean qolShowLowFps = true;
     public static boolean qolShowFrameTime = false;
     public static boolean qolShowCoordinates = false;
     public static boolean qolShowDirection = false;
@@ -204,10 +202,6 @@ public final class PotassiumConfig {
 
         qolHud = configuration.getBoolean("qolHud", "qol", true,
                 "Show Potassium's lightweight in-game information HUD.");
-        qolShowFps = configuration.getBoolean("qolShowFps", "qol", true,
-                "Show current FPS in the Potassium HUD.");
-        qolShowLowFps = configuration.getBoolean("qolShowLowFps", "qol", false,
-                "Show 1% low and 0.1% low FPS in the Potassium HUD.");
         qolShowFrameTime = configuration.getBoolean("qolShowFrameTime", "qol", false,
                 "Show average frame time in milliseconds in the Potassium HUD.");
         qolShowCoordinates = configuration.getBoolean("qolShowCoordinates", "qol", false,
