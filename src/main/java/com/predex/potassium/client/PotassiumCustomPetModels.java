@@ -171,12 +171,14 @@ public final class PotassiumCustomPetModels {
     private static final class PetModel extends ModelBase {
         private final String type;
         private final ModelRenderer[] p = new ModelRenderer[8];
+        private ModelRenderer[] details = new ModelRenderer[0];
 
         private PetModel(String type) {
             this.type = type;
             textureWidth = 64;
             textureHeight = 64;
             build();
+            details = createDetails();
         }
 
         private void build() {
@@ -320,6 +322,9 @@ public final class PotassiumCustomPetModels {
             for (ModelRenderer part : p) {
                 if (part != null) part.render(scale);
             }
+            for (ModelRenderer detail : details) {
+                if (detail != null) detail.render(scale);
+            }
         }
 
         private void setColor() {
@@ -346,6 +351,59 @@ public final class PotassiumCustomPetModels {
             else if ("moon_cat".equals(type)) { r=0.50F; g=0.42F; b=0.82F; }
             // Textures carry each pet's full palette; keep geometry untinted.
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        }
+
+
+        /**
+         * Signature silhouettes layered over the base body: tall ears for cute
+         * pets, horns/spines for dangerous pets, and armor fins for guardians.
+         * These are real cuboids, not just texture decals.
+         */
+        private ModelRenderer[] createDetails() {
+            if ("bunny".equals(type)) {
+                return new ModelRenderer[]{box(-2,-14,-2,1,7,2), box(1,-14,-2,1,7,2),
+                        box(-1,-5,-3,2,1,1)};
+            }
+            if ("kitsune".equals(type)) {
+                return new ModelRenderer[]{box(-3,-10,-2,2,4,2), box(1,-10,-2,2,4,2),
+                        box(-2,-2,4,2,2,6), box(0,-2,5,2,2,6), box(2,-2,4,2,2,5)};
+            }
+            if ("cyber_cat".equals(type) || "moon_cat".equals(type)) {
+                return new ModelRenderer[]{box(-3,-10,-2,2,4,2), box(1,-10,-2,2,4,2),
+                        box(-1,-3,-4,2,1,1)};
+            }
+            if ("wolf".equals(type)) {
+                return new ModelRenderer[]{box(-2,-9,-2,1,2,2), box(1,-9,-2,1,2,2),
+                        box(-2,-1,4,1,1,2)};
+            }
+            if ("king_dragon".equals(type) || "black_dragon".equals(type)
+                    || "shadow_dragon".equals(type) || "mini_ender_dragon".equals(type)) {
+                return new ModelRenderer[]{box(-2,-10,-4,1,3,2), box(1,-10,-4,1,3,2),
+                        box(-3,-1,2,2,2,3), box(1,-1,2,2,2,3),
+                        box(-1,0,5,2,2,3), box(-2,-3,-5,2,2,2)};
+            }
+            if ("devil".equals(type) || "inferno".equals(type) || "predex".equals(type)) {
+                return new ModelRenderer[]{box(-3,-10,-2,2,4,2), box(1,-10,-2,2,4,2),
+                        box(-3,-3,2,2,2,2), box(1,-3,2,2,2,2),
+                        box(-1,-1,4,2,2,2)};
+            }
+            if ("tiny_reaper".equals(type) || "voidling".equals(type)) {
+                return new ModelRenderer[]{box(-3,-10,-2,2,3,2), box(1,-10,-2,2,3,2),
+                        box(-2,-2,2,1,2,2), box(1,-2,2,1,2,2)};
+            }
+            if ("guardian".equals(type) || "tiny_knight".equals(type) || "mini_golem".equals(type)) {
+                return new ModelRenderer[]{box(-5,-2,-2,2,3,4), box(3,-2,-2,2,3,4),
+                        box(-2,-5,-4,4,2,1)};
+            }
+            if ("mini_phoenix".equals(type) || "crystal_fairy".equals(type)) {
+                return new ModelRenderer[]{box(-4,-2,-2,2,3,1), box(2,-2,-2,2,3,1),
+                        box(-1,-9,-3,2,2,2)};
+            }
+            if ("spirit".equals(type)) {
+                return new ModelRenderer[]{box(-4,-1,-1,1,3,3), box(3,-1,-1,1,3,3),
+                        box(-1,-10,-1,2,2,2)};
+            }
+            return new ModelRenderer[]{box(-3,-9,-2,2,3,2), box(1,-9,-2,2,3,2)};
         }
 
         private ModelRenderer head(float x, float y, float z, int w, int h, int d) {
