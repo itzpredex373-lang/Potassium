@@ -74,6 +74,36 @@ public final class PotassiumCustomPetModels {
         ResourceLocation cached = TEXTURES.get(type);
         if (cached != null) return cached;
 
+        // Prefer the bundled, original 20-pet texture atlas. Crop the selected
+        // 64x64 tile into a DynamicTexture so the existing per-part UV mapping
+        // continues to work without changing model geometry.
+        try {
+            String[] atlasTypes = new String[]{
+                "predex", "king_dragon", "devil", "black_dragon", "shadow_dragon",
+                "kitsune", "cyber_cat", "mini_phoenix", "wolf", "bunny",
+                "spirit", "inferno", "voidling", "guardian", "tiny_knight",
+                "mini_golem", "mini_ender_dragon", "crystal_fairy", "tiny_reaper", "moon_cat"
+            };
+            int index = -1;
+            for (int i = 0; i < atlasTypes.length; i++) {
+                if (atlasTypes[i].equals(type)) { index = i; break; }
+            }
+            if (index >= 0) {
+                ResourceLocation atlasLocation = new ResourceLocation("potassium", "textures/pets/pet_atlas.png");
+                BufferedImage atlas = javax.imageio.ImageIO.read(
+                    Minecraft.getMinecraft().getResourceManager().getResource(atlasLocation).getInputStream());
+                if (atlas != null && atlas.getWidth() >= 320 && atlas.getHeight() >= 256) {
+                    BufferedImage tile = atlas.getSubimage((index % 5) * 64, (index / 5) * 64, 64, 64);
+                    ResourceLocation location = Minecraft.getMinecraft().getTextureManager()
+                        .getDynamicTextureLocation("potassium_pet_" + type, new DynamicTexture(tile));
+                    TEXTURES.put(type, location);
+                    return location;
+                }
+            }
+        } catch (Exception ignored) {
+            // Keep the procedural fallback below for development or damaged resource packs.
+        }
+
         BufferedImage image = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
         int[] palette = paletteFor(type);
         boolean cute = isCute(type);
