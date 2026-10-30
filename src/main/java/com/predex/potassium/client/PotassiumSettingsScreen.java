@@ -82,8 +82,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(51, right, y + 110, 150, "Reset Metrics");
             drawCenteredString(fontRendererObj,
                     "FPS: " + String.format(Locale.ROOT, "%.0f", BenchmarkMonitor.getMeasuredFps())
-                            + " | Avg: " + String.format(Locale.ROOT, "%.2f", FrameTimeMonitor.getAverageMs()) + "ms"
-                            + ,
+                            + " | Avg: " + String.format(Locale.ROOT, "%.2f", FrameTimeMonitor.getAverageMs()) + "ms",
                     center, y + 136, 0xAAAAAA);
             drawCenteredString(fontRendererObj,
                     "Hover any button to see what it changes.",
@@ -156,10 +155,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 67: PotassiumConfig.qolShowBiome = !PotassiumConfig.qolShowBiome; break;
             case 68: PotassiumConfig.qolShowMemory = !PotassiumConfig.qolShowMemory; break;
             case 69: PotassiumConfig.qolShowSessionTime = !PotassiumConfig.qolShowSessionTime; break;
-                PotassiumConfig.zoomEnabled = !PotassiumConfig.zoomEnabled;
-                break;
-                PotassiumConfig.zoomFovPercent = cycle(PotassiumConfig.zoomFovPercent, 10, 60, 5);
-                break;
             case 90: page = Math.max(0, page - 1); break;
             case 91: page = Math.min(3, page + 1); break;
             case 99:
