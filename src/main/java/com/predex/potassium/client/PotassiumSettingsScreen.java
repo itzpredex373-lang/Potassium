@@ -322,7 +322,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 1: text = "Master switch. Turns Potassium optimizations on/off; FPS and monitoring stay available."; break;
             case 3: text = "High: strong optimization for systems that want a large FPS/frame-time reduction."; break;
             case 4: text = "Mid: balanced optimization with useful QoL features. Good general-purpose profile."; break;
-            case 5: text = "Low: lighter optimization, more client QoL, and the mini pet. It intentionally gives up some FPS."; break;
+            case 5: text = "Low: lighter optimization with a few more client QoL options. It intentionally gives up some FPS."; break;
             case 6: text = "Performance: ultra optimization. Prioritizes raw FPS, 1% lows and frame-time stability."; break;
             case 10: text = "Fast Render: uses Potassium fast paths where the hook is safe."; break;
             case 11: text = "Fast Math: caches Potassium hot-path math to reduce CPU work."; break;
