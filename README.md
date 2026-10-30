@@ -16,12 +16,16 @@ The goal is to let players keep OptiFine installed while using Potassium-owned o
 OptiDex detects the OptiFine Forge tweaker at runtime.
 
 When OptiFine is detected:
-- Potassium's risky core-renderer hooks are bypassed so they do not compete with OptiFine's renderer.
-- Potassium's custom VBO ownership and custom draw-submission path are disabled.
-- Vanilla/OptiFine rendering remains the fallback.
-- Potassium's conservative event-driven workload management, performance budgeting, telemetry, and client HUD can continue to operate.
+- The core transformer leaves Minecraft renderer classes untouched. It does not inject Potassium hooks into EffectRenderer, Tessellator, RenderGlobal, VboRenderList, ChunkRenderDispatcher, RenderChunk, RenderManager, or BlockModelRenderer.
+- Only the NetHandlerPlayClient observer remains transformed; it records incoming chunk-packet bursts and does not replace packet decoding or world mutation.
+- Potassium's custom VBO ownership, custom draw submission, custom mesh rebuild, block/entity render culling, and renderer-side chunk scheduling hooks are not run.
+- OptiFine/vanilla retain full ownership of rendering, chunk mesh compilation, and GPU submission.
+- Independent client-side systems can still run where they do not take ownership of OptiFine rendering: CPU/memory workload budgeting, conservative particle-list maintenance, world-transition bookkeeping, packet-burst telemetry, and the lightweight HUD.
+- Experimental distant-entity update throttling remains off by default.
 
-This is a compatibility-first approach, not a promise that every OptiFine option or every third-party mod combination is compatible. Test with the exact OptiFine build and modpack you use. If you encounter rendering glitches, disable Potassium renderer-core hooks first.
+Without OptiFine, Potassium may use its own renderer hooks and custom mesh path when the relevant settings and hardware checks allow them.
+
+This is a compatibility-first separation, not a promise that every OptiFine option or third-party mod combination is compatible. Test the exact OptiFine build and modpack you use.
 
 ## Optimization systems
 
