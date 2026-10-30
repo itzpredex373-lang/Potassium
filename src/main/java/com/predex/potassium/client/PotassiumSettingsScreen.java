@@ -44,39 +44,15 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(4, left + 79, y + 24, 74, "Mid");
             addButton(5, left + 158, y + 24, 74, "Low");
             addButton(6, left + 237, y + 24, 73, "Performance");
-
-            addButton(10, left, y + 52, 150, "Fast Render: " + onOff(PotassiumConfig.fastRender));
-            addButton(11, right, y + 52, 150, "Fast Math: " + onOff(PotassiumConfig.fastMath));
-            addButton(12, left, y + 74, 150, "Smart Animations: " + onOff(PotassiumConfig.smartAnimations));
-            addButton(13, right, y + 74, 150, "Block Face Culling: " + onOff(PotassiumConfig.blockFaceCulling));
-            addButton(14, left, y + 96, 150, "Entity Culling: " + onOff(PotassiumConfig.entityOcclusionCulling));
-            addButton(15, right, y + 96, 150, "Render Regions: " + onOff(PotassiumConfig.renderRegions));
-            addButton(16, left, y + 118, 150, "Chunk Optimization: " + onOff(PotassiumConfig.optimizeChunkUpdates));
-            addButton(17, right, y + 118, 150, "Lazy Chunk Loading: " + onOff(PotassiumConfig.lazyChunkLoading));
-            addButton(18, left, y + 140, 150, "Dynamic Chunk Updates: " + onOff(PotassiumConfig.dynamicChunkUpdates));
             addButton(19, right, y + 140, 150, "Adaptive Performance: " + onOff(PotassiumConfig.adaptivePerformance));
 
             drawCenteredString(fontRendererObj,
-                    "Profile: " + PerformanceProfileManager.getActiveProfileName()
-                            + "  |  High = strong  |  Mid = balanced  |  Low = light + QoL  |  Performance = ultra",
+                    "Profile: " + PerformanceProfileManager.getActiveProfileName() + "  |  Adaptive CPU/memory workload control",
                     center, y + 164, 0xAAAAAA);
         } else if (page == 1) {
-            addButton(20, left, y, 150, "Entity Rendering: " + onOff(PotassiumConfig.optimizeEntityRendering));
-            addButton(21, right, y, 150, "Entity Updates: " + onOff(PotassiumConfig.reduceEntityUpdates));
-            addButton(22, left, y + 22, 150, "Particles: " + onOff(PotassiumConfig.reduceParticles));
             addButton(23, right, y + 22, 150, "Low Memory Mode: " + onOff(PotassiumConfig.lowMemoryMode));
-            addButton(24, left, y + 44, 150, "Entity Distance: " + PotassiumConfig.entityRenderDistance);
-            addButton(25, right, y + 44, 150, "Entity Update Distance: " + PotassiumConfig.entityUpdateDistance);
-            addButton(26, left, y + 66, 150, "Particle Budget: " + PotassiumConfig.maxParticlesPerTick);
-            addButton(27, right, y + 66, 150, "Chunk Radius: " + PotassiumConfig.chunkUpdateRadius);
-            addButton(28, left, y + 88, 150, "Chunk Budget: " + PotassiumConfig.maxChunkUpdatesPerTick);
             addButton(29, right, y + 88, 150, "CPU Budget: " + PotassiumConfig.cpuBudgetMillis + "ms");
             addButton(30, left, y + 110, 150, "Memory Threshold: " + PotassiumConfig.memoryPressureThreshold + "%");
-            addButton(31, right, y + 110, 150, "Renderer Hooks: " + onOff(PotassiumConfig.rendererCoreHooks));
-            addButton(32, left, y + 132, 150, "Empty Draw Skip: " + onOff(PotassiumConfig.skipEmptyDrawCalls));
-            addButton(33, right, y + 132, 150, "Smooth World: " + onOff(PotassiumConfig.smoothWorld));
-            addButton(34, left, y + 154, 150, "Chunk Streaming: " + onOff(PotassiumConfig.mobileChunkStreaming));
-            addButton(35, right, y + 154, 150, "Movement Prediction: " + PotassiumConfig.movementPredictionChunks);
         } else if (page == 2) {
             addButton(60, left, y, 150, "QoL HUD: " + onOff(PotassiumConfig.qolHud));
             addButton(61, right, y, 150, "HUD Scale: " + PotassiumConfig.qolHudScale + "%");
@@ -88,8 +64,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(67, right, y + 66, 150, "Biome: " + onOff(PotassiumConfig.qolShowBiome));
             addButton(68, left, y + 88, 150, "Memory: " + onOff(PotassiumConfig.qolShowMemory));
             addButton(69, right, y + 88, 150, "Session Timer: " + onOff(PotassiumConfig.qolShowSessionTime));
-            addButton(73, left, y + 110, 150, "C Zoom: " + onOff(PotassiumConfig.zoomEnabled));
-            addButton(74, right, y + 110, 150, "Zoom FOV: " + PotassiumConfig.zoomFovPercent + "%");
 
             if (!PerformanceProfileManager.isQoLAllowed()) {
                 for (Object obj : buttonList) {
@@ -99,25 +73,17 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                 }
             }
             drawCenteredString(fontRendererObj,
-                    "FPS/Ping HUD stays available without F3. C Zoom works in every profile.",
+                    "FPS/Ping HUD stays available without F3. OptiFine owns zoom and visual controls.",
                     center, y + 180, 0xAAAAAA);
         } else {
             addButton(40, left, y, 150, "Video Settings");
             addButton(41, right, y, 150, "Reset Potassium Defaults");
-            addButton(42, left, y + 22, 150, "FPS Smoothing: " + onOff(PotassiumConfig.smoothFps));
-            addButton(43, right, y + 22, 150, "Renderer Hooks: " + onOff(PotassiumConfig.rendererCoreHooks));
             addButton(44, left, y + 44, 150, "Master Optimization: " + onOff(PotassiumConfig.enabled));
-            addButton(45, right, y + 44, 150, "Profile: " + PerformanceProfileManager.getActiveProfileName());
-            addButton(46, left, y + 66, 150, "Render Sections: " + onOff(PotassiumConfig.renderSections));
-            addButton(47, right, y + 66, 150, "Mesh Uploads: " + PotassiumConfig.maxMeshUploadsPerFrame);
-            addButton(48, left, y + 88, 150, "Mesh Prep: " + onOff(PotassiumConfig.customMeshPreparation));
-            addButton(49, right, y + 88, 150, "Occlusion Budget: " + PotassiumConfig.maxEntityOcclusionTestsPerFrame);
-            addButton(50, left, y + 110, 150, "Mesh Pipeline: " + onOff(PotassiumConfig.meshUploadPipeline));
             addButton(51, right, y + 110, 150, "Reset Metrics");
             drawCenteredString(fontRendererObj,
                     "FPS: " + String.format(Locale.ROOT, "%.0f", BenchmarkMonitor.getMeasuredFps())
                             + " | Avg: " + String.format(Locale.ROOT, "%.2f", FrameTimeMonitor.getAverageMs()) + "ms"
-                            + " | 1% Low: " + String.format(Locale.ROOT, "%.0f", FrameTimeMonitor.getOnePercentLowFps()),
+                            + ,
                     center, y + 136, 0xAAAAAA);
             drawCenteredString(fontRendererObj,
                     "Hover any button to see what it changes.",
@@ -164,47 +130,17 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 6:
                 selectProfile("PERFORMANCE");
                 break;
-            case 10: PotassiumConfig.fastRender = !PotassiumConfig.fastRender; break;
-            case 11: PotassiumConfig.fastMath = !PotassiumConfig.fastMath; break;
-            case 12: PotassiumConfig.smartAnimations = !PotassiumConfig.smartAnimations; break;
-            case 13: PotassiumConfig.blockFaceCulling = !PotassiumConfig.blockFaceCulling; break;
-            case 14: PotassiumConfig.entityOcclusionCulling = !PotassiumConfig.entityOcclusionCulling; break;
-            case 15: PotassiumConfig.renderRegions = !PotassiumConfig.renderRegions; break;
-            case 16: PotassiumConfig.optimizeChunkUpdates = !PotassiumConfig.optimizeChunkUpdates; break;
-            case 17: PotassiumConfig.lazyChunkLoading = !PotassiumConfig.lazyChunkLoading; break;
-            case 18: PotassiumConfig.dynamicChunkUpdates = !PotassiumConfig.dynamicChunkUpdates; break;
             case 19: PotassiumConfig.adaptivePerformance = !PotassiumConfig.adaptivePerformance; break;
-            case 20: PotassiumConfig.optimizeEntityRendering = !PotassiumConfig.optimizeEntityRendering; break;
-            case 21: PotassiumConfig.reduceEntityUpdates = !PotassiumConfig.reduceEntityUpdates; break;
-            case 22: PotassiumConfig.reduceParticles = !PotassiumConfig.reduceParticles; break;
             case 23: PotassiumConfig.lowMemoryMode = !PotassiumConfig.lowMemoryMode; break;
-            case 24: PotassiumConfig.entityRenderDistance = cycle(PotassiumConfig.entityRenderDistance, 32, 256, 32); break;
-            case 25: PotassiumConfig.entityUpdateDistance = cycle(PotassiumConfig.entityUpdateDistance, 16, 128, 16); break;
-            case 26: PotassiumConfig.maxParticlesPerTick = cycle(PotassiumConfig.maxParticlesPerTick, 16, 512, 16); break;
-            case 27: PotassiumConfig.chunkUpdateRadius = cycle(PotassiumConfig.chunkUpdateRadius, 2, 32, 2); break;
-            case 28: PotassiumConfig.maxChunkUpdatesPerTick = cycle(PotassiumConfig.maxChunkUpdatesPerTick, 1, 16, 1); break;
             case 29: PotassiumConfig.cpuBudgetMillis = cycle(PotassiumConfig.cpuBudgetMillis, 20, 50, 5); break;
             case 30: PotassiumConfig.memoryPressureThreshold = cycle(PotassiumConfig.memoryPressureThreshold, 60, 95, 5); break;
-            case 31: PotassiumConfig.rendererCoreHooks = !PotassiumConfig.rendererCoreHooks; break;
-            case 32: PotassiumConfig.skipEmptyDrawCalls = !PotassiumConfig.skipEmptyDrawCalls; break;
-            case 33: PotassiumConfig.smoothWorld = !PotassiumConfig.smoothWorld; break;
-            case 34: PotassiumConfig.mobileChunkStreaming = !PotassiumConfig.mobileChunkStreaming; break;
-            case 35: PotassiumConfig.movementPredictionChunks = cycle(PotassiumConfig.movementPredictionChunks, 1, 3, 1); break;
             case 40:
                 Minecraft.getMinecraft().displayGuiScreen(new PotassiumVideoSettingsScreen(this));
                 return;
             case 41:
                 resetDefaults();
                 break;
-            case 42: PotassiumConfig.smoothFps = !PotassiumConfig.smoothFps; break;
-            case 43: PotassiumConfig.rendererCoreHooks = !PotassiumConfig.rendererCoreHooks; break;
             case 44: PotassiumConfig.enabled = !PotassiumConfig.enabled; break;
-            case 45: cycleProfile(); break;
-            case 46: PotassiumConfig.renderSections = !PotassiumConfig.renderSections; break;
-            case 47: PotassiumConfig.maxMeshUploadsPerFrame = cycle(PotassiumConfig.maxMeshUploadsPerFrame, 1, 8, 1); break;
-            case 48: PotassiumConfig.customMeshPreparation = !PotassiumConfig.customMeshPreparation; break;
-            case 49: PotassiumConfig.maxEntityOcclusionTestsPerFrame = cycle(PotassiumConfig.maxEntityOcclusionTestsPerFrame, 8, 256, 8); break;
-            case 50: PotassiumConfig.meshUploadPipeline = !PotassiumConfig.meshUploadPipeline; break;
             case 51:
                 FrameTimeMonitor.reset();
                 PerformanceTelemetry.reset();
@@ -220,10 +156,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 67: PotassiumConfig.qolShowBiome = !PotassiumConfig.qolShowBiome; break;
             case 68: PotassiumConfig.qolShowMemory = !PotassiumConfig.qolShowMemory; break;
             case 69: PotassiumConfig.qolShowSessionTime = !PotassiumConfig.qolShowSessionTime; break;
-            case 73:
                 PotassiumConfig.zoomEnabled = !PotassiumConfig.zoomEnabled;
                 break;
-            case 74:
                 PotassiumConfig.zoomFovPercent = cycle(PotassiumConfig.zoomFovPercent, 10, 60, 5);
                 break;
             case 90: page = Math.max(0, page - 1); break;
@@ -259,9 +193,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.adaptivePerformance = true;
         PotassiumConfig.performanceProfile = "MEDIUM";
         PerformanceProfileManager.applyConfiguredProfile();
-
-        PotassiumConfig.smoothFps = true;
-        PotassiumConfig.smoothWorld = true;
         PotassiumConfig.dynamicChunkUpdates = false;
         PotassiumConfig.reduceEntityUpdates = false;
         PotassiumConfig.qolHud = true;
@@ -272,9 +203,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.qolShowMemory = false;
         PotassiumConfig.qolShowSessionTime = false;
         PotassiumConfig.qolHudScale = 100;
-        PotassiumConfig.zoomEnabled = true;
-        PotassiumConfig.zoomFovPercent = 35;
-        PotassiumConfig.zoomSmoothness = 8;
     }
 
     private void save() {
@@ -324,43 +252,13 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 4: text = "Mid: balanced optimization with useful QoL features. Good general-purpose profile."; break;
             case 5: text = "Low: lighter optimization with a few more client QoL options. It intentionally gives up some FPS."; break;
             case 6: text = "Performance: ultra optimization. Prioritizes raw FPS, 1% lows and frame-time stability."; break;
-            case 10: text = "Fast Render: uses Potassium fast paths where the hook is safe."; break;
-            case 11: text = "Fast Math: caches Potassium hot-path math to reduce CPU work."; break;
-            case 12: text = "Smart Animations: skips optional animation work when it is not useful."; break;
-            case 13: text = "Block Face Culling: avoids drawing block faces that cannot be seen."; break;
-            case 14: text = "Entity Culling: avoids rendering entities hidden behind blocks."; break;
-            case 15: text = "Render Regions: groups render work so the renderer submits less fragmented work."; break;
-            case 16: text = "Chunk Optimization: schedules chunk rebuild work instead of processing everything at once."; break;
-            case 17: text = "Lazy Chunk Loading: spreads optional chunk preparation across ticks to reduce spikes."; break;
-            case 18: text = "Dynamic Chunk Updates: allows extra chunk work when the player is stationary."; break;
             case 19: text = "Adaptive Performance: reacts to frame time, CPU and memory pressure automatically."; break;
-            case 20: text = "Entity Rendering: reduces expensive entity rendering work at distance."; break;
-            case 21: text = "Entity Updates: throttles selected living-entity updates. Experimental."; break;
-            case 22: text = "Particles: reduces optional particle processing when enabled."; break;
             case 23: text = "Low Memory Mode: uses more conservative budgets when memory pressure rises."; break;
-            case 24: text = "Entity Distance: maximum distance used by Potassium's entity render optimization."; break;
-            case 25: text = "Entity Update Distance: distance used by optional entity-update throttling."; break;
-            case 26: text = "Particle Budget: maximum optional particle processing per client tick."; break;
-            case 27: text = "Chunk Radius: radius considered for optional chunk work."; break;
-            case 28: text = "Chunk Budget: maximum optional chunk work slots per client tick."; break;
             case 29: text = "CPU Budget: target time budget for optional maintenance work."; break;
             case 30: text = "Memory Threshold: heap usage level where Potassium becomes more conservative."; break;
-            case 31: text = "Renderer Hooks: enables Potassium's Forge 1.8.9 renderer bytecode hooks."; break;
-            case 32: text = "Empty Draw Skip: avoids submitting empty Tessellator work."; break;
-            case 33: text = "Smooth World: spreads optional world work to reduce large CPU bursts."; break;
-            case 34: text = "Chunk Streaming: uses directional, bounded chunk scheduling for smoother movement."; break;
-            case 35: text = "Movement Prediction: looks ahead a few chunks based on player motion."; break;
             case 40: text = "Open Minecraft-style Video Settings: graphics, render distance, clouds, particles, VSync, VBO and more."; break;
             case 41: text = "Restore Potassium's balanced default profile and QoL defaults."; break;
-            case 42: text = "FPS Smoothing: adaptive workload control intended to reduce sudden frame-time changes."; break;
-            case 43: text = "Renderer Hooks: enable/disable Potassium's core renderer hooks."; break;
             case 44: text = "Master Optimization: same global optimization switch as page 1."; break;
-            case 45: text = "Cycle through High, Mid, Low and Performance profiles."; break;
-            case 46: text = "Render Sections: tracks render sections for visibility and rebuild scheduling."; break;
-            case 47: text = "Mesh Uploads: limits optional mesh uploads per render frame."; break;
-            case 48: text = "Mesh Prep: enables bounded CPU-side mesh preparation."; break;
-            case 49: text = "Occlusion Budget: limits entity occlusion tests per render frame."; break;
-            case 50: text = "Mesh Pipeline: uses Potassium's bounded mesh upload admission queue."; break;
             case 51: text = "Reset Metrics: clears FPS, frame-time and telemetry samples."; break;
             case 60: text = "QoL HUD: controls the lightweight information overlay."; break;
             case 61: text = "HUD Scale: changes the size of the Potassium overlay."; break;
@@ -372,8 +270,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 67: text = "Biome: shows the current biome."; break;
             case 68: text = "Memory: shows current Java heap usage."; break;
             case 69: text = "Session Timer: shows elapsed client session time."; break;
-            case 73: text = "C Zoom: hold C for a smooth client-only zoom. It works independently of the optimization master switch."; break;
-            case 74: text = "Zoom FOV: lower values create a stronger zoom effect."; break;
             case 90: text = "Go to the previous Potassium settings page."; break;
             case 91: text = "Go to the next Potassium settings page."; break;
             case 99: text = "Close Potassium settings."; break;
