@@ -2,6 +2,7 @@ package com.predex.potassium.optimization.particles;
 
 import com.predex.potassium.config.PotassiumConfig;
 import com.predex.potassium.optimization.PerformanceManager;
+import com.predex.potassium.optimization.compat.CompatibilityManager;
 import com.predex.potassium.optimization.system.CpuOptimizer;
 import com.predex.potassium.optimization.adaptive.DynamicQualityController;
 import com.predex.potassium.optimization.system.MemoryOptimizer;
@@ -23,13 +24,18 @@ public final class ParticleOptimizer {
         tick++;
         particlesThisTick = 0;
 
-        if (isEnabled() && CpuOptimizer.shouldRunOptionalWork()) {
+        // OptiFine owns particle rendering and its particle controls. Do not
+        // trim or budget its particle lists from a companion mod.
+        if (isEnabled() && !CompatibilityManager.isOptiFinePresent()
+                && CpuOptimizer.shouldRunOptionalWork()) {
             trimParticleLayers(getEffectiveBudget());
         }
     }
 
     public static boolean isEnabled() {
-        return PerformanceManager.isOptimizationEnabled() && PotassiumConfig.reduceParticles;
+        return PerformanceManager.isOptimizationEnabled()
+                && PotassiumConfig.reduceParticles
+                && !CompatibilityManager.isOptiFinePresent();
     }
 
     public static boolean tryAcquire() {
