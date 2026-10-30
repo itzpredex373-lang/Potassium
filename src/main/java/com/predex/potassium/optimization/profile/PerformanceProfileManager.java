@@ -75,8 +75,6 @@ public final class PerformanceProfileManager {
     public static PerformanceProfile getActiveProfile() { return activeProfile; }
     public static String getActiveProfileName() { return activeProfile.name(); }
     public static boolean isQoLAllowed() { return activeProfile.isQoLAllowed(); }
-    public static boolean isPetAllowed() { return activeProfile == PerformanceProfile.LOW; }
-
     /**
      * Returns whether the active profile intentionally restricts extra QoL.
      * HIGH and PERFORMANCE keep the performance-first behavior.
@@ -92,8 +90,5 @@ public final class PerformanceProfileManager {
      */
     public static void reloadConfiguredProfile() {
         applyConfiguredProfile();
-        if (!isPetAllowed()) {
-            PotassiumConfig.miniPetEnabled = false;
-        }
     }
 }
