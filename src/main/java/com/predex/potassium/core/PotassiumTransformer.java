@@ -15,6 +15,15 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
         if (basicClass == null || transformedName == null) return basicClass;
 
+        // OptiFine owns the 1.8.9 renderer when installed. Do not inject
+        // Potassium renderer/particle/chunk bytecode hooks into the same
+        // classes. Keep only the NetHandler observer, which records incoming
+        // chunk packet bursts without changing packet decoding or world state.
+        if (isOptiFinePresent()
+                && !"net.minecraft.client.network.NetHandlerPlayClient".equals(transformedName)) {
+            return basicClass;
+        }
+
         try {
             if ("net.minecraft.client.particle.EffectRenderer".equals(transformedName)) {
                 return transformEffectRenderer(basicClass);
@@ -48,6 +57,16 @@ public final class PotassiumTransformer implements net.minecraft.launchwrapper.I
         }
 
         return basicClass;
+    }
+
+    private boolean isOptiFinePresent() {
+        try {
+            ClassLoader loader = getClass().getClassLoader();
+            Class.forName("optifine.OptiFineForgeTweaker", false, loader);
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
     }
 
     private byte[] transformEffectRenderer(byte[] bytes) {
