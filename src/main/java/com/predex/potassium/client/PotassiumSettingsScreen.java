@@ -88,11 +88,8 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             addButton(67, right, y + 66, 150, "Biome: " + onOff(PotassiumConfig.qolShowBiome));
             addButton(68, left, y + 88, 150, "Memory: " + onOff(PotassiumConfig.qolShowMemory));
             addButton(69, right, y + 88, 150, "Session Timer: " + onOff(PotassiumConfig.qolShowSessionTime));
-            addButton(70, left, y + 110, 150, "Mini Pet: " + onOff(PotassiumConfig.miniPetEnabled));
-            addButton(71, right, y + 110, 150, "Pet Scale: " + PotassiumConfig.miniPetScale + "%");
-            addButton(72, left, y + 132, 310, "Pet: " + petName(PotassiumConfig.miniPetType));
-            addButton(73, left, y + 154, 150, "C Zoom: " + onOff(PotassiumConfig.zoomEnabled));
-            addButton(74, right, y + 154, 150, "Zoom FOV: " + PotassiumConfig.zoomFovPercent + "%");
+            addButton(73, left, y + 110, 150, "C Zoom: " + onOff(PotassiumConfig.zoomEnabled));
+            addButton(74, right, y + 110, 150, "Zoom FOV: " + PotassiumConfig.zoomFovPercent + "%");
 
             if (!PerformanceProfileManager.isQoLAllowed()) {
                 for (Object obj : buttonList) {
@@ -101,14 +98,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
                     if (b.id >= 60 && b.id <= 72 && b.id != 62 && b.id != 63) b.enabled = false;
                 }
             }
-            if (!PerformanceProfileManager.isPetAllowed()) {
-                for (Object obj : buttonList) {
-                    if (!(obj instanceof GuiButton)) continue;
-                    GuiButton b = (GuiButton) obj;
-                    if (b.id >= 70 && b.id <= 72) b.enabled = false;
-                }
-            }
-
             drawCenteredString(fontRendererObj,
                     "FPS/Ping HUD stays available without F3. C Zoom works in every profile.",
                     center, y + 180, 0xAAAAAA);
@@ -150,10 +139,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
 
     private String onOff(boolean value) {
         return value ? "ON" : "OFF";
-    }
-
-    private String petName(String type) {
-        return PotassiumPetTypes.displayName(type);
     }
 
     private int cycle(int value, int min, int max, int step) {
@@ -235,15 +220,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 67: PotassiumConfig.qolShowBiome = !PotassiumConfig.qolShowBiome; break;
             case 68: PotassiumConfig.qolShowMemory = !PotassiumConfig.qolShowMemory; break;
             case 69: PotassiumConfig.qolShowSessionTime = !PotassiumConfig.qolShowSessionTime; break;
-            case 70:
-                if (PerformanceProfileManager.isPetAllowed()) PotassiumConfig.miniPetEnabled = !PotassiumConfig.miniPetEnabled;
-                break;
-            case 71:
-                if (PerformanceProfileManager.isPetAllowed()) PotassiumConfig.miniPetScale = cycle(PotassiumConfig.miniPetScale, 25, 75, 8);
-                break;
-            case 72:
-                if (PerformanceProfileManager.isPetAllowed()) cyclePetType();
-                break;
             case 73:
                 PotassiumConfig.zoomEnabled = !PotassiumConfig.zoomEnabled;
                 break;
@@ -267,9 +243,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.performanceProfile = profile;
         PerformanceProfileManager.applyConfiguredProfile();
 
-        if (!PerformanceProfileManager.isPetAllowed()) {
-            PotassiumConfig.miniPetEnabled = false;
-        }
         save();
     }
 
@@ -279,11 +252,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         else if ("MEDIUM".equals(current)) selectProfile("LOW");
         else if ("LOW".equals(current)) selectProfile("PERFORMANCE");
         else selectProfile("HIGH");
-    }
-
-    private void cyclePetType() {
-        int index = PotassiumPetTypes.indexOf(PotassiumConfig.miniPetType);
-        PotassiumConfig.miniPetType = PotassiumPetTypes.get((index + 1) % PotassiumPetTypes.TYPES.length);
     }
 
     private void resetDefaults() {
@@ -304,9 +272,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
         PotassiumConfig.qolShowMemory = false;
         PotassiumConfig.qolShowSessionTime = false;
         PotassiumConfig.qolHudScale = 100;
-        PotassiumConfig.miniPetEnabled = false;
-        PotassiumConfig.miniPetScale = 42;
-        PotassiumConfig.miniPetType = "predex";
         PotassiumConfig.zoomEnabled = true;
         PotassiumConfig.zoomFovPercent = 35;
         PotassiumConfig.zoomSmoothness = 8;
@@ -322,7 +287,7 @@ public final class PotassiumSettingsScreen extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
 
-        drawCenteredString(fontRendererObj, "Potassium Settings",
+        drawCenteredString(fontRendererObj, "OptiDex Settings",
                 width / 2, 12, 0xFFFFFF);
         drawCenteredString(fontRendererObj,
                 "Page " + (page + 1) + "/4",
@@ -407,9 +372,6 @@ public final class PotassiumSettingsScreen extends GuiScreen {
             case 67: text = "Biome: shows the current biome."; break;
             case 68: text = "Memory: shows current Java heap usage."; break;
             case 69: text = "Session Timer: shows elapsed client session time."; break;
-            case 70: text = "Mini Pet: client-only cosmetic companion. Available only in Low profile."; break;
-            case 71: text = "Pet Scale: changes the local pet's render size."; break;
-            case 72: text = "Pet Selector: cycles through Potassium's original cosmetic pet choices."; break;
             case 73: text = "C Zoom: hold C for a smooth client-only zoom. It works independently of the optimization master switch."; break;
             case 74: text = "Zoom FOV: lower values create a stronger zoom effect."; break;
             case 90: text = "Go to the previous Potassium settings page."; break;
