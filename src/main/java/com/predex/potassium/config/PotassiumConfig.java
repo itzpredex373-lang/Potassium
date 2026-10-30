@@ -59,11 +59,6 @@ public final class PotassiumConfig {
     public static boolean qolShowSessionTime = false;
     public static int qolHudScale = 100;
 
-    // Client-only zoom, inspired by the familiar C-key zoom workflow.
-    public static boolean zoomEnabled = true;
-    public static int zoomFovPercent = 35;
-    public static int zoomSmoothness = 8;
-
     private PotassiumConfig() {}
 
     public static void init(File file) {
@@ -211,13 +206,6 @@ public final class PotassiumConfig {
                 "Show elapsed client session time in the Potassium HUD.");
         qolHudScale = configuration.getInt("qolHudScale", "qol", 100, 75, 150,
                 "Scale percentage for the Potassium HUD.");
-
-        zoomEnabled = configuration.getBoolean("zoomEnabled", "qol", true,
-                "Enable the client-only C-key zoom.");
-        zoomFovPercent = configuration.getInt("zoomFovPercent", "qol", 35, 10, 60,
-                "Zoom field-of-view percentage while the zoom key is held.");
-        zoomSmoothness = configuration.getInt("zoomSmoothness", "qol", 8, 1, 20,
-                "Smoothness of the client-only zoom transition.");
 
         if (configuration.hasChanged()) configuration.save();
     }
