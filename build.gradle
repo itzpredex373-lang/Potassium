@@ -32,12 +32,3 @@ processResources {
         exclude "mcmod.info"
     }
 }
-
-jar {
-    manifest {
-        attributes(
-                "FMLCorePlugin": "com.predex.potassium.core.PotassiumCorePlugin",
-                "FMLCorePluginContainsFMLMod": "true"
-        )
-    }
-}

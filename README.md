@@ -1,8 +1,6 @@
 # Potassium: OptiDex
 
-**OptiDex** is the OptiFine-compatible performance edition of the Potassium project for Minecraft Java Edition 1.8.9 Forge.
-
-The goal is to let players keep OptiFine installed while using Potassium-owned optimization systems to reduce avoidable CPU/render workload and improve frame-time consistency. Actual FPS gains depend on hardware, world, server, OptiFine settings, and other mods; no fixed FPS increase is guaranteed.
+A minimal Minecraft Java Edition 1.8.9 Forge mod foundation.
 
 ## Target platform
 
@@ -11,48 +9,25 @@ The goal is to let players keep OptiFine installed while using Potassium-owned o
 - Java 8
 - ForgeGradle 2.1 / Gradle wrapper 2.14.1
 
-## OptiFine compatibility
+## Cleanup status
 
-OptiDex detects the OptiFine Forge tweaker at runtime.
+The legacy experimental optimization implementation has been removed rather than presented as working FPS improvements.
 
-When OptiFine is detected:
-- The core transformer leaves Minecraft renderer classes untouched. It does not inject Potassium hooks into EffectRenderer, Tessellator, RenderGlobal, VboRenderList, ChunkRenderDispatcher, RenderChunk, RenderManager, or BlockModelRenderer.
-- Only the NetHandlerPlayClient observer remains transformed; it records incoming chunk-packet bursts and does not replace packet decoding or world mutation.
-- Potassium's custom VBO ownership, custom draw submission, custom mesh rebuild, block/entity render culling, and renderer-side chunk scheduling hooks are not run.
-- OptiFine/vanilla retain full ownership of rendering, chunk mesh compilation, and GPU submission.
-- Independent client-side systems can still run where they do not take ownership of OptiFine rendering: CPU/JVM-heap pressure measurement, adaptive budgeting for OptiDex-owned optional work, world-transition bookkeeping, and chunk-packet burst telemetry.
-- Particle caps/list trimming are disabled while OptiFine is present; OptiFine keeps ownership of particle behavior and settings.
-- OptiDex does not try to replace OptiFine's Fast Render, Fast Math, Smooth FPS, Smooth World, Render Regions, Smart Animations, chunk rendering, entity/block culling, or zoom controls.
-- Experimental distant-entity update throttling remains off by default.
+Removed from the source tree:
+- Potassium-owned renderer and render hooks
+- Custom chunk mesh engine, mesh cache, GPU region/VBO and upload pipeline
+- Chunk scheduling, async preparation, streaming and rebuild queues
+- Entity rendering/update and occlusion optimizers
+- Particle culling, scheduling, caps and pools
+- CPU/memory pressure controllers and adaptive quality systems
+- Benchmark/frame-time telemetry and monitoring
+- Multiplayer chunk-packet telemetry
+- World-transition and world-update schedulers
+- Old performance profiles and obsolete configuration
+- Coremod transformer and bytecode hooks
+- Custom settings, HUD and duplicate video controls
 
-Without OptiFine, the legacy standalone renderer hooks may still be available when their settings and hardware checks allow them. The supported companion configuration is OptiFine-first.
-
-This is a compatibility-first separation, not a promise that every OptiFine option or third-party mod combination is compatible. Test the exact OptiFine build and modpack you use.
-
-## Optimization systems
-
-The codebase includes Potassium-owned systems for:
-- CPU tick-time and JVM-heap pressure measurement (without forced garbage collection)
-- Adaptive budgets for OptiDex-owned optional maintenance work
-- Multiplayer chunk-packet burst telemetry (client-side only; does not change server TPS)
-- World-transition bookkeeping and conservative warm-up budgeting
-
-Some custom GPU/mesh paths are intentionally disabled while OptiFine is present. Compatibility takes priority over forcing two renderers to own the same GPU resources.
-
-## Performance profiles
-
-| Profile | Purpose |
-|---|---|
-| HIGH | Strong optimization |
-| MEDIUM | Balanced optimization |
-| LOW | Lighter optimization with more QoL |
-| PERFORMANCE | Aggressive performance-first budgets |
-
-Profiles adjust workload budgets and feature switches. Results vary by system; compare the same world, render distance, and settings when benchmarking.
-
-## User interface
-
-OptiDex does not add a custom settings screen, HUD, FPS counter, ping counter, or duplicate video-settings page. Configure graphics through Minecraft/OptiFine's own settings. Internal performance telemetry may still be used by optimization algorithms and is not displayed as an overlay.
+OptiFine/vanilla are left in control of rendering, chunk compilation, GPU submission, particles and visual settings. This cleaned build currently contains only the Forge mod entry point; **it does not currently claim to provide FPS optimizations**. Independent optimization features may be reintroduced only when they are demonstrably useful, do not duplicate OptiFine, and can be validated on Minecraft 1.8.9.
 
 ## Build
 
@@ -73,8 +48,4 @@ chmod +x gradlew
 
 The JAR is generated in `build/libs/`.
 
-## Project identity and releases
-
-The mod display name is **Potassium: OptiDex** and the mod version label is **OptiDex**. The internal Forge mod ID and Java package remain `potassium` to preserve existing configuration and integration compatibility.
-
-**No public release, GitHub Release, tag, or downloadable version should be published without Predex's explicit permission.** Repository development commits and CI builds are not public releases.
+No public release, tag, or downloadable version is created by this cleanup.
