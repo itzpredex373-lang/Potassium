@@ -53,13 +53,13 @@ Profiles adjust workload budgets and feature switches. Results vary by system; c
 
 ## Settings and HUD
 
-OptiDex retains the Potassium settings interface, including:
+OptiDex retains a compact companion settings interface, including:
 - Master optimization switch
-- Performance profiles and rendering/chunk controls
-- Video Settings shortcut
+- Performance profiles and CPU/JVM-heap budget controls
+- Native Minecraft Video Settings shortcut
 - FPS and server-ping HUD
 - Optional frame-time, coordinates, direction, biome, memory, and session-time display
-- OptiFine retains zoom and other visual/QoL controls; OptiDex avoids duplicating them.
+- OptiFine retains zoom and other visual/QoL controls; OptiDex does not register a duplicate zoom handler.
 
 FPS/frame-time telemetry is used for measurement. The HUD does not promise a specific FPS improvement.
 
