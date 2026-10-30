@@ -2,7 +2,7 @@
   {
     "modid": "potassium",
     "name": "Potassium: OptiDex",
-    "description": "OptiDex performance edition of Potassium for Minecraft 1.8.9 Forge, designed to complement OptiFine with conservative compatibility fallbacks.",
+    "description": "Lightweight Minecraft 1.8.9 Forge companion foundation with read-only client diagnostics. No renderer hooks or FPS gains are currently claimed.",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "https://github.com/itzpredex373-lang/Potassium",

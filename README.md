@@ -1,6 +1,6 @@
 # Potassium: OptiDex
 
-A minimal Minecraft Java Edition 1.8.9 Forge mod foundation.
+A lightweight companion foundation for Minecraft Java Edition 1.8.9 Forge, designed to coexist with OptiFine.
 
 ## Target platform
 
@@ -9,25 +9,33 @@ A minimal Minecraft Java Edition 1.8.9 Forge mod foundation.
 - Java 8
 - ForgeGradle 2.1 / Gradle wrapper 2.14.1
 
-## Cleanup status
+## Current implementation
 
-The legacy experimental optimization implementation has been removed rather than presented as working FPS improvements.
+### Read-only client diagnostics
 
-Removed from the source tree:
-- Potassium-owned renderer and render hooks
-- Custom chunk mesh engine, mesh cache, GPU region/VBO and upload pipeline
-- Chunk scheduling, async preparation, streaming and rebuild queues
-- Entity rendering/update and occlusion optimizers
-- Particle culling, scheduling, caps and pools
-- CPU/memory pressure controllers and adaptive quality systems
-- Benchmark/frame-time telemetry and monitoring
-- Multiplayer chunk-packet telemetry
-- World-transition and world-update schedulers
-- Old performance profiles and obsolete configuration
-- Coremod transformer and bytecode hooks
-- Custom settings, HUD and duplicate video controls
+Run `/potassium` or `/potassium status` in-game to display:
+- Minecraft version
+- Java runtime version
+- JVM memory used, allocated, and maximum
+- Whether the OptiFine Config class is detectable
+- Current optimization-module status
 
-OptiFine/vanilla are left in control of rendering, chunk compilation, GPU submission, particles and visual settings. This cleaned build currently contains only the Forge mod entry point; **it does not currently claim to provide FPS optimizations**. Independent optimization features may be reintroduced only when they are demonstrably useful, do not duplicate OptiFine, and can be validated on Minecraft 1.8.9.
+The command does not change settings, force garbage collection, add a HUD, or modify rendering.
+
+## Compatibility boundaries
+
+OptiFine/vanilla retain ownership of rendering, chunk compilation, GPU submission, culling, particles, zoom, and visual settings. Potassium currently installs no renderer or chunk hooks and does not claim measurable FPS improvements.
+
+## Planned independent features
+
+Features will be added only when they are useful, measurable, safe for Minecraft 1.8.9, and do not duplicate OptiFine:
+- Crash-safe environment diagnostic reports
+- A bounded API for Potassium-owned background work
+- Conservative world-transition state tracking
+- Resource-reload work deduplication where profiling proves a benefit
+- Compatibility checks with OptiFine both present and absent
+
+No custom settings GUI, permanent HUD, duplicate video controls, developer panel, or pet system is planned.
 
 ## Build
 
@@ -46,6 +54,6 @@ chmod +x gradlew
 ./gradlew build
 ```
 
-The JAR is generated in `build/libs/`.
+The JAR is generated in `build/libs/`. A successful CI build does not replace an in-game test with the exact OptiFine build and modpack.
 
-No public release, tag, or downloadable version is created by this cleanup.
+No public release, tag, or downloadable version is created without explicit permission.
