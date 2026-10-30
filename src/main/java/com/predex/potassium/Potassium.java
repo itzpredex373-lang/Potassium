@@ -13,9 +13,9 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 @Mod(modid = Potassium.MOD_ID, name = Potassium.NAME, version = Potassium.VERSION, acceptedMinecraftVersions = "[1.8.9]")
 public final class Potassium {
     public static final String MOD_ID = "potassium";
-    public static final String NAME = "Potassium";
-    public static final String VERSION = "0.1.3";
-    private static final Logger LOGGER = LogManager.getLogger("Potassium");
+    public static final String NAME = "Potassium: OptiDex";
+    public static final String VERSION = "OptiDex";
+    private static final Logger LOGGER = LogManager.getLogger("OptiDex");
 
     @SidedProxy(
             clientSide = "com.predex.potassium.proxy.PotassiumClientProxy",
@@ -30,13 +30,13 @@ public final class Potassium {
         PotassiumConfig.init(event.getSuggestedConfigurationFile());
         PerformanceProfileManager.applyConfiguredProfile();
         proxy.registerCommonHooks();
-        LOGGER.info("Potassium {} initializing for Minecraft 1.8.9", VERSION);
+        LOGGER.info("OptiDex {} initializing for Minecraft 1.8.9", VERSION);
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         proxy.registerClientHooks();
-        LOGGER.info("Potassium {} client optimization hooks enabled", VERSION);
+        LOGGER.info("OptiDex {} client optimization hooks enabled", VERSION);
     }
 
     public static Potassium getInstance() {
