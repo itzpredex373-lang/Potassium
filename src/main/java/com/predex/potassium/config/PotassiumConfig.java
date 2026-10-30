@@ -59,11 +59,6 @@ public final class PotassiumConfig {
     public static boolean qolShowSessionTime = false;
     public static int qolHudScale = 100;
 
-    // Client-only cosmetic companion. This never affects the server/world state.
-    public static boolean miniPetEnabled = false;
-    public static int miniPetScale = 42;
-    public static String miniPetType = "predex";
-
     // Client-only zoom, inspired by the familiar C-key zoom workflow.
     public static boolean zoomEnabled = true;
     public static int zoomFovPercent = 35;
@@ -216,13 +211,6 @@ public final class PotassiumConfig {
                 "Show elapsed client session time in the Potassium HUD.");
         qolHudScale = configuration.getInt("qolHudScale", "qol", 100, 75, 150,
                 "Scale percentage for the Potassium HUD.");
-
-        miniPetEnabled = configuration.getBoolean("miniPetEnabled", "qol", false,
-                "Show Potassium's client-only mini pet companion.");
-        miniPetScale = configuration.getInt("miniPetScale", "qol", 42, 25, 75,
-                "Mini pet render scale percentage.");
-        miniPetType = configuration.getString("miniPetType", "qol", "predex",
-                "Client-only mini pet type. 45 cosmetic pet choices are available.");
 
         zoomEnabled = configuration.getBoolean("zoomEnabled", "qol", true,
                 "Enable the client-only C-key zoom.");
