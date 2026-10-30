@@ -20,7 +20,7 @@ When OptiFine is detected:
 - Only the NetHandlerPlayClient observer remains transformed; it records incoming chunk-packet bursts and does not replace packet decoding or world mutation.
 - Potassium's custom VBO ownership, custom draw submission, custom mesh rebuild, block/entity render culling, and renderer-side chunk scheduling hooks are not run.
 - OptiFine/vanilla retain full ownership of rendering, chunk mesh compilation, and GPU submission.
-- Independent client-side systems can still run where they do not take ownership of OptiFine rendering: CPU/JVM-heap pressure measurement, adaptive budgeting for OptiDex-owned optional work, world-transition bookkeeping, chunk-packet burst telemetry, and the lightweight HUD.
+- Independent client-side systems can still run where they do not take ownership of OptiFine rendering: CPU/JVM-heap pressure measurement, adaptive budgeting for OptiDex-owned optional work, world-transition bookkeeping, and chunk-packet burst telemetry.
 - Particle caps/list trimming are disabled while OptiFine is present; OptiFine keeps ownership of particle behavior and settings.
 - OptiDex does not try to replace OptiFine's Fast Render, Fast Math, Smooth FPS, Smooth World, Render Regions, Smart Animations, chunk rendering, entity/block culling, or zoom controls.
 - Experimental distant-entity update throttling remains off by default.
@@ -36,7 +36,6 @@ The codebase includes Potassium-owned systems for:
 - Adaptive budgets for OptiDex-owned optional maintenance work
 - Multiplayer chunk-packet burst telemetry (client-side only; does not change server TPS)
 - World-transition bookkeeping and conservative warm-up budgeting
-- Lightweight FPS/ping and diagnostic HUD
 
 Some custom GPU/mesh paths are intentionally disabled while OptiFine is present. Compatibility takes priority over forcing two renderers to own the same GPU resources.
 
@@ -51,17 +50,9 @@ Some custom GPU/mesh paths are intentionally disabled while OptiFine is present.
 
 Profiles adjust workload budgets and feature switches. Results vary by system; compare the same world, render distance, and settings when benchmarking.
 
-## Settings and HUD
+## User interface
 
-OptiDex retains a compact companion settings interface, including:
-- Master optimization switch
-- Performance profiles and CPU/JVM-heap budget controls
-- Native Minecraft Video Settings shortcut
-- FPS and server-ping HUD
-- Optional frame-time, coordinates, direction, biome, memory, and session-time display
-- OptiFine retains zoom and other visual/QoL controls; OptiDex does not register a duplicate zoom handler.
-
-FPS/frame-time telemetry is used for measurement. The HUD does not promise a specific FPS improvement.
+OptiDex does not add a custom settings screen, HUD, FPS counter, ping counter, or duplicate video-settings page. Configure graphics through Minecraft/OptiFine's own settings. Internal performance telemetry may still be used by optimization algorithms and is not displayed as an overlay.
 
 ## Build
 
