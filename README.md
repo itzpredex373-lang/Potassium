@@ -14,7 +14,7 @@ A lightweight companion foundation for Minecraft Java Edition 1.8.9 Forge, desig
 ### Read-only client diagnostics
 
 Run these commands in-game:
-- `/potassium` or `/potassium status` — show Minecraft and Java versions, JVM memory, OptiFine detectability, and optimization-module status.
+- `/potassium` or `/potassium status` — show Minecraft and Java versions, operating system/architecture, available CPU threads, JVM memory, OptiFine detectability, and optimization-module status.
 - `/potassium report` — write a local `potassium-diagnostics.txt` report in the Minecraft game directory.
 
 The report contains basic runtime, operating-system, processor, memory, and OptiFine-detection information. It is saved locally; Potassium does not upload telemetry. The report may be overwritten by a later report command.

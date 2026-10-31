@@ -55,6 +55,9 @@ public final class PotassiumCommand extends CommandBase {
         sender.addChatMessage(new ChatComponentText("§b§lPotassium Diagnostics"));
         sender.addChatMessage(new ChatComponentText("§7Minecraft: §f" + Minecraft.getMinecraft().getVersion()));
         sender.addChatMessage(new ChatComponentText("§7Java: §f" + System.getProperty("java.version")));
+        sender.addChatMessage(new ChatComponentText("§7OS: §f" + System.getProperty("os.name", "unknown")
+                + " (" + System.getProperty("os.arch", "unknown") + ")"));
+        sender.addChatMessage(new ChatComponentText("§7CPU threads: §f" + runtime.availableProcessors()));
         sender.addChatMessage(new ChatComponentText("§7Memory: §f" + usedMb + " MB used / "
                 + allocatedMb + " MB allocated / " + maxMb + " MB max"));
         sender.addChatMessage(new ChatComponentText("§7OptiFine: §f" + detectOptiFine()));
