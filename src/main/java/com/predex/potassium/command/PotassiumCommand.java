@@ -8,30 +8,19 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-/**
- * Read-only diagnostics with an optional local text report.
- * No settings are changed and no telemetry is uploaded.
- */
+/** Read-only diagnostics with an optional local text report. */
 @SideOnly(Side.CLIENT)
 public final class PotassiumCommand extends CommandBase {
     @Override
-    public String getCommandName() {
-        return "potassium";
-    }
+    public String getCommandName() { return "potassium"; }
 
     @Override
-    public String getCommandUsage(ICommandSender sender) {
-        return "/potassium [status|report]";
-    }
+    public String getCommandUsage(ICommandSender sender) { return "/potassium [status|report]"; }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
@@ -41,7 +30,6 @@ public final class PotassiumCommand extends CommandBase {
             sender.addChatMessage(new ChatComponentText("§bPotassium§7: Usage: /potassium [status|report]"));
             return;
         }
-
         if (args.length == 1 && "report".equalsIgnoreCase(args[0])) {
             writeReport(sender);
             return;
@@ -51,7 +39,6 @@ public final class PotassiumCommand extends CommandBase {
         long usedMb = (runtime.totalMemory() - runtime.freeMemory()) / 1048576L;
         long allocatedMb = runtime.totalMemory() / 1048576L;
         long maxMb = runtime.maxMemory() / 1048576L;
-
         sender.addChatMessage(new ChatComponentText("§b§lPotassium Diagnostics"));
         sender.addChatMessage(new ChatComponentText("§7Minecraft: §f" + Minecraft.getMinecraft().getVersion()));
         sender.addChatMessage(new ChatComponentText("§7Java: §f" + System.getProperty("java.version")));
@@ -61,20 +48,19 @@ public final class PotassiumCommand extends CommandBase {
         sender.addChatMessage(new ChatComponentText("§7Memory: §f" + usedMb + " MB used / "
                 + allocatedMb + " MB allocated / " + maxMb + " MB max"));
         sender.addChatMessage(new ChatComponentText("§7OptiFine: §f" + detectOptiFine()));
-        sender.addChatMessage(new ChatComponentText("§7Optimization modules: §eNone installed yet"));
-        sender.addChatMessage(new ChatComponentText("§8This diagnostic build does not claim FPS gains."));
+        sender.addChatMessage(new ChatComponentText("§7Optimization modules: §eBounded diagnostics I/O"));
+        sender.addChatMessage(new ChatComponentText("§8No renderer/FPS optimization is installed yet."));
     }
 
     private void writeReport(ICommandSender sender) {
-        File gameDir = Minecraft.getMinecraft().mcDataDir;
-        File report = new File(gameDir, "potassium-diagnostics.txt");
+        final Minecraft minecraft = Minecraft.getMinecraft();
+        File report = new File(minecraft.mcDataDir, "potassium-diagnostics.txt");
         Runtime runtime = Runtime.getRuntime();
-
         StringBuilder contents = new StringBuilder();
         contents.append("Potassium Diagnostics").append(System.lineSeparator());
         contents.append("Generated: ").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.ROOT)
                 .format(new Date())).append(System.lineSeparator());
-        contents.append("Minecraft: ").append(Minecraft.getMinecraft().getVersion()).append(System.lineSeparator());
+        contents.append("Minecraft: ").append(minecraft.getVersion()).append(System.lineSeparator());
         contents.append("Java version: ").append(System.getProperty("java.version", "unknown")).append(System.lineSeparator());
         contents.append("Java VM: ").append(System.getProperty("java.vm.name", "unknown")).append(System.lineSeparator());
         contents.append("Operating system: ").append(System.getProperty("os.name", "unknown")).append(" ")
@@ -86,23 +72,14 @@ public final class PotassiumCommand extends CommandBase {
         contents.append("Memory allocated MB: ").append(runtime.totalMemory() / 1048576L).append(System.lineSeparator());
         contents.append("Memory maximum MB: ").append(runtime.maxMemory() / 1048576L).append(System.lineSeparator());
         contents.append("OptiFine detectable: ").append(detectOptiFine()).append(System.lineSeparator());
-        contents.append("Optimization modules: none").append(System.lineSeparator());
-        contents.append("No performance improvement is claimed by this diagnostic build.")
-                .append(System.lineSeparator());
+        contents.append("Optimization modules: bounded diagnostics disk I/O only").append(System.lineSeparator());
+        contents.append("No renderer or FPS improvement is claimed.").append(System.lineSeparator());
 
-        try {
-            File parent = report.getParentFile();
-            if (parent != null && !parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory()) {
-                throw new IOException("Could not create the Minecraft game directory");
-            }
-            try (BufferedWriter writer = Files.newBufferedWriter(report.toPath(), StandardCharsets.UTF_8)) {
-                writer.write(contents.toString());
-            }
-            sender.addChatMessage(new ChatComponentText("§aPotassium: Diagnostic report saved to "
-                    + report.getName() + " in your Minecraft folder."));
-        } catch (IOException exception) {
-            sender.addChatMessage(new ChatComponentText("§cPotassium: Could not save diagnostic report: "
-                    + exception.getMessage()));
+        if (!DiagnosticsWriter.submit(report, contents.toString(), sender, minecraft)) {
+            sender.addChatMessage(new ChatComponentText(
+                    "§ePotassium: Diagnostics writer is busy; try /potassium report again shortly."));
+        } else {
+            sender.addChatMessage(new ChatComponentText("§7Potassium: Saving diagnostic report in the background..."));
         }
     }
 
@@ -116,7 +93,5 @@ public final class PotassiumCommand extends CommandBase {
     }
 
     @Override
-    public int getRequiredPermissionLevel() {
-        return 0;
-    }
+    public int getRequiredPermissionLevel() { return 0; }
 }
