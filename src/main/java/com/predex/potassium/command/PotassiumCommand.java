@@ -7,6 +7,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import com.predex.potassium.optimization.ParticleBurstLimiter;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -48,8 +49,9 @@ public final class PotassiumCommand extends CommandBase {
         sender.addChatMessage(new ChatComponentText("§7Memory: §f" + usedMb + " MB used / "
                 + allocatedMb + " MB allocated / " + maxMb + " MB max"));
         sender.addChatMessage(new ChatComponentText("§7OptiFine: §f" + detectOptiFine()));
-        sender.addChatMessage(new ChatComponentText("§7Optimization modules: §eBounded diagnostics I/O"));
-        sender.addChatMessage(new ChatComponentText("§8No renderer/FPS optimization is installed yet."));
+        sender.addChatMessage(new ChatComponentText("§7Optimization: §eParticle burst limiter (max "
+                + ParticleBurstLimiter.MAX_PARTICLES_PER_TICK + " new particles/client tick)"));
+        sender.addChatMessage(new ChatComponentText("§8Existing particles and entity rendering are unchanged."));
     }
 
     private void writeReport(ICommandSender sender) {
@@ -72,8 +74,10 @@ public final class PotassiumCommand extends CommandBase {
         contents.append("Memory allocated MB: ").append(runtime.totalMemory() / 1048576L).append(System.lineSeparator());
         contents.append("Memory maximum MB: ").append(runtime.maxMemory() / 1048576L).append(System.lineSeparator());
         contents.append("OptiFine detectable: ").append(detectOptiFine()).append(System.lineSeparator());
-        contents.append("Optimization modules: bounded diagnostics disk I/O only").append(System.lineSeparator());
-        contents.append("No renderer or FPS improvement is claimed.").append(System.lineSeparator());
+        contents.append("Optimization: client particle burst admission cap ")
+                .append(ParticleBurstLimiter.MAX_PARTICLES_PER_TICK).append(" per tick").append(System.lineSeparator());
+        contents.append("Existing particles and entity rendering are unchanged.").append(System.lineSeparator());
+        contents.append("No measured FPS improvement is claimed.").append(System.lineSeparator());
 
         if (!DiagnosticsWriter.submit(report, contents.toString(), sender, minecraft)) {
             sender.addChatMessage(new ChatComponentText(

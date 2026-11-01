@@ -16,6 +16,10 @@ A lightweight companion foundation for Minecraft Java Edition 1.8.9 Forge, desig
 - `/potassium` or `/potassium status` — show Minecraft and Java versions, operating system/architecture, CPU threads, JVM memory, OptiFine detectability, and optimization-module status.
 - `/potassium report` — write a local `potassium-diagnostics.txt` report in the Minecraft game directory.
 
+### Client particle burst limiter
+
+A client-only event handler admits at most 256 newly-added `EntityFX` particles per client tick and cancels excess additions during unusually large bursts. It does not remove existing particles, change entity ticking, alter server state, or replace OptiFine rendering. The cap is intentionally conservative and needs in-game visual/performance testing; no FPS gain is claimed.
+
 ### Bounded background diagnostics I/O
 
 Report disk writes run on one daemon worker instead of the Minecraft client thread. A single-flight guard prevents duplicate reports from building up; the executor also has a bounded queue. The writer uses a temporary file and replaces the report atomically where supported. Completion messages are scheduled back onto the client thread, and worker failures do not leave the writer permanently marked busy. This avoids blocking a client tick on report disk I/O. It is not a general FPS optimization.
