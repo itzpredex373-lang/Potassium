@@ -18,17 +18,27 @@ A lightweight companion foundation for Minecraft Java Edition 1.8.9 Forge, desig
 
 ### Bounded background diagnostics I/O
 
-Report disk writes run on one daemon worker instead of the Minecraft client thread. Its one-task queue bounds pending work and rejects excess requests rather than growing without limit. It writes a temporary file and replaces the report atomically where supported; completion messages are scheduled back onto the client thread. This avoids blocking a client tick on report disk I/O. It is not a general FPS optimization.
+Report disk writes run on one daemon worker instead of the Minecraft client thread. A single-flight guard prevents duplicate reports from building up; the executor also has a bounded queue. The writer uses a temporary file and replaces the report atomically where supported. Completion messages are scheduled back onto the client thread, and worker failures do not leave the writer permanently marked busy. This avoids blocking a client tick on report disk I/O. It is not a general FPS optimization.
 
 Reports remain local; no telemetry is uploaded.
+
+## Optimization status
+
+The requested optimization areas are tracked separately; they are not all implemented yet.
+
+| Area | Current state |
+|---|---|
+| Stability | Bounded diagnostics worker, duplicate-submit protection, failure cleanup |
+| World & server | No world/server optimization installed yet |
+| Entity | No entity update or rendering optimization installed yet |
+| CPU | Diagnostic file I/O moved off the client thread; no general tick optimization yet |
+| Memory | Bounded task admission; no general memory/cache optimizer installed yet |
 
 ## Compatibility boundaries
 
 OptiFine/vanilla retain ownership of rendering, chunk compilation, GPU submission, culling, particles, zoom, and visual settings. Potassium currently installs no renderer or chunk hooks and does not claim measurable FPS improvements.
 
-## Next optimization work
-
-Only add independent optimizations with a real consumer and measurable benefit: profile-driven CPU/entity workload reductions, bounded/cancellable background work, cleanup for state Potassium actually owns, and resource-reload deduplication only when profiling proves it useful. Test with OptiFine present and absent.
+Future work must have a real consumer and measurable benefit: lifecycle cleanup for state Potassium actually owns, cancellable/deduplicated background work, and profile-driven CPU/entity workload reductions. Do not add duplicate OptiFine behavior or empty optimization placeholders.
 
 No custom settings GUI, permanent HUD, duplicate video controls, developer panel, or pet system is planned.
 
